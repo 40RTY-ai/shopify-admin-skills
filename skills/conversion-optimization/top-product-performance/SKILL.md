@@ -11,7 +11,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Ranks products by revenue, units sold, and refund rate for a given date range by aggregating order line items and refund line items across all orders in the period. Useful for identifying top performers and products with high refund rates. Read-only — no mutations are executed. Replaces analytics apps like Triple Whale or Lucky Orange's product performance views.
+Ranks products by revenue, units sold, and refund rate for a given date range by aggregating order line items and refund line items across all orders in the period. Useful for identifying top performers and products with high refund rates. Read-only — no mutations are executed.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

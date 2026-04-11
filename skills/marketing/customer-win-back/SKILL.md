@@ -12,7 +12,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Segments lapsed customers — those who placed at least one order but have not purchased again within a configurable window — and tags them for re-engagement. Replaces the "winback" automation segment found in email marketing apps. This skill handles the Shopify-native data layer; sending re-engagement emails requires an external tool.
+Segments lapsed customers — those who placed at least one order but have not purchased again within a configurable window — and tags them for re-engagement. This skill handles the Shopify-native data layer; sending re-engagement emails requires an external tool.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

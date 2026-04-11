@@ -12,7 +12,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Applies a percentage or fixed price adjustment to every variant across a Shopify collection or tag in a single automated workflow — without manually navigating products in the admin UI, exporting CSVs, editing them, and re-importing. Use this skill when you need to run a storewide or collection-level sale, revert prices after a promotion ends, pass through a supplier cost increase, or align pricing across a segment of products. It replaces the paid functionality of apps like Prisync, Retail Pricing, or Bold Custom Pricing, and eliminates error-prone manual CSV uploads by operating directly against the Admin GraphQL API.
+Applies a percentage or fixed price adjustment to every variant across a Shopify collection or tag in a single automated workflow — without manually navigating products in the admin UI, exporting CSVs, editing them, and re-importing. Use this skill when you need to run a storewide or collection-level sale, revert prices after a promotion ends, pass through a supplier cost increase, or align pricing across a segment of products.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Processes refunds and creates replacement orders without navigating the Shopify admin UI. Replaces manual refund workflows in apps like Gorgias. This skill handles both the refund and the optional replacement draft order in a single workflow.
+Processes refunds and creates replacement orders without navigating the Shopify admin UI. This skill handles both the refund and the optional replacement draft order in a single workflow.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

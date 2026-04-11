@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Places or releases holds on fulfillment orders programmatically without navigating the Shopify admin. Useful for fraud review queues, inventory shortages, or payment verification workflows. Replaces manual hold management via admin UI or Shopify Flow automation triggers. Works on orders with fulfillment orders in `OPEN` status.
+Places or releases holds on fulfillment orders programmatically without navigating the Shopify admin. Useful for fraud review queues, inventory shortages, or payment verification workflows. Works on orders with fulfillment orders in `OPEN` status.
 
 ## Prerequisites
 - `shopify auth login --store <domain>`

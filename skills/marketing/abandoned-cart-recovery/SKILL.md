@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Identifies customers who started checkout but did not complete their purchase, generates a unique discount code for each one, and tags them in Shopify so they can be targeted in follow-up campaigns. Replaces the abandoned cart flow functionality of email marketing apps like Klaviyo or Omnisend — this skill handles the Shopify-native data layer (querying, discounts, tagging); sending the actual email requires an external tool.
+Identifies customers who started checkout but did not complete their purchase, generates a unique discount code for each one, and tags them in Shopify so they can be targeted in follow-up campaigns. This skill handles the Shopify-native data layer (querying, discounts, tagging); sending the actual email requires an external tool.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

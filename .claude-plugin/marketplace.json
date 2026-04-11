@@ -1,14 +1,14 @@
 {
-  "name": "shopify-admin-skills",
+  "name": "shopify-store-skills",
   "owner": {
-    "name": "40RTY-ai",
-    "url": "https://github.com/40RTY-ai/shopify-admin-skills"
+    "name": "40RTY-ai & Community Contributors",
+    "url": "https://github.com/40RTY-ai/shopify-store-skills"
   },
   "plugins": [
     {
-      "name": "shopify-admin-skills",
+      "name": "shopify-store-skills",
       "source": "./",
-      "description": "AI agent skills to operate your Shopify store with extended capabilities — native Admin GraphQL, no apps required.",
+      "description": "Operator workflow skills for running a Shopify store via native Admin GraphQL API — no apps, no UI navigation, CLI only.",
       "version": "1.0.0"
     }
   ]
