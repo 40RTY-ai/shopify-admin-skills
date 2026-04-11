@@ -46,7 +46,7 @@ Scans all store pages and blog articles for missing or thin content (short body,
 ## GraphQL Operations
 
 ```graphql
-# pages:query — validated against api_version 2025-01
+# pages:query — validated against api_version 2025-04
 query PageContentAudit($after: String) {
   pages(first: 250, after: $after) {
     edges {
@@ -57,10 +57,8 @@ query PageContentAudit($after: String) {
         publishedAt
         bodySummary
         body
-        seo {
-          title
-          description
-        }
+        seoTitle: metafield(namespace: "global", key: "title_tag") { value }
+        seoDescription: metafield(namespace: "global", key: "description_tag") { value }
       }
     }
     pageInfo {
@@ -72,7 +70,7 @@ query PageContentAudit($after: String) {
 ```
 
 ```graphql
-# articles:query — validated against api_version 2025-01
+# articles:query — validated against api_version 2025-04
 query ArticleContentAudit($after: String) {
   articles(first: 250, after: $after) {
     edges {
@@ -82,10 +80,9 @@ query ArticleContentAudit($after: String) {
         handle
         publishedAt
         body
-        seo {
-          title
-          description
-        }
+        summary
+        seoTitle: metafield(namespace: "global", key: "title_tag") { value }
+        seoDescription: metafield(namespace: "global", key: "description_tag") { value }
         blog {
           id
           title

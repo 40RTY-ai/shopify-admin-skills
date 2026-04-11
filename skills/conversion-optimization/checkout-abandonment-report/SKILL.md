@@ -51,7 +51,9 @@ query AbandonedCheckoutsReport($first: Int!, $after: String, $query: String) {
           }
         }
         customer {
-          email
+          defaultEmailAddress {
+            emailAddress
+          }
         }
         lineItems {
           edges {

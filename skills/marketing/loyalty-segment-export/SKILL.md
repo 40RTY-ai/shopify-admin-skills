@@ -33,7 +33,7 @@ Segments your highest-value customers by order count and total lifetime spend, t
 
 1. **OPERATION:** `customers` — query
    **Inputs:** filter `orders_count:>=(min_orders)`, `total_spent:>=(min_spend)`, `first: 250`, pagination
-   **Expected output:** List with `id`, `email`, `firstName`, `lastName`, `ordersCount`, `totalSpentV2`; paginate until `hasNextPage: false`
+   **Expected output:** List with `id`, `defaultEmailAddress { emailAddress }`, `firstName`, `lastName`, `ordersCount`, `totalSpentV2`; paginate until `hasNextPage: false`
 
 2. **OPERATION:** `tagsAdd` — mutation
    **Inputs:** Customer `id`, tag from `tag` parameter
@@ -42,13 +42,15 @@ Segments your highest-value customers by order count and total lifetime spend, t
 ## GraphQL Operations
 
 ```graphql
-# customers:query — validated against api_version 2025-01
+# customers:query — validated against api_version 2025-04
 query LoyaltyCustomers($first: Int!, $after: String, $query: String) {
   customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
-        email
+        defaultEmailAddress {
+          emailAddress
+        }
         firstName
         lastName
         ordersCount

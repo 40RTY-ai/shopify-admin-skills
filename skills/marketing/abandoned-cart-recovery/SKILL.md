@@ -53,14 +53,23 @@ Identifies customers who started checkout but did not complete their purchase, g
 ## GraphQL Operations
 
 ```graphql
-# abandonedCheckouts:query — validated against api_version 2025-01
+# abandonedCheckouts:query — validated against api_version 2025-04
 query AbandonedCheckouts($first: Int!, $after: String, $query: String) {
   abandonedCheckouts(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
-        email
-        totalPrice
+        customer {
+          defaultEmailAddress {
+            emailAddress
+          }
+        }
+        totalPriceSet {
+          shopMoney {
+            amount
+            currencyCode
+          }
+        }
         createdAt
         lineItems {
           edges {

@@ -34,7 +34,7 @@ Segments lapsed customers — those who placed at least one order but have not p
 
 1. **OPERATION:** `customers` — query
    **Inputs:** filter `last_order_date:<(NOW - inactive_days days)`, `orders_count:>=(min_orders)`, `first: 250`, pagination
-   **Expected output:** List of customer objects with `id`, `email`, `firstName`, `lastName`, `ordersCount`, `lastOrder.processedAt`; paginate until `hasNextPage: false`
+   **Expected output:** List of customer objects with `id`, `defaultEmailAddress { emailAddress }`, `firstName`, `lastName`, `ordersCount`, `lastOrder.processedAt`; paginate until `hasNextPage: false`
 
 2. **OPERATION:** `tagsAdd` — mutation
    **Inputs:** Customer `id`, tag string from `tag` parameter
@@ -43,13 +43,15 @@ Segments lapsed customers — those who placed at least one order but have not p
 ## GraphQL Operations
 
 ```graphql
-# customers:query — validated against api_version 2025-01
+# customers:query — validated against api_version 2025-04
 query LapsedCustomers($first: Int!, $after: String, $query: String) {
   customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
-        email
+        defaultEmailAddress {
+          emailAddress
+        }
         firstName
         lastName
         ordersCount

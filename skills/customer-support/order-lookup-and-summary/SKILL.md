@@ -62,7 +62,9 @@ query OrderLookup($first: Int!, $query: String) {
         }
         customer {
           id
-          email
+          defaultEmailAddress {
+            emailAddress
+          }
           firstName
           lastName
           phone

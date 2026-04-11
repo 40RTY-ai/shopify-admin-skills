@@ -98,7 +98,7 @@ query CollectionSEO($after: String) {
 ```
 
 ```graphql
-# pages:query — validated against api_version 2025-01
+# pages:query — validated against api_version 2025-04
 query PageSEO($after: String) {
   pages(first: 250, after: $after) {
     edges {
@@ -106,10 +106,8 @@ query PageSEO($after: String) {
         id
         title
         handle
-        seo {
-          title
-          description
-        }
+        seoTitle: metafield(namespace: "global", key: "title_tag") { value }
+        seoDescription: metafield(namespace: "global", key: "description_tag") { value }
       }
     }
     pageInfo {

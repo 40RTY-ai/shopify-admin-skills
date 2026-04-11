@@ -56,7 +56,9 @@ query OrderForReturn($id: ID!) {
     displayFinancialStatus
     customer {
       id
-      email
+      defaultEmailAddress {
+        emailAddress
+      }
       firstName
       lastName
     }

@@ -96,7 +96,9 @@ query OrderForRefund($id: ID!) {
     }
     customer {
       id
-      email
+      defaultEmailAddress {
+        emailAddress
+      }
       firstName
       lastName
     }
