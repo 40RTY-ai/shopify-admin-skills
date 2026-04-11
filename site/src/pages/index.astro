@@ -111,8 +111,7 @@ const marqueeSkills = [...shuffled, ...shuffled];
         </div>
         <p class="cmd-platforms">Claude Code &middot; Cursor &middot; Cline &middot; Copilot &middot; Gemini CLI</p>
         <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
-          <img src="/40rty-mark.png" alt="40rty" class="built-by-logo" />
-          Built by 40rty agents
+          Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
         </a>
       </div>
     </div>
@@ -323,7 +322,7 @@ const marqueeSkills = [...shuffled, ...shuffled];
     align-items: center;
     gap: 7px;
     margin-top: 16px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-muted);
     text-decoration: none;
@@ -333,14 +332,14 @@ const marqueeSkills = [...shuffled, ...shuffled];
   .built-by:hover { color: var(--color-dark); }
 
   .built-by-logo {
-    width: 18px;
-    height: 18px;
+    height: 22px;
+    width: auto;
     object-fit: contain;
-    opacity: 0.55;
+    opacity: 0.5;
     transition: opacity 0.15s;
   }
 
-  .built-by:hover .built-by-logo { opacity: 1; }
+  .built-by:hover .built-by-logo { opacity: 0.85; }
 
   .cmd {
     display: inline-flex;
@@ -386,7 +385,7 @@ const marqueeSkills = [...shuffled, ...shuffled];
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
+    padding: 18px 24px;
     border: 2px solid var(--color-dark);
     border-radius: var(--radius);
     font-size: 0.88rem;
