@@ -1,0 +1,312 @@
+---
+import Base from '../../layouts/Base.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+
+const base = import.meta.env.BASE_URL;
+
+const skillsRoot = path.resolve(process.cwd(), '../skills');
+const categories = fs.readdirSync(skillsRoot).filter((d: string) =>
+  fs.statSync(path.join(skillsRoot, d)).isDirectory()
+);
+
+interface Skill {
+  name: string;
+  description: string;
+  category: string;
+  categorySlug: string;
+  slug: string;
+}
+
+const skills: Skill[] = [];
+for (const cat of categories) {
+  const catPath = path.join(skillsRoot, cat);
+  const skillDirs = fs.readdirSync(catPath).filter((d: string) =>
+    fs.statSync(path.join(catPath, d)).isDirectory()
+  );
+  for (const skill of skillDirs) {
+    const skillFile = path.join(catPath, skill, 'SKILL.md');
+    if (fs.existsSync(skillFile)) {
+      const content = fs.readFileSync(skillFile, 'utf-8');
+      const { data } = matter(content);
+      skills.push({
+        name: data.name || skill,
+        description: data.description || '',
+        category: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        categorySlug: cat,
+        slug: skill,
+      });
+    }
+  }
+}
+
+const grouped = skills.reduce((acc, s) => {
+  if (!acc[s.category]) acc[s.category] = [];
+  acc[s.category].push(s);
+  return acc;
+}, {} as Record<string, Skill[]>);
+
+const categoryMeta: Record<string, { label: string; color: string; desc: string }> = {
+  'Marketing': { label: 'Marketing', color: '#E8A838', desc: 'Cart recovery, win-back, loyalty' },
+  'Merchandising': { label: 'Catalog & Inventory', color: '#5B8DEF', desc: 'Pricing, stock, SEO, product data' },
+  'Customer Support': { label: 'Support', color: '#E85D75', desc: 'Orders, refunds, returns, WISMO' },
+  'Customer Ops': { label: 'Customer Ops', color: '#9B6EE3', desc: 'Segmentation, tagging, B2B' },
+  'Conversion Optimization': { label: 'Conversion', color: '#3DBB8F', desc: 'Discounts, performance, gift cards' },
+  'Fulfillment Ops': { label: 'Fulfillment', color: '#E87838', desc: 'Shipping, routing, tracking' },
+  'Finance': { label: 'Finance', color: '#5BB8A8', desc: 'Revenue, tax, refunds, AOV' },
+  'Order Intelligence': { label: 'Order Intel', color: '#D4605A', desc: 'Fraud, risk, repeat purchases' },
+  'Returns': { label: 'Returns', color: '#8B8B8B', desc: 'Reasons, SLAs, exchange ratios' },
+  'Store Management': { label: 'Store Mgmt', color: '#6B8CA8', desc: 'Redirects, drafts, discounts, pages' },
+};
+
+const categoryOrder = Object.keys(categoryMeta);
+---
+
+<Base title="All Skills — Shopify Admin Skills">
+
+  <!-- Header -->
+  <section class="page-header">
+    <div class="header-inner">
+      <a href={base} class="back">&larr; Back</a>
+      <h1>All Skills<span class="dot">.</span></h1>
+    </div>
+  </section>
+
+  <!-- Category nav -->
+  <nav class="cat-nav">
+    <div class="cat-nav-inner">
+      {categoryOrder.map(cat => {
+        const meta = categoryMeta[cat];
+        const catSkills = grouped[cat];
+        if (!catSkills) return null;
+        return (
+          <a href={`#${cat.toLowerCase().replace(/\s+/g, '-')}`} class="cat-pill" style={`--pill-color: ${meta.color};`}>
+            {meta.label}
+          </a>
+        );
+      })}
+    </div>
+  </nav>
+
+  <!-- Skills by category -->
+  <section class="catalog">
+    <div class="catalog-inner">
+      {categoryOrder.map(cat => {
+        const catSkills = grouped[cat];
+        const meta = categoryMeta[cat];
+        if (!catSkills) return null;
+        return (
+          <div class="cat-section" id={cat.toLowerCase().replace(/\s+/g, '-')}>
+            <div class="cat-header">
+              <div class="cat-color" style={`background: ${meta.color};`}></div>
+              <div>
+                <h2>{meta.label}</h2>
+                <p class="cat-desc">{meta.desc}</p>
+              </div>
+            </div>
+            <div class="skill-list">
+              {catSkills.map(skill => (
+                <a href={`${base}skills/${skill.categorySlug}/${skill.slug}/`} class="skill-row">
+                  <div class="skill-row-left">
+                    <code class="skill-row-name">{skill.name}</code>
+                    <p class="skill-row-desc">{skill.description}</p>
+                  </div>
+                  <span class="skill-row-arrow">&#8599;</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+</Base>
+
+<style>
+  /* Header */
+  .page-header {
+    padding: 48px 40px 0;
+  }
+
+  .header-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .back {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    display: inline-block;
+    margin-bottom: 20px;
+    transition: color 0.15s;
+  }
+
+  .back:hover { color: var(--color-dark); }
+
+  .page-header h1 {
+    font-size: clamp(3rem, 6vw, 5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .dot { color: var(--color-accent); }
+
+  /* Category nav */
+  .cat-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(250, 250, 250, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-card-border);
+    margin-top: 32px;
+  }
+
+  .cat-nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 14px 40px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cat-nav-inner::-webkit-scrollbar { display: none; }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid var(--color-card-border);
+    transition: all 0.2s;
+    color: var(--color-dark);
+  }
+
+  .cat-pill:hover {
+    border-color: var(--pill-color);
+    background: color-mix(in srgb, var(--pill-color) 8%, transparent);
+  }
+
+  .pill-count {
+    background: var(--color-dark);
+    color: var(--color-text-light);
+    font-size: 0.65rem;
+    padding: 1px 7px;
+    border-radius: 100px;
+  }
+
+  /* Catalog */
+  .catalog {
+    padding: 40px 40px 80px;
+  }
+
+  .catalog-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .cat-section {
+    margin-bottom: 64px;
+    scroll-margin-top: 80px;
+  }
+
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .cat-color {
+    width: 6px;
+    height: 48px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .cat-header h2 {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+
+  .cat-desc {
+    font-size: 0.88rem;
+    color: var(--color-muted);
+  }
+
+  /* Skill rows */
+  .skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: var(--color-card);
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .skill-row:hover {
+    border-color: var(--color-card-border);
+    transform: translateX(4px);
+  }
+
+  .skill-row-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .skill-row-name {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .skill-row-desc {
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .skill-row-arrow {
+    font-size: 1rem;
+    color: var(--color-muted);
+    opacity: 0;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .skill-row:hover .skill-row-arrow {
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .page-header { padding: 32px 24px 0; }
+    .cat-nav-inner { padding: 12px 24px; }
+    .catalog { padding: 24px 24px 60px; }
+    .skill-row { padding: 14px 18px; }
+    .skill-row-desc { white-space: normal; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; }
+  }
+</style>

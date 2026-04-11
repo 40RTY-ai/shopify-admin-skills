@@ -1,0 +1,455 @@
+---
+import Base from '../layouts/Base.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+
+const base = import.meta.env.BASE_URL;
+
+const skillsRoot = path.resolve(process.cwd(), '../skills');
+const categories = fs.readdirSync(skillsRoot).filter((d: string) =>
+  fs.statSync(path.join(skillsRoot, d)).isDirectory()
+);
+
+interface Skill {
+  name: string;
+  description: string;
+  category: string;
+  categorySlug: string;
+}
+
+const skills: Skill[] = [];
+for (const cat of categories) {
+  const catPath = path.join(skillsRoot, cat);
+  const skillDirs = fs.readdirSync(catPath).filter((d: string) =>
+    fs.statSync(path.join(catPath, d)).isDirectory()
+  );
+  for (const skill of skillDirs) {
+    const skillFile = path.join(catPath, skill, 'SKILL.md');
+    if (fs.existsSync(skillFile)) {
+      const content = fs.readFileSync(skillFile, 'utf-8');
+      const { data } = matter(content);
+      skills.push({
+        name: data.name || skill,
+        description: data.description || '',
+        category: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        categorySlug: cat,
+      });
+    }
+  }
+}
+
+const categoryColors: Record<string, string> = {
+  'Marketing': '#E8A838',
+  'Merchandising': '#5B8DEF',
+  'Customer Support': '#E85D75',
+  'Customer Ops': '#9B6EE3',
+  'Conversion Optimization': '#3DBB8F',
+  'Fulfillment Ops': '#E87838',
+  'Finance': '#5BB8A8',
+  'Order Intelligence': '#D4605A',
+  'Returns': '#8B8B8B',
+  'Store Management': '#6B8CA8',
+};
+
+const categoryLabels: Record<string, string> = {
+  'Marketing': 'Marketing',
+  'Merchandising': 'Catalog & Inventory',
+  'Customer Support': 'Support',
+  'Customer Ops': 'Customer Ops',
+  'Conversion Optimization': 'Conversion',
+  'Fulfillment Ops': 'Fulfillment',
+  'Finance': 'Finance',
+  'Order Intelligence': 'Order Intel',
+  'Returns': 'Returns',
+  'Store Management': 'Store Mgmt',
+};
+
+// Shuffle so different categories are interleaved
+const shuffled = [...skills].sort(() => Math.random() - 0.5);
+const marqueeSkills = [...shuffled, ...shuffled];
+---
+
+<Base title="Shopify Admin Skills — AI agent skills for your store">
+
+  <!-- GitHub link -->
+  <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-link">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+  </a>
+
+  <!-- HERO + MARQUEE as one section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="line typewriter" id="t1">Shopify</span>
+        <span class="line stroke typewriter" id="t2">Admin</span>
+        <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
+      </h1>
+      <p class="hero-sub">
+        <span id="rotating-text"></span>
+      </p>
+      <p class="hero-sub-static">through your AI agent.</p>
+      <div class="hero-cta">
+        <button class="cmd" id="copy-btn" data-cmd="npx skills add 40RTY-ai/shopify-admin-skills">
+          <span class="cmd-dollar">$</span>
+          <code>npx skills add 40RTY-ai/shopify-admin-skills</code>
+          <span class="cmd-copy" aria-label="Copy">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </span>
+          <span class="cmd-toast">Copied!</span>
+        </button>
+        <p class="cmd-platforms">Claude Code &middot; Cursor &middot; Cline &middot; Copilot &middot; Gemini CLI</p>
+      </div>
+    </div>
+
+    <!-- Horizontal marquee -->
+    <div class="marquee">
+      <div class="marquee-label">
+        <a href={`${base}skills/`}>Browse all {skills.length} skills &rarr;</a>
+      </div>
+      <div class="marquee-track">
+        <div class="marquee-scroll">
+          {marqueeSkills.map(s => (
+            <div class="m-card">
+              <span class="m-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryLabels[s.category] || s.category}</span>
+              <code class="m-name">{s.name}</code>
+              <p class="m-desc">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Copy button
+    const btn = document.getElementById('copy-btn');
+    btn?.addEventListener('click', async () => {
+      const cmd = btn.getAttribute('data-cmd') || '';
+      await navigator.clipboard.writeText(cmd);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1500);
+    });
+
+    // Typewriter reveal
+    const lines = [
+      document.getElementById('t1'),
+      document.getElementById('t2'),
+      document.getElementById('t3'),
+    ];
+    lines.forEach((el, i) => {
+      if (!el) return;
+      el.style.animationDelay = `${i * 0.4}s`;
+      el.classList.add('reveal');
+    });
+
+    // Rotating subtitle
+    const abilities = [
+      'Recover abandoned carts',
+      'Bulk-adjust prices across collections',
+      'Audit inventory across locations',
+      'Process refunds and reorders',
+      'Tag customers by spend tier',
+      'Detect duplicate SKUs and barcodes',
+      'Analyze return reasons',
+      'Route fulfillments by location',
+      'Track delivery SLAs',
+      'Clean up stale discount codes',
+      'Export loyalty segments',
+      'Generate revenue-by-location reports',
+      'Find dead stock eating warehouse costs',
+      'Audit SEO metadata across products',
+    ];
+
+    const rotEl = document.getElementById('rotating-text');
+    let currentIdx = 0;
+
+    function typeText(text: string, el: HTMLElement) {
+      el.textContent = '';
+      let i = 0;
+      const interval = setInterval(() => {
+        el.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+      }, 35);
+    }
+
+    function eraseAndType() {
+      if (!rotEl) return;
+      rotEl.style.opacity = '0';
+      setTimeout(() => {
+        currentIdx = (currentIdx + 1) % abilities.length;
+        rotEl.style.opacity = '1';
+        typeText(abilities[currentIdx], rotEl);
+      }, 300);
+    }
+
+    // Initial type
+    if (rotEl) {
+      typeText(abilities[0], rotEl);
+    }
+
+    setInterval(eraseAndType, 3500);
+  </script>
+
+</Base>
+
+<style>
+  /* GitHub link */
+  .gh-link {
+    position: fixed;
+    top: 28px;
+    right: 32px;
+    z-index: 100;
+    color: var(--color-muted);
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+
+  .gh-link:hover {
+    opacity: 1;
+    color: var(--color-dark);
+  }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 24px;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 40px;
+  }
+
+  .hero-title {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .line {
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 0.88;
+  }
+
+  .typewriter {
+    display: inline-block;
+    white-space: nowrap;
+    clip-path: inset(-20% 100% -20% 0);
+    opacity: 0;
+  }
+
+  .typewriter.reveal {
+    animation: typeReveal 0.8s steps(12, end) forwards;
+  }
+
+  @keyframes typeReveal {
+    0% { clip-path: inset(-20% 100% -20% 0); opacity: 1; }
+    100% { clip-path: inset(-20% 0 -20% 0); opacity: 1; }
+  }
+
+  .stroke {
+    -webkit-text-stroke: 3px var(--color-dark);
+    color: transparent;
+  }
+
+  .dot { color: var(--color-accent); }
+
+  .hero-sub {
+    margin-top: 24px;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    max-width: 500px;
+    line-height: 1.5;
+    min-height: 1.6em;
+  }
+
+  .hero-sub-static {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin-top: 4px;
+  }
+
+  #rotating-text {
+    color: var(--color-dark);
+    font-weight: 600;
+    font-size: 1.2rem;
+    transition: opacity 0.3s;
+    border-right: 2px solid var(--color-accent);
+    padding-right: 3px;
+    animation: blink 0.8s step-end infinite;
+    background: linear-gradient(to top, rgba(232, 168, 56, 0.2) 40%, transparent 40%);
+    padding-bottom: 2px;
+  }
+
+  @keyframes blink {
+    50% { border-color: transparent; }
+  }
+
+  .hero-cta { margin-top: 28px; }
+
+  .cmd {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--color-dark);
+    color: var(--color-text-light);
+    padding: 18px 28px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    border: 2px solid var(--color-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .cmd:hover {
+    background: transparent;
+    color: var(--color-dark);
+  }
+
+  .cmd-dollar { color: var(--color-accent); font-weight: 700; }
+  .cmd-copy { opacity: 0.4; transition: opacity 0.15s; }
+  .cmd:hover .cmd-copy { opacity: 1; }
+
+  .cmd-toast {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--color-accent);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s;
+  }
+
+  .cmd.copied .cmd-toast { opacity: 1; transform: translateY(0); }
+
+  .cmd-platforms {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--color-muted);
+  }
+
+  /* MARQUEE */
+  .marquee {
+    margin-top: auto;
+    padding-bottom: 8px;
+  }
+
+  .marquee-label {
+    max-width: var(--max-width);
+    margin: 0 auto 20px;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .marquee-label a {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-card-border);
+    padding-bottom: 1px;
+    transition: all 0.15s;
+  }
+
+  .marquee-label a:hover {
+    color: var(--color-dark);
+    border-color: var(--color-dark);
+  }
+
+  .marquee-track {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+  }
+
+  .marquee-scroll {
+    display: flex;
+    gap: 14px;
+    width: max-content;
+    animation: marquee 600s linear infinite;
+  }
+
+  .marquee-scroll:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .m-card {
+    flex-shrink: 0;
+    width: 300px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+
+  .m-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .m-cat {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .m-name {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .m-desc {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 60px 0 30px; }
+    .hero-content { padding: 0 24px; }
+    .line { font-size: clamp(3rem, 14vw, 5.5rem); }
+    .stroke { -webkit-text-stroke: 2px var(--color-dark); }
+    .cmd { font-size: 0.75rem; padding: 14px 18px; }
+    .marquee-label { padding: 0 24px; }
+    .m-card { width: 240px; }
+    .gh-btn { top: 16px; right: 16px; padding: 8px 14px; font-size: 0.8rem; }
+  }
+</style>

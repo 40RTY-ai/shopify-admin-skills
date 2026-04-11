@@ -1,33 +1,25 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Shopify-Store%20Skills-96bf48?style=for-the-badge&logo=shopify&logoColor=white" alt="Shopify Store Skills" />
-</p>
-
-<h1 align="center">Shopify Store Skills</h1>
+<h1 align="center">Shopify Admin Skills.</h1>
 
 <p align="center">
-  <strong>Community-maintained AI agent skills for operating Shopify stores.</strong>
+  <strong>AI agent skills to operate your Shopify store with extended capabilities.</strong>
   <br />
-  Native Shopify Admin GraphQL — no apps, no UI navigation, just Claude and your store.
+  Recover abandoned carts, bulk-adjust prices, audit inventory, process refunds — all through your AI agent.
 </p>
 
 <p align="center">
-  <a href="#installation"><img src="https://img.shields.io/badge/install-quick%20start-blue?style=flat-square" alt="Install" /></a>
-  <img src="https://img.shields.io/badge/skills-63-96bf48?style=flat-square" alt="63 Skills" />
-  <img src="https://img.shields.io/badge/roles-10-blueviolet?style=flat-square" alt="10 Roles" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome" /></a>
-  <a href="https://github.com/40RTY-ai/shopify-store-skills/issues"><img src="https://img.shields.io/badge/issues-open-orange?style=flat-square" alt="Issues" /></a>
 </p>
 
 ---
 
-## What Is This?
+## Install
 
-Shopify's [AI Toolkit](https://github.com/Shopify/Shopify-AI-Toolkit) gives agents access to Shopify's platform APIs. **Shopify Store Skills** uses those same APIs to teach Claude how to accomplish complete merchant workflows — by operator role, in the CLI, with no app required.
+```bash
+npx skills add 40RTY-ai/shopify-admin-skills
+```
 
-**63 skills across 10 operator roles** — from daily fulfillment ops and inventory management to finance reporting, fraud detection, and catalog hygiene. Every skill runs against your live store via the Shopify Admin GraphQL API and reports exactly what it did, step by step.
-
-Works with **Claude Code, Cursor, Codex, Gemini CLI, and VS Code**.
+Works with **Claude Code, Cursor, Cline, Copilot, Gemini CLI**.
 
 ## Installation
 
