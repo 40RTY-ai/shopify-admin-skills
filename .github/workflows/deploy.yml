@@ -23,8 +23,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: site/pnpm-lock.yaml
       - run: pnpm install
         working-directory: site
       - run: pnpm build
