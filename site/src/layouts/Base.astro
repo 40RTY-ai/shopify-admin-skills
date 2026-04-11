@@ -1,0 +1,133 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'AI agent skills to operate your Shopify store with extended capabilities.' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+  </head>
+  <body>
+    <!-- Page-wide gradient mesh -->
+    <div class="page-mesh">
+      <div class="mesh-orb mesh-1"></div>
+      <div class="mesh-orb mesh-2"></div>
+      <div class="mesh-orb mesh-3"></div>
+    </div>
+
+    <slot />
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <a href="https://40rty.ai" target="_blank" rel="noopener" class="footer-logo-link">
+          <img src="/shopify-admin-skills/40rty-logo.png" alt="40rty" class="footer-logo-img" />
+        </a>
+        <span class="footer-sep">MIT License</span>
+        <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
+
+<style>
+  .page-mesh {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .mesh-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: drift 16s ease-in-out infinite;
+  }
+
+  .mesh-1 {
+    width: 700px;
+    height: 700px;
+    background: var(--color-accent);
+    opacity: 0.25;
+    top: -200px;
+    right: -150px;
+    animation-delay: 0s;
+  }
+
+  .mesh-2 {
+    width: 500px;
+    height: 500px;
+    background: var(--color-accent-light);
+    opacity: 0.2;
+    bottom: 10%;
+    left: -100px;
+    animation-delay: -6s;
+  }
+
+  .mesh-3 {
+    width: 400px;
+    height: 400px;
+    background: var(--color-dark);
+    opacity: 0.03;
+    top: 40%;
+    right: 20%;
+    animation-delay: -10s;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.06); }
+    66% { transform: translate(-30px, 20px) scale(0.94); }
+  }
+
+  body > *:not(.page-mesh) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer {
+    border-top: 1px solid var(--color-card-border);
+    padding: 24px 40px;
+    margin-top: 0;
+    background: rgba(250, 250, 250, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .footer-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+
+  .footer-logo-link {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer-logo-img {
+    height: 32px;
+    width: auto;
+  }
+
+  .footer-sep { opacity: 0.5; }
+  .footer a:hover { color: var(--color-dark); }
+</style>

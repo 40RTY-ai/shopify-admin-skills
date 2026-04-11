@@ -1,0 +1,392 @@
+---
+import Base from '../../../layouts/Base.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+
+const base = import.meta.env.BASE_URL;
+
+export function getStaticPaths() {
+  const skillsRoot = path.resolve(process.cwd(), '../skills');
+  const categories = fs.readdirSync(skillsRoot).filter((d: string) =>
+    fs.statSync(path.join(skillsRoot, d)).isDirectory()
+  );
+
+  const paths: { params: { category: string; slug: string }; props: Record<string, unknown> }[] = [];
+
+  for (const cat of categories) {
+    const catPath = path.join(skillsRoot, cat);
+    const skillDirs = fs.readdirSync(catPath).filter((d: string) =>
+      fs.statSync(path.join(catPath, d)).isDirectory()
+    );
+    for (const skill of skillDirs) {
+      const skillFile = path.join(catPath, skill, 'SKILL.md');
+      if (fs.existsSync(skillFile)) {
+        const raw = fs.readFileSync(skillFile, 'utf-8');
+        const { data, content } = matter(raw);
+
+        // Get sibling skills for sidebar
+        const siblings = skillDirs
+          .filter((d: string) => fs.existsSync(path.join(catPath, d, 'SKILL.md')))
+          .map((d: string) => {
+            const sibRaw = fs.readFileSync(path.join(catPath, d, 'SKILL.md'), 'utf-8');
+            const sibData = matter(sibRaw).data;
+            return { name: sibData.name || d, slug: d };
+          });
+
+        paths.push({
+          params: { category: cat, slug: skill },
+          props: {
+            frontmatter: data,
+            content,
+            categorySlug: cat,
+            categoryName: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            siblings,
+          },
+        });
+      }
+    }
+  }
+
+  return paths;
+}
+
+const { frontmatter, content, categorySlug, categoryName, siblings } = Astro.props as {
+  frontmatter: { name: string; description: string };
+  content: string;
+  categorySlug: string;
+  categoryName: string;
+  siblings: { name: string; slug: string }[];
+};
+const { slug } = Astro.params;
+
+// Simple markdown to HTML (headings, code blocks, lists, paragraphs, bold, inline code, tables)
+function renderMarkdown(md: string): string {
+  const lines = md.split('\n');
+  let html = '';
+  let inCodeBlock = false;
+  let codeLang = '';
+  let codeContent = '';
+  let inTable = false;
+  let tableRows: string[] = [];
+
+  function flushTable() {
+    if (!inTable || tableRows.length === 0) return;
+    let out = '<div class="table-wrap"><table>';
+    for (let i = 0; i < tableRows.length; i++) {
+      if (i === 1 && tableRows[i].match(/^\s*\|[\s-:|]+\|\s*$/)) continue; // skip separator
+      const cells = tableRows[i].split('|').slice(1, -1).map(c => c.trim());
+      const tag = i === 0 ? 'th' : 'td';
+      out += '<tr>' + cells.map(c => `<${tag}>${inlineFormat(c)}</${tag}>`).join('') + '</tr>';
+    }
+    out += '</table></div>';
+    html += out;
+    inTable = false;
+    tableRows = [];
+  }
+
+  function inlineFormat(text: string): string {
+    return text
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+
+  for (const line of lines) {
+    if (line.startsWith('```')) {
+      if (inCodeBlock) {
+        html += `<pre><code class="lang-${codeLang}">${codeContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        inCodeBlock = false;
+        codeContent = '';
+      } else {
+        flushTable();
+        inCodeBlock = true;
+        codeLang = line.slice(3).trim() || 'text';
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeContent += line + '\n';
+      continue;
+    }
+
+    // Table detection
+    if (line.match(/^\s*\|.*\|\s*$/)) {
+      if (!inTable) inTable = true;
+      tableRows.push(line);
+      continue;
+    } else {
+      flushTable();
+    }
+
+    if (line.startsWith('#### ')) {
+      html += `<h4>${inlineFormat(line.slice(5))}</h4>`;
+    } else if (line.startsWith('### ')) {
+      html += `<h3>${inlineFormat(line.slice(4))}</h3>`;
+    } else if (line.startsWith('## ')) {
+      html += `<h2>${inlineFormat(line.slice(3))}</h2>`;
+    } else if (line.startsWith('# ')) {
+      // skip title, we render it from frontmatter
+    } else if (line.match(/^\s*[-*]\s/)) {
+      html += `<li>${inlineFormat(line.replace(/^\s*[-*]\s/, ''))}</li>`;
+    } else if (line.match(/^\s*\d+\.\s/)) {
+      html += `<li>${inlineFormat(line.replace(/^\s*\d+\.\s/, ''))}</li>`;
+    } else if (line.trim() === '') {
+      html += '<br/>';
+    } else {
+      html += `<p>${inlineFormat(line)}</p>`;
+    }
+  }
+
+  flushTable();
+  return html;
+}
+
+const renderedContent = renderMarkdown(content);
+---
+
+<Base title={`${frontmatter.name} — Shopify Admin Skills`} description={frontmatter.description}>
+  <div class="skill-page">
+    <aside class="sidebar">
+      <a href={`${base}#skills`} class="sidebar-back">All Skills</a>
+      <h4 class="sidebar-category">{categoryName}</h4>
+      <ul class="sidebar-list">
+        {siblings.map((s: { name: string; slug: string }) => (
+          <li class:list={[{ active: s.slug === slug }]}>
+            <a href={`${base}skills/${categorySlug}/${s.slug}/`}>{s.name}</a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+
+    <main class="skill-content">
+      <nav class="breadcrumb">
+        <a href={base}>Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href={`${base}#skills`}>{categoryName}</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>{frontmatter.name}</span>
+      </nav>
+
+      <h1 class="skill-title">{frontmatter.name}</h1>
+      <p class="skill-desc">{frontmatter.description}</p>
+
+      <div class="markdown-body" set:html={renderedContent} />
+    </main>
+  </div>
+</Base>
+
+<style>
+  .skill-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 48px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
+  .sidebar-back {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 16px;
+    transition: color 0.15s;
+  }
+
+  .sidebar-back:hover { color: var(--color-text); }
+
+  .sidebar-category {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent-hover);
+    margin-bottom: 12px;
+  }
+
+  .sidebar-list {
+    list-style: none;
+  }
+
+  .sidebar-list li {
+    margin-bottom: 4px;
+  }
+
+  .sidebar-list a {
+    display: block;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    transition: all 0.15s;
+  }
+
+  .sidebar-list a:hover {
+    color: var(--color-text);
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .sidebar-list li.active a {
+    color: var(--color-text);
+    background: var(--color-accent);
+    font-weight: 500;
+  }
+
+  .breadcrumb {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 24px;
+  }
+
+  .breadcrumb a {
+    transition: color 0.15s;
+  }
+
+  .breadcrumb a:hover { color: var(--color-text); }
+
+  .breadcrumb-sep {
+    margin: 0 8px;
+    opacity: 0.4;
+  }
+
+  .skill-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+
+  .skill-desc {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin-bottom: 40px;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+
+  /* Markdown body styles */
+  .markdown-body :global(h2) {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-card-border);
+  }
+
+  .markdown-body :global(h3) {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 28px 0 12px;
+  }
+
+  .markdown-body :global(h4) {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 20px 0 8px;
+  }
+
+  .markdown-body :global(p) {
+    margin-bottom: 8px;
+    line-height: 1.7;
+  }
+
+  .markdown-body :global(li) {
+    margin-left: 20px;
+    margin-bottom: 4px;
+    line-height: 1.6;
+  }
+
+  .markdown-body :global(pre) {
+    background: var(--color-code-bg);
+    color: var(--color-text-light);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .markdown-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+
+  .markdown-body :global(p code),
+  .markdown-body :global(li code) {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .markdown-body :global(.table-wrap) {
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  .markdown-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .markdown-body :global(th) {
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.04);
+    border-bottom: 2px solid var(--color-card-border);
+  }
+
+  .markdown-body :global(td) {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-card-border);
+  }
+
+  .markdown-body :global(strong) {
+    font-weight: 600;
+  }
+
+  .markdown-body :global(a) {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .markdown-body :global(a:hover) {
+    color: var(--color-text);
+  }
+
+  @media (max-width: 768px) {
+    .skill-page {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .sidebar {
+      position: static;
+      border-bottom: 1px solid var(--color-card-border);
+      padding-bottom: 20px;
+    }
+
+    .sidebar-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+  }
+</style>
