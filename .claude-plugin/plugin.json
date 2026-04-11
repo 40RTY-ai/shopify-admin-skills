@@ -1,0 +1,22 @@
+{
+  "name": "shopify-admin-skills",
+  "version": "1.0.0",
+  "description": "AI agent skills to operate your Shopify store with extended capabilities — native Admin GraphQL, no apps required.",
+  "author": {
+    "name": "40RTY-ai"
+  },
+  "homepage": "https://github.com/40RTY-ai/shopify-admin-skills#readme",
+  "repository": "https://github.com/40RTY-ai/shopify-admin-skills",
+  "license": "MIT",
+  "keywords": [
+    "shopify",
+    "skills",
+    "claude",
+    "cursor",
+    "codex",
+    "gemini",
+    "ecommerce",
+    "graphql",
+    "admin-api"
+  ]
+}
