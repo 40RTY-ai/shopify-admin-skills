@@ -150,7 +150,7 @@ const renderedContent = renderMarkdown(content);
 <Base title={`${frontmatter.name} — Shopify Admin Skills`} description={frontmatter.description}>
   <div class="skill-page">
     <aside class="sidebar">
-      <a href={`${base}#skills`} class="sidebar-back">All Skills</a>
+      <a href={`${base}skills/`} class="sidebar-back">&larr; All Skills</a>
       <h4 class="sidebar-category">{categoryName}</h4>
       <ul class="sidebar-list">
         {siblings.map((s: { name: string; slug: string }) => (
@@ -165,7 +165,7 @@ const renderedContent = renderMarkdown(content);
       <nav class="breadcrumb">
         <a href={base}>Home</a>
         <span class="breadcrumb-sep">/</span>
-        <a href={`${base}#skills`}>{categoryName}</a>
+        <a href={`${base}skills/#${categoryName.toLowerCase().replace(/\s+/g, '-')}`}>{categoryName}</a>
         <span class="breadcrumb-sep">/</span>
         <span>{frontmatter.name}</span>
       </nav>
