@@ -110,7 +110,7 @@ const base = import.meta.env.BASE_URL;
 
   .footer {
     border-top: 1px solid var(--color-card-border);
-    padding: 24px 40px;
+    padding: 12px 40px;
     margin-top: 0;
     background: rgba(250, 250, 250, 0.6);
     backdrop-filter: blur(8px);
@@ -121,8 +121,8 @@ const base = import.meta.env.BASE_URL;
     margin: 0 auto;
     display: flex;
     align-items: center;
-    gap: 24px;
-    font-size: 0.9rem;
+    gap: 16px;
+    font-size: 0.75rem;
     color: var(--color-muted);
   }
 
@@ -132,10 +132,18 @@ const base = import.meta.env.BASE_URL;
   }
 
   .footer-logo-img {
-    height: 32px;
+    height: 20px;
     width: auto;
   }
 
-  .footer-sep { opacity: 0.5; }
+  .footer-sep { opacity: 0.4; }
   .footer a:hover { color: var(--color-dark); }
+
+  @media (max-width: 768px) {
+    .footer { padding: 10px 20px; }
+    .footer-inner { gap: 12px; font-size: 0.7rem; }
+    .footer-logo-img { height: 16px; }
+    .mesh-1 { width: 400px; height: 400px; }
+    .mesh-2 { width: 300px; height: 300px; }
+  }
 </style>

@@ -65,9 +65,11 @@ const categoryLabels: Record<string, string> = {
   'Store Management': 'Store Mgmt',
 };
 
-// Shuffle so different categories are interleaved
+// Shuffle and split into 2 rows for snake effect
 const shuffled = [...skills].sort(() => Math.random() - 0.5);
-const marqueeSkills = [...shuffled, ...shuffled];
+const half = Math.ceil(shuffled.length / 2);
+const row1 = [...shuffled.slice(0, half), ...shuffled.slice(0, half)];
+const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
 ---
 
 <Base title="Shopify Admin Skills — AI agent skills for your store">
@@ -116,18 +118,27 @@ const marqueeSkills = [...shuffled, ...shuffled];
       </div>
     </div>
 
-    <!-- Horizontal marquee -->
+    <!-- Horizontal marquee — 2 rows, opposite directions -->
     <div class="marquee">
       <div class="marquee-label">
         <a href={`${base}skills/`}>Browse all {skills.length} skills &rarr;</a>
       </div>
       <div class="marquee-track">
-        <div class="marquee-scroll">
-          {marqueeSkills.map(s => (
+        <div class="marquee-scroll row-left">
+          {row1.map(s => (
             <div class="m-card">
               <span class="m-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryLabels[s.category] || s.category}</span>
               <code class="m-name">{s.name}</code>
-              <p class="m-desc">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div class="marquee-track">
+        <div class="marquee-scroll row-right">
+          {row2.map(s => (
+            <div class="m-card">
+              <span class="m-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryLabels[s.category] || s.category}</span>
+              <code class="m-name">{s.name}</code>
             </div>
           ))}
         </div>
@@ -445,30 +456,48 @@ const marqueeSkills = [...shuffled, ...shuffled];
     -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
   }
 
+  .marquee-track + .marquee-track {
+    margin-top: 10px;
+  }
+
   .marquee-scroll {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     width: max-content;
-    animation: marquee 600s linear infinite;
+  }
+
+  .row-left {
+    animation: scrollLeft 400s linear infinite;
+  }
+
+  .row-right {
+    animation: scrollRight 450s linear infinite;
   }
 
   .marquee-scroll:hover {
     animation-play-state: paused;
   }
 
-  @keyframes marquee {
+  @keyframes scrollLeft {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
 
+  @keyframes scrollRight {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+
   .m-card {
     flex-shrink: 0;
-    width: 300px;
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(8px);
     border: 1px solid var(--color-card-border);
-    border-radius: var(--radius);
-    padding: 20px 22px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     transition: border-color 0.2s;
   }
 
@@ -479,41 +508,44 @@ const marqueeSkills = [...shuffled, ...shuffled];
   .m-cat {
     display: inline-block;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     padding: 3px 8px;
     border-radius: 4px;
-    margin-bottom: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .m-name {
     font-family: var(--font-mono);
-    font-size: 0.88rem;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .m-desc {
     font-size: 0.8rem;
-    color: var(--color-muted);
-    line-height: 1.45;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   @media (max-width: 768px) {
-    .hero { padding: 60px 0 30px; }
-    .hero-content { padding: 0 24px; }
-    .line { font-size: clamp(3rem, 14vw, 5.5rem); }
+    .hero { padding: 24px 0 16px; }
+    .hero-content { padding: 0 20px; }
+    .line { font-size: clamp(2.5rem, 12vw, 4rem); }
     .stroke { -webkit-text-stroke: 2px var(--color-dark); }
-    .cmd { font-size: 0.75rem; padding: 14px 18px; }
-    .marquee-label { padding: 0 24px; }
-    .m-card { width: 240px; }
-    .gh-btn { top: 16px; right: 16px; padding: 8px 14px; font-size: 0.8rem; }
+    .hero-sub { margin-top: 16px; font-size: 0.95rem; }
+    .hero-sub-static { font-size: 0.95rem; }
+    #rotating-text { font-size: 1rem; }
+    .hero-cta { margin-top: 20px; }
+    .hero-cta-row { gap: 10px; }
+    .cmd { font-size: 0.65rem; padding: 12px 14px; gap: 8px; }
+    .gh-cta { padding: 12px 16px; font-size: 0.78rem; }
+    .cmd-platforms { font-size: 0.72rem; margin-top: 10px; }
+    .built-by { margin-top: 10px; font-size: 0.8rem; }
+    .built-by-logo { height: 18px; }
+    .marquee { padding-bottom: 4px; }
+    .marquee-label { padding: 0 20px; margin-bottom: 12px; }
+    .m-card { width: 220px; padding: 14px 16px; }
+    .m-name { font-size: 0.78rem; }
+    .m-desc { font-size: 0.72rem; }
+    .m-cat { font-size: 0.58rem; margin-bottom: 6px; }
+    .gh-link { top: 16px; right: 16px; }
   }
 </style>
