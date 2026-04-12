@@ -93,14 +93,15 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
 
 
   <!-- HERO — split layout: left title, right skills grid -->
-  <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-    Star on GitHub
-  </a>
+  
 
   <section class="hero">
     <div class="hero-split">
       <div class="hero-left">
+        <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          Star on GitHub
+        </a>
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
           <span class="line stroke typewriter" id="t2">Admin</span>
@@ -236,9 +237,9 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
 
 <style>
   .gh-top {
-    position: fixed;
+    position: absolute;
     top: 24px;
-    right: 24px;
+    right: 40px;
     z-index: 100;
     display: inline-flex;
     align-items: center;
@@ -250,9 +251,10 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     letter-spacing: -0.01em;
     color: var(--color-dark);
     text-decoration: none;
-    border: 1px solid var(--color-dark);
-    border-radius: 100px;
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
     transition: all 0.15s;
+    background: var(--color-card);
   }
 
   .gh-top:hover {
@@ -261,7 +263,7 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
   }
 
   @media (max-width: 768px) {
-    .gh-top { top: 14px; right: 14px; font-size: 0.78rem; padding: 7px 13px; }
+    .gh-top { position: relative; top: auto; right: auto; margin-bottom: 24px; font-size: 0.85rem; padding: 10px 16px; border-radius: 6px; width: max-content; display: inline-flex; background: var(--color-card); border-color: var(--color-card-border); }
   }
 
   /* HERO */
@@ -592,9 +594,9 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     .hero-sub-static { font-size: 1.05rem; }
     #rotating-text { font-size: 1.15rem; }
     .hero-cta { margin-top: 16px; }
-    .hero-cta-row { gap: 10px; }
-    .cmd { font-size: 0.65rem; padding: 12px 14px; gap: 8px; flex-wrap: nowrap; max-width: 100%; box-sizing: border-box; }
-    .cmd code { white-space: normal; word-break: break-all; text-align: left; line-height: 1.4; }
+    .hero-cta-row { gap: 10px; display: block; width: 100%; }
+    .cmd { font-size: 0.7rem; padding: 14px; gap: 8px; display: flex; flex-direction: column; align-items: flex-start; max-width: 100%; width: 100%; box-sizing: border-box; }
+    .cmd code { white-space: pre-wrap; word-break: break-word; text-align: left; line-height: 1.5; font-size: 0.7rem; }
     .gh-cta { padding: 12px 16px; font-size: 0.78rem; }
     .cmd-platforms { font-size: 0.72rem; margin-top: 8px; }
     .built-by { margin-top: 8px; font-size: 0.8rem; }
