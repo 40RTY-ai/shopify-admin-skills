@@ -16,6 +16,7 @@ interface Skill {
   description: string;
   category: string;
   categorySlug: string;
+  slug: string;
 }
 
 const skills: Skill[] = [];
@@ -34,6 +35,7 @@ for (const cat of categories) {
         description: data.description || '',
         category: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         categorySlug: cat,
+        slug: skill,
       });
     }
   }
@@ -65,83 +67,88 @@ const categoryLabels: Record<string, string> = {
   'Store Management': 'Store Mgmt',
 };
 
-// Shuffle and split into 2 rows for snake effect
+const categoryIcons: Record<string, string> = {
+  'Marketing': '📣',
+  'Merchandising': '📦',
+  'Customer Support': '💬',
+  'Customer Ops': '👥',
+  'Conversion Optimization': '📈',
+  'Fulfillment Ops': '🚚',
+  'Finance': '💰',
+  'Order Intelligence': '🛡️',
+  'Returns': '↩️',
+  'Store Management': '⚙️',
+};
+
+// Shuffle and split into 2 columns, tripled for seamless loop
 const shuffled = [...skills].sort(() => Math.random() - 0.5);
 const half = Math.ceil(shuffled.length / 2);
-const row1 = [...shuffled.slice(0, half), ...shuffled.slice(0, half)];
-const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
+const col1Base = shuffled.slice(0, half);
+const col2Base = shuffled.slice(half);
+const row1 = [...col1Base, ...col1Base, ...col1Base];
+const row2 = [...col2Base, ...col2Base, ...col2Base];
 ---
 
 <Base title="Shopify Admin Skills — AI agent skills for your store">
 
-  <!-- GitHub link -->
-  <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-link">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+
+  <!-- HERO — split layout: left title, right skills grid -->
+  <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    Star on GitHub
   </a>
 
-  <!-- HERO + MARQUEE as one section -->
   <section class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">
-        <span class="line typewriter" id="t1">Shopify</span>
-        <span class="line stroke typewriter" id="t2">Admin</span>
-        <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
-      </h1>
-      <p class="hero-sub">
-        <span id="rotating-text"></span>
-      </p>
-      <p class="hero-sub-static">through your AI agent.</p>
-      <div class="hero-cta">
-        <div class="hero-cta-row">
-          <button class="cmd" id="copy-btn" data-cmd="npx skills add 40RTY-ai/shopify-admin-skills">
-            <span class="cmd-dollar">$</span>
-            <code>npx skills add 40RTY-ai/shopify-admin-skills</code>
-            <span class="cmd-copy" aria-label="Copy">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </span>
-            <span class="cmd-toast">Copied!</span>
-          </button>
-          <a
-            href="https://github.com/40RTY-ai/shopify-admin-skills"
-            target="_blank"
-            rel="noopener"
-            class="gh-cta"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            View on GitHub
+    <div class="hero-split">
+      <div class="hero-left">
+        <h1 class="hero-title">
+          <span class="line typewriter" id="t1">Shopify</span>
+          <span class="line stroke typewriter" id="t2">Admin</span>
+          <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
+        </h1>
+        <p class="hero-sub">
+          <a id="rotating-link" href="#"><span id="rotating-text"></span></a>
+        </p>
+        <p class="hero-sub-static">through your AI agent.</p>
+        <div class="hero-cta">
+          <div class="hero-cta-row">
+            <button class="cmd" id="copy-btn" data-cmd="npx skills add 40RTY-ai/shopify-admin-skills">
+              <span class="cmd-dollar">$</span>
+              <code>npx skills add 40RTY-ai/shopify-admin-skills</code>
+              <span class="cmd-copy" aria-label="Copy">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </span>
+              <span class="cmd-toast">Copied!</span>
+            </button>
+          </div>
+          <p class="cmd-platforms">Claude Code &middot; Cursor &middot; Cline &middot; Copilot &middot; Gemini CLI</p>
+          <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
+            Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
           </a>
         </div>
-        <p class="cmd-platforms">Claude Code &middot; Cursor &middot; Cline &middot; Copilot &middot; Gemini CLI</p>
-        <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
-          Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
-        </a>
       </div>
-    </div>
 
-    <!-- Horizontal marquee — 2 rows, opposite directions -->
-    <div class="marquee">
-      <div class="marquee-label">
-        <a href={`${base}skills/`}>Browse all {skills.length} skills &rarr;</a>
-      </div>
-      <div class="marquee-track">
-        <div class="marquee-scroll row-left">
-          {row1.map(s => (
-            <div class="m-card">
-              <span class="m-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryLabels[s.category] || s.category}</span>
-              <code class="m-name">{s.name}</code>
-            </div>
-          ))}
+      <!-- Right side: skills grid scrolling vertically -->
+      <div class="hero-right">
+        <div class="skills-scroll-mask">
+          <div class="skills-scroll-col col-up">
+            {row1.map(s => (
+              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
+                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
+                <code class="s-name">{s.name}</code>
+              </a>
+            ))}
+          </div>
+          <div class="skills-scroll-col col-down">
+            {row2.map(s => (
+              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
+                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
+                <code class="s-name">{s.name}</code>
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
-      <div class="marquee-track">
-        <div class="marquee-scroll row-right">
-          {row2.map(s => (
-            <div class="m-card">
-              <span class="m-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryLabels[s.category] || s.category}</span>
-              <code class="m-name">{s.name}</code>
-            </div>
-          ))}
-        </div>
+        <a href={`${base}skills/`} class="browse-link">Browse all {skills.length} skills &rarr;</a>
       </div>
     </div>
   </section>
@@ -168,25 +175,27 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
       el.classList.add('reveal');
     });
 
-    // Rotating subtitle
-    const abilities = [
-      'Recover abandoned carts',
-      'Bulk-adjust prices across collections',
-      'Audit inventory across locations',
-      'Process refunds and reorders',
-      'Tag customers by spend tier',
-      'Detect duplicate SKUs and barcodes',
-      'Analyze return reasons',
-      'Route fulfillments by location',
-      'Track delivery SLAs',
-      'Clean up stale discount codes',
-      'Export loyalty segments',
-      'Generate revenue-by-location reports',
-      'Find dead stock eating warehouse costs',
-      'Audit SEO metadata across products',
+    // Rotating subtitle — [text, skill-path]
+    const base = (document.querySelector('base')?.href || '/').replace(location.origin, '') || '/';
+    const abilities: [string, string][] = [
+      ['Recover abandoned carts', 'skills/marketing/abandoned-cart-recovery/'],
+      ['Bulk-adjust prices across collections', 'skills/merchandising/bulk-price-adjustment/'],
+      ['Audit inventory across locations', 'skills/merchandising/multi-location-inventory-audit/'],
+      ['Process refunds and reorders', 'skills/customer-support/refund-and-reorder/'],
+      ['Tag customers by spend tier', 'skills/customer-ops/customer-spend-tier-tagger/'],
+      ['Detect duplicate SKUs and barcodes', 'skills/merchandising/duplicate-sku-barcode-detector/'],
+      ['Analyze return reasons', 'skills/returns/return-reason-analysis/'],
+      ['Route fulfillments by location', 'skills/fulfillment-ops/fulfillment-location-routing/'],
+      ['Track delivery SLAs', 'skills/fulfillment-ops/delivery-time-analysis/'],
+      ['Clean up stale discount codes', 'skills/store-management/discount-hygiene-cleanup/'],
+      ['Export loyalty segments', 'skills/marketing/loyalty-segment-export/'],
+      ['Generate revenue-by-location reports', 'skills/finance/revenue-by-location-report/'],
+      ['Find dead stock eating warehouse costs', 'skills/merchandising/dead-stock-identifier/'],
+      ['Audit SEO metadata across products', 'skills/merchandising/seo-metadata-audit/'],
     ];
 
     const rotEl = document.getElementById('rotating-text');
+    const rotLink = document.getElementById('rotating-link') as HTMLAnchorElement | null;
     let currentIdx = 0;
 
     function typeText(text: string, el: HTMLElement) {
@@ -199,19 +208,25 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
       }, 35);
     }
 
+    function updateLink(idx: number) {
+      if (rotLink) rotLink.href = base + abilities[idx][1];
+    }
+
     function eraseAndType() {
       if (!rotEl) return;
       rotEl.style.opacity = '0';
       setTimeout(() => {
         currentIdx = (currentIdx + 1) % abilities.length;
         rotEl.style.opacity = '1';
-        typeText(abilities[currentIdx], rotEl);
+        updateLink(currentIdx);
+        typeText(abilities[currentIdx][0], rotEl);
       }, 300);
     }
 
     // Initial type
     if (rotEl) {
-      typeText(abilities[0], rotEl);
+      updateLink(0);
+      typeText(abilities[0][0], rotEl);
     }
 
     setInterval(eraseAndType, 3500);
@@ -220,37 +235,59 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
 </Base>
 
 <style>
-  /* GitHub link */
-  .gh-link {
+  .gh-top {
     position: fixed;
-    top: 28px;
-    right: 32px;
+    top: 24px;
+    right: 24px;
     z-index: 100;
-    color: var(--color-muted);
-    opacity: 0.5;
-    transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-dark);
+    text-decoration: none;
+    border: 1px solid var(--color-dark);
+    border-radius: 100px;
+    transition: all 0.15s;
   }
 
-  .gh-link:hover {
-    opacity: 1;
-    color: var(--color-dark);
+  .gh-top:hover {
+    background: var(--color-dark);
+    color: var(--color-text-light);
+  }
+
+  @media (max-width: 768px) {
+    .gh-top { top: 14px; right: 14px; font-size: 0.78rem; padding: 7px 13px; }
   }
 
   /* HERO */
   .hero {
     height: 100vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 40px 0 24px;
+    align-items: center;
+    padding: 0;
     overflow: hidden;
   }
 
-  .hero-content {
+  .hero-split {
     max-width: var(--max-width);
     margin: 0 auto;
     width: 100%;
     padding: 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    height: 100%;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .hero-title {
@@ -303,11 +340,20 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
     margin-top: 4px;
   }
 
+  #rotating-link {
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #rotating-link:hover #rotating-text {
+    background: linear-gradient(to top, rgba(232, 168, 56, 0.45) 40%, transparent 40%);
+  }
+
   #rotating-text {
     color: var(--color-dark);
     font-weight: 600;
     font-size: 1.2rem;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s, background 0.2s;
     border-right: 2px solid var(--color-accent);
     padding-right: 3px;
     animation: blink 0.8s step-end infinite;
@@ -395,20 +441,21 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
   .gh-cta {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 18px 24px;
-    border: 2px solid var(--color-dark);
-    border-radius: var(--radius);
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--color-dark);
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
     text-decoration: none;
-    transition: all 0.2s;
+    padding: 8px 14px;
+    border: 1px solid var(--color-card-border);
+    border-radius: 8px;
+    transition: all 0.15s;
   }
 
   .gh-cta:hover {
-    background: var(--color-dark);
-    color: var(--color-text-light);
+    color: var(--color-dark);
+    border-color: var(--color-dark);
+    background: rgba(0, 0, 0, 0.03);
   }
 
   .cmd-platforms {
@@ -417,25 +464,93 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
     color: var(--color-muted);
   }
 
-  /* MARQUEE */
-  .marquee {
-    margin-top: auto;
-    padding-bottom: 8px;
-  }
-
-  .marquee-label {
-    max-width: var(--max-width);
-    margin: 0 auto 20px;
-    padding: 0 40px;
+  /* RIGHT SIDE — vertical scroll columns */
+  .hero-right {
+    height: 100%;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: var(--font-heading);
-    font-size: 0.95rem;
-    font-weight: 600;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
   }
 
-  .marquee-label a {
+  .skills-scroll-mask {
+    display: flex;
+    gap: 12px;
+    height: 70vh;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+  }
+
+  .skills-scroll-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 50%;
+  }
+
+  .col-up {
+    animation: scrollUp 30s linear infinite;
+  }
+
+  .col-down {
+    animation: scrollDown 35s linear infinite;
+  }
+
+  .skills-scroll-col:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes scrollUp {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-33.33%); }
+  }
+
+  @keyframes scrollDown {
+    0% { transform: translateY(-33.33%); }
+    100% { transform: translateY(0); }
+  }
+
+  .s-chip {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--color-card-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .s-chip:hover {
+    border-color: var(--color-accent);
+  }
+
+  .s-cat {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+
+  .s-name {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: block;
+  }
+
+  .browse-link {
+    display: block;
+    margin-top: 16px;
     font-family: var(--font-mono);
     font-size: 0.82rem;
     font-weight: 500;
@@ -443,109 +558,104 @@ const row2 = [...shuffled.slice(half), ...shuffled.slice(half)];
     border-bottom: 1px solid var(--color-card-border);
     padding-bottom: 1px;
     transition: all 0.15s;
+    width: fit-content;
   }
 
-  .marquee-label a:hover {
+  .browse-link:hover {
     color: var(--color-dark);
     border-color: var(--color-dark);
   }
 
-  .marquee-track {
-    overflow: hidden;
-    mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
-  }
-
-  .marquee-track + .marquee-track {
-    margin-top: 10px;
-  }
-
-  .marquee-scroll {
-    display: flex;
-    gap: 12px;
-    width: max-content;
-  }
-
-  .row-left {
-    animation: scrollLeft 400s linear infinite;
-  }
-
-  .row-right {
-    animation: scrollRight 450s linear infinite;
-  }
-
-  .marquee-scroll:hover {
-    animation-play-state: paused;
-  }
-
-  @keyframes scrollLeft {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  @keyframes scrollRight {
-    0% { transform: translateX(-50%); }
-    100% { transform: translateX(0); }
-  }
-
-  .m-card {
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--color-card-border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: border-color 0.2s;
-  }
-
-  .m-card:hover {
-    border-color: var(--color-accent);
-  }
-
-  .m-cat {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .m-name {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
   @media (max-width: 768px) {
-    .hero { padding: 24px 0 16px; }
-    .hero-content { padding: 0 20px; }
-    .line { font-size: clamp(2.5rem, 12vw, 4rem); }
-    .stroke { -webkit-text-stroke: 2px var(--color-dark); }
-    .hero-sub { margin-top: 16px; font-size: 0.95rem; }
-    .hero-sub-static { font-size: 0.95rem; }
-    #rotating-text { font-size: 1rem; }
-    .hero-cta { margin-top: 20px; }
+    .hero {
+      height: auto;
+      min-height: 100dvh;
+    }
+
+    .hero-split {
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px;
+      gap: 0;
+      height: auto;
+    }
+
+    .hero-left {
+      flex: 0 0 auto;
+      padding-top: 40px;
+    }
+
+    .line { font-size: clamp(3.5rem, 18vw, 5.5rem); }
+    .stroke { -webkit-text-stroke: 2.5px var(--color-dark); }
+    .hero-sub { margin-top: 20px; font-size: 1.05rem; }
+    .hero-sub-static { font-size: 1.05rem; }
+    #rotating-text { font-size: 1.15rem; }
+    .hero-cta { margin-top: 16px; }
     .hero-cta-row { gap: 10px; }
     .cmd { font-size: 0.65rem; padding: 12px 14px; gap: 8px; }
     .gh-cta { padding: 12px 16px; font-size: 0.78rem; }
-    .cmd-platforms { font-size: 0.72rem; margin-top: 10px; }
-    .built-by { margin-top: 10px; font-size: 0.8rem; }
+    .cmd-platforms { font-size: 0.72rem; margin-top: 8px; }
+    .built-by { margin-top: 8px; font-size: 0.8rem; }
     .built-by-logo { height: 18px; }
-    .marquee { padding-bottom: 4px; }
-    .marquee-label { padding: 0 20px; margin-bottom: 12px; }
-    .m-card { width: 220px; padding: 14px 16px; }
-    .m-name { font-size: 0.78rem; }
-    .m-desc { font-size: 0.72rem; }
-    .m-cat { font-size: 0.58rem; margin-bottom: 6px; }
+
+    /* Skills scroll — sits right below the hero content */
+    .hero-right {
+      flex: 0 0 auto;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skills-scroll-mask {
+      height: auto;
+      flex-direction: column;
+      gap: 6px;
+      mask-image: linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%);
+      overflow: hidden;
+    }
+
+    .skills-scroll-col {
+      flex-direction: row;
+      width: max-content;
+      gap: 6px;
+    }
+
+    .col-up {
+      animation: scrollLeftMobile 200s linear infinite;
+    }
+
+    .col-down {
+      animation: scrollRightMobile 220s linear infinite;
+    }
+
+    @keyframes scrollLeftMobile {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-33.33%); }
+    }
+
+    @keyframes scrollRightMobile {
+      0% { transform: translateX(-33.33%); }
+      100% { transform: translateX(0); }
+    }
+
+    .s-chip { padding: 14px 18px; border-radius: 12px; }
+    .s-name { font-size: 1rem; white-space: nowrap; }
+    .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
+    .browse-link {
+      display: inline-flex;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 12px 20px;
+      border: 2px solid var(--color-dark);
+      border-radius: 10px;
+      align-self: flex-start;
+      background: var(--color-card);
+      color: var(--color-dark);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
     .gh-link { top: 16px; right: 16px; }
   }
 </style>

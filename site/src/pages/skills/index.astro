@@ -47,17 +47,17 @@ const grouped = skills.reduce((acc, s) => {
   return acc;
 }, {} as Record<string, Skill[]>);
 
-const categoryMeta: Record<string, { label: string; color: string; desc: string }> = {
-  'Marketing': { label: 'Marketing', color: '#E8A838', desc: 'Cart recovery, win-back, loyalty' },
-  'Merchandising': { label: 'Catalog & Inventory', color: '#5B8DEF', desc: 'Pricing, stock, SEO, product data' },
-  'Customer Support': { label: 'Support', color: '#E85D75', desc: 'Orders, refunds, returns, WISMO' },
-  'Customer Ops': { label: 'Customer Ops', color: '#9B6EE3', desc: 'Segmentation, tagging, B2B' },
-  'Conversion Optimization': { label: 'Conversion', color: '#3DBB8F', desc: 'Discounts, performance, gift cards' },
-  'Fulfillment Ops': { label: 'Fulfillment', color: '#E87838', desc: 'Shipping, routing, tracking' },
-  'Finance': { label: 'Finance', color: '#5BB8A8', desc: 'Revenue, tax, refunds, AOV' },
-  'Order Intelligence': { label: 'Order Intel', color: '#D4605A', desc: 'Fraud, risk, repeat purchases' },
-  'Returns': { label: 'Returns', color: '#8B8B8B', desc: 'Reasons, SLAs, exchange ratios' },
-  'Store Management': { label: 'Store Mgmt', color: '#6B8CA8', desc: 'Redirects, drafts, discounts, pages' },
+const categoryMeta: Record<string, { label: string; color: string; icon: string; desc: string }> = {
+  'Marketing': { label: 'Marketing', color: '#E8A838', icon: '📣', desc: 'Cart recovery, win-back, loyalty' },
+  'Merchandising': { label: 'Catalog & Inventory', color: '#5B8DEF', icon: '📦', desc: 'Pricing, stock, SEO, product data' },
+  'Customer Support': { label: 'Support', color: '#E85D75', icon: '💬', desc: 'Orders, refunds, returns, WISMO' },
+  'Customer Ops': { label: 'Customer Ops', color: '#9B6EE3', icon: '👥', desc: 'Segmentation, tagging, B2B' },
+  'Conversion Optimization': { label: 'Conversion', color: '#3DBB8F', icon: '📈', desc: 'Discounts, performance, gift cards' },
+  'Fulfillment Ops': { label: 'Fulfillment', color: '#E87838', icon: '🚚', desc: 'Shipping, routing, tracking' },
+  'Finance': { label: 'Finance', color: '#5BB8A8', icon: '💰', desc: 'Revenue, tax, refunds, AOV' },
+  'Order Intelligence': { label: 'Order Intel', color: '#D4605A', icon: '🛡️', desc: 'Fraud, risk, repeat purchases' },
+  'Returns': { label: 'Returns', color: '#8B8B8B', icon: '↩️', desc: 'Reasons, SLAs, exchange ratios' },
+  'Store Management': { label: 'Store Mgmt', color: '#6B8CA8', icon: '⚙️', desc: 'Redirects, drafts, discounts, pages' },
 };
 
 const categoryOrder = Object.keys(categoryMeta);
@@ -82,6 +82,7 @@ const categoryOrder = Object.keys(categoryMeta);
         if (!catSkills) return null;
         return (
           <a href={`#${cat.toLowerCase().replace(/\s+/g, '-')}`} class="cat-pill" style={`--pill-color: ${meta.color};`}>
+            <span class="pill-icon">{meta.icon}</span>
             {meta.label}
           </a>
         );
@@ -99,7 +100,7 @@ const categoryOrder = Object.keys(categoryMeta);
         return (
           <div class="cat-section" id={cat.toLowerCase().replace(/\s+/g, '-')}>
             <div class="cat-header">
-              <div class="cat-color" style={`background: ${meta.color};`}></div>
+              <div class="cat-icon" style={`background: ${meta.color}20; color: ${meta.color};`}>{meta.icon}</div>
               <div>
                 <h2>{meta.label}</h2>
                 <p class="cat-desc">{meta.desc}</p>
