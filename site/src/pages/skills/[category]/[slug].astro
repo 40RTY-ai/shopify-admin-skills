@@ -315,7 +315,7 @@ const renderedContent = renderMarkdown(content);
     color: var(--color-text-light);
     padding: 20px 24px;
     border-radius: var(--radius);
-    overflow-x: auto;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; box-sizing: border-box;
     margin: 16px 0;
     font-size: 0.9rem;
     line-height: 1.5;
@@ -334,7 +334,7 @@ const renderedContent = renderMarkdown(content);
   }
 
   .markdown-body :global(.table-wrap) {
-    overflow-x: auto;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; box-sizing: border-box; display: block;
     margin: 16px 0;
   }
 
@@ -375,6 +375,10 @@ const renderedContent = renderMarkdown(content);
     .skill-page {
       grid-template-columns: 1fr;
       gap: 24px;
+      padding: 24px 16px;
+      width: 100vw;
+      box-sizing: border-box;
+      overflow-x: hidden;
     }
 
     .sidebar {
@@ -388,5 +392,11 @@ const renderedContent = renderMarkdown(content);
       flex-wrap: wrap;
       gap: 4px;
     }
+
+    .skill-content { width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+    .markdown-body { width: 100%; max-width: 100%; box-sizing: border-box; }
+    .markdown-body :global(pre) { padding: 16px; font-size: 0.8rem; border-radius: 8px; }
+    .skill-desc { font-size: 0.95rem; }
+    .skill-title { font-size: 2rem; }
   }
 </style>
