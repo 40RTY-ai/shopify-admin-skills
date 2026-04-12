@@ -593,7 +593,8 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     #rotating-text { font-size: 1.15rem; }
     .hero-cta { margin-top: 16px; }
     .hero-cta-row { gap: 10px; }
-    .cmd { font-size: 0.65rem; padding: 12px 14px; gap: 8px; }
+    .cmd { font-size: 0.65rem; padding: 12px 14px; gap: 8px; flex-wrap: nowrap; max-width: 100%; box-sizing: border-box; }
+    .cmd code { white-space: normal; word-break: break-all; text-align: left; line-height: 1.4; }
     .gh-cta { padding: 12px 16px; font-size: 0.78rem; }
     .cmd-platforms { font-size: 0.72rem; margin-top: 8px; }
     .built-by { margin-top: 8px; font-size: 0.8rem; }
@@ -611,11 +612,17 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
       height: auto;
       flex-direction: column;
       gap: 6px;
-      mask-image: linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%, black 75%, transparent 100%);
-      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+      width: 100%;
     }
-
+    .skills-scroll-mask::-webkit-scrollbar {
+      display: none;
+    }
     .skills-scroll-col {
       flex-direction: row;
       width: max-content;
@@ -623,11 +630,11 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     }
 
     .col-up {
-      animation: scrollLeftMobile 200s linear infinite;
+      /* animation removed for touch scrolling */
     }
 
     .col-down {
-      animation: scrollRightMobile 220s linear infinite;
+      /* animation removed for touch scrolling */
     }
 
     @keyframes scrollLeftMobile {
