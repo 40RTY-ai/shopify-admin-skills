@@ -618,9 +618,9 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
       width: max-content;
       gap: 12px;
     }
-.col-up { animation: scrollLeftMobile 50s linear infinite; }
+.col-up { animation: scrollLeftMobile 120s linear infinite; }
 
-    .col-down { animation: scrollRightMobile 55s linear infinite; }
+    .col-down { animation: scrollRightMobile 130s linear infinite; display: none; } /* User said "only row on mobile" */
 
     @keyframes scrollLeftMobile {
       0% { transform: translateX(0); }
