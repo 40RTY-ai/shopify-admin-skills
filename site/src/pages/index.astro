@@ -279,7 +279,7 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     max-width: var(--max-width);
     margin: 0 auto;
     width: 100%;
-    padding: 0 40px;
+    padding: 0 40px; box-sizing: border-box;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 48px;
@@ -578,19 +578,19 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     .hero-split {
       display: flex;
       flex-direction: column;
-      padding: 0 20px;
+      padding: 0 20px; box-sizing: border-box; width: 100vw; overflow-x: hidden;
       gap: 0;
       height: auto;
     }
 
     .hero-left {
-      flex: 0 0 auto;
+      flex: 0 0 auto; width: 100%; max-width: 100vw; box-sizing: border-box; overflow-x: hidden;
       padding-top: 40px;
     }
 
-    .line { font-size: clamp(3.5rem, 18vw, 5.5rem); }
+    .line { font-size: clamp(3.0rem, 14vw, 4.5rem); word-wrap: break-word; white-space: pre-wrap; line-height: 1; max-width: 100%; display: block; overflow: hidden; }
     .stroke { -webkit-text-stroke: 2.5px var(--color-dark); }
-    .hero-sub { margin-top: 20px; font-size: 1.05rem; }
+    .hero-sub { margin-top: 20px; width: 100%; box-sizing: border-box; box-sizing: border-box; overflow: hidden; font-size: 1.05rem; }
     .hero-sub-static { font-size: 1.05rem; }
     #rotating-text { font-size: 1.15rem; }
     .hero-cta { margin-top: 16px; }
@@ -605,7 +605,7 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
     /* Skills scroll — sits right below the hero content */
     .hero-right {
       flex: 0 0 auto;
-      margin-top: 20px;
+      margin-top: 20px; width: 100%; box-sizing: border-box; overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -620,7 +620,7 @@ const row2 = [...col2Base, ...col2Base, ...col2Base];
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       padding-bottom: 10px;
-      width: 100%;
+      width: 100%; box-sizing: border-box;
     }
     .skills-scroll-mask::-webkit-scrollbar {
       display: none;
