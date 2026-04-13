@@ -1,0 +1,35 @@
+# Shopify Admin Skills
+
+> Pre-built AI agent skills for operating Shopify stores. Open source. Free.
+
+Shopify Admin Skills is an open-source collection of AI agent skills for Shopify store operators.
+Each skill is a structured prompt that guides an AI agent (Claude Code, Cursor, Cline, Copilot, Gemini CLI)
+through a specific store operation using the Shopify Admin GraphQL API.
+
+## Install
+
+```
+npx skills add 40RTY-ai/shopify-admin-skills
+```
+
+Or paste the guided install prompt into Claude Code.
+
+## Skill Categories
+
+- **Marketing** — Abandoned cart recovery, customer win-back, loyalty segment export
+- **Merchandising** — Bulk price adjustment, inventory audit, dead stock identification, SEO metadata audit, duplicate SKU detection, variant normalization
+- **Customer Support** — Order lookup, refund & reorder, return initiation, address correction, WISMO reports
+- **Customer Ops** — Spend tier tagging, cohort analysis, duplicate customer finder, bulk note annotation, B2B company overview
+- **Conversion Optimization** — Discount A/B analysis, checkout abandonment report, gift card issuance, top product performance
+- **Fulfillment Ops** — Bulk fulfillment creation, split shipment planning, location routing, tracking updates, hold & release
+- **Finance** — Revenue by location, AOV trends, refund rate analysis, gift card balance, sales by channel, tax liability, shipping cost analysis
+- **Order Intelligence** — High-risk order tagging, risk reports, notes & attributes report, repeat purchase rate
+- **Returns** — Return reason analysis, processing SLA, exchange vs refund ratio, return initiation
+- **Store Management** — Discount hygiene cleanup, draft order cleanup, page content audit, URL redirect audit, publication channel audit
+
+## Source & License
+
+- GitHub: https://github.com/40RTY-ai/shopify-admin-skills
+- Site: https://skills.40rty.ai
+- Built by: 40rty — https://40rty.ai
+- License: MIT

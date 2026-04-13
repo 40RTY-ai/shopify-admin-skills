@@ -71,7 +71,19 @@ function humanName(slug: string): string {
 }
 ---
 
-<Base title="All Skills — Shopify Admin Skills">
+<Base
+  title="All Skills — Shopify Admin Skills"
+  description={`Browse all ${skills.length} Shopify Admin Skills organized by category: Marketing, Merchandising, Customer Support, Fulfillment, Finance, and more.`}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'All Skills — Shopify Admin Skills',
+    description: `Browse all ${skills.length} Shopify Admin Skills organized by category.`,
+    url: 'https://skills.40rty.ai/skills/',
+    isPartOf: { '@type': 'WebSite', name: 'Shopify Admin Skills', url: 'https://skills.40rty.ai' },
+    numberOfItems: skills.length,
+  }}
+>
 
   <!-- Header -->
   <section class="page-header">
