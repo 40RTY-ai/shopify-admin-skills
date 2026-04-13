@@ -195,6 +195,10 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
           <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
             Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
           </a>
+          <a href="#signup" class="signup-teaser">
+            Tell me more cool stuff
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          </a>
         </div>
       </div>
 
@@ -224,7 +228,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   </section>
 
   <!-- SIGNUP SECTION -->
-  <section class="signup">
+  <section class="signup" id="signup">
     <div class="signup-card">
       <span class="signup-eyebrow">From 40rty</span>
       <h2 class="signup-heading">Get new skills first.</h2>
@@ -814,6 +818,30 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .built-by:hover .built-by-logo { opacity: 0.85; }
+
+  .signup-teaser {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.15s, gap 0.2s;
+  }
+
+  .signup-teaser:hover {
+    color: var(--color-accent);
+  }
+
+  .teaser-arrow {
+    transition: transform 0.25s;
+  }
+
+  .signup-teaser:hover .teaser-arrow {
+    transform: translateY(3px);
+  }
 
   .cmd {
     display: inline-flex;
