@@ -156,7 +156,23 @@ function renderMarkdown(md: string): string {
 const renderedContent = renderMarkdown(content);
 ---
 
-<Base title={`${frontmatter.name} — Shopify Admin Skills`} description={frontmatter.description}>
+<Base
+  title={`${humanName(frontmatter.name)} — Shopify Admin Skills`}
+  description={frontmatter.description}
+  type="article"
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: `${humanName(frontmatter.name)} — Shopify Admin Skills`,
+    description: frontmatter.description,
+    url: `https://skills.40rty.ai/skills/${Astro.params.category}/${Astro.params.slug}/`,
+    articleSection: categoryName,
+    keywords: `Shopify, AI agent, ${humanName(frontmatter.name)}, ${categoryName}, Claude Code, Cursor`,
+    author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+    publisher: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+    isPartOf: { '@type': 'WebSite', name: 'Shopify Admin Skills', url: 'https://skills.40rty.ai' },
+  }}
+>
   <div class="skill-page">
     <aside class="sidebar">
       <a href={`${base}skills/`} class="sidebar-back">&larr; All Skills</a>

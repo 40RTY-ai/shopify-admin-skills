@@ -2,10 +2,45 @@
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  type?: 'website' | 'article';
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description = 'AI agent skills to operate your Shopify store with extended capabilities.' } = Astro.props;
+const {
+  title,
+  description = 'AI agent skills to operate your Shopify store with extended capabilities. Works with Claude Code, Cursor, Cline, Copilot, and Gemini CLI.',
+  ogImage = 'https://skills.40rty.ai/40rty-logo.png',
+  type = 'website',
+  jsonLd,
+} = Astro.props;
+
 const base = import.meta.env.BASE_URL;
+const canonicalUrl = Astro.url.href;
+const siteName = 'Shopify Admin Skills';
+const siteUrl = 'https://skills.40rty.ai';
+
+const defaultSchema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': type === 'article' ? 'TechArticle' : 'WebPage',
+  name: title,
+  description,
+  url: canonicalUrl,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: siteName,
+    url: siteUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: '40rty',
+      url: 'https://40rty.ai',
+    },
+  },
+};
+
+const schemas: Record<string, unknown>[] = jsonLd
+  ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd])
+  : [defaultSchema];
 ---
 
 <!DOCTYPE html>
@@ -13,16 +48,50 @@ const base = import.meta.env.BASE_URL;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
+
+    <!-- Primary -->
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={type === 'article' ? 'article' : 'website'} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:site" content="@40rtyAI" />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="icon" type="image/x-icon" href={`${base}favicon.ico`} />
+
+    <!-- JSON-LD structured data -->
+    {schemas.map(schema => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+
     <!-- Google Analytics -->
     <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-515917473"></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-515917473');
+      gtag('config', 'G-515917473', {
+        page_title: document.title,
+        page_location: window.location.href,
+      });
     </script>
   </head>
   <body>

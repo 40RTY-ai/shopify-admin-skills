@@ -123,7 +123,33 @@ For each, give a one-sentence description. Ask me to pick one (or describe my ow
 Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text, no logs, no "here's what I ran" unless I ask.`;
 ---
 
-<Base title="Shopify Admin Skills — AI agent skills for your store">
+<Base
+  title="Shopify Admin Skills — AI agent skills for your store"
+  description={`${skills.length}+ pre-built AI agent skills for Shopify store operators. Recover carts, adjust prices, audit inventory, process refunds and more — directly through Claude Code, Cursor, Cline, Copilot, or Gemini CLI.`}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Shopify Admin Skills',
+      url: 'https://skills.40rty.ai',
+      description: `${skills.length}+ pre-built AI agent skills for Shopify store operators.`,
+      publisher: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Shopify Admin Skills',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Claude Code, Cursor, Cline, Copilot, Gemini CLI',
+      url: 'https://skills.40rty.ai',
+      downloadUrl: 'https://github.com/40RTY-ai/shopify-admin-skills',
+      license: 'https://opensource.org/licenses/MIT',
+      description: `${skills.length}+ pre-built AI agent skills for Shopify: cart recovery, bulk pricing, inventory audits, refunds, fulfillment routing, SEO, and more.`,
+      author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+  ]}
+>
 
 
   <!-- HERO — split layout: left title, right skills grid -->
