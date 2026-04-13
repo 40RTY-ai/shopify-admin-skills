@@ -223,6 +223,34 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     </div>
   </section>
 
+  <!-- SIGNUP SECTION -->
+  <section class="signup">
+    <div class="signup-card">
+      <span class="signup-eyebrow">From 40rty</span>
+      <h2 class="signup-heading">Get new skills first.</h2>
+      <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
+      <form class="signup-form" id="signup-form" novalidate>
+        <div class="signup-row">
+          <input
+            type="email"
+            name="email"
+            id="signup-email"
+            placeholder="your@email.com"
+            required
+            class="signup-input"
+            autocomplete="email"
+          />
+          <button type="submit" class="signup-btn">Get updates</button>
+        </div>
+        <p class="signup-fine">No spam. Unsubscribe any time.</p>
+      </form>
+      <div class="signup-success" id="signup-success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>You're in — we'll be in touch.</span>
+      </div>
+    </div>
+  </section>
+
   <script>
     // Copy buttons — handle both .cmd and .prompt-box
     document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
@@ -356,6 +384,39 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         typeText(abilities[currentIdx][0], rotEl);
         startRotation();
       }
+    });
+
+    const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
+    const signupSuccess = document.getElementById('signup-success');
+    const signupBtn = signupForm?.querySelector('.signup-btn') as HTMLButtonElement | null;
+
+    signupForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+      const email = emailInput?.value?.trim();
+      if (!email) return;
+
+      if (signupBtn) { signupBtn.textContent = 'Sending…'; signupBtn.disabled = true; }
+
+      const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : 'https://audit.40rty.ai';
+      try {
+        const res = await fetch(`${apiBase}/api/skills-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Request failed');
+      } catch (_) {
+        // Fail silently — still show success to the user
+      }
+
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'skills_signup', { method: 'email' });
+      }
+
+      if (signupForm) signupForm.style.display = 'none';
+      if (signupSuccess) signupSuccess.classList.add('visible');
     });
   </script>
 
@@ -989,5 +1050,131 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
     .browse-link { display: inline-flex; order: -1; margin-top: 0px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600; padding: 12px 20px; border: 2px solid var(--color-dark); border-radius: 10px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
+  }
+
+  /* SIGNUP SECTION */
+  .signup {
+    padding: 100px 40px 120px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .signup-card {
+    background: var(--color-dark);
+    border-radius: 24px;
+    padding: 60px 64px;
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .signup-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    background: rgba(232, 168, 56, 0.12);
+    border: 1px solid rgba(232, 168, 56, 0.25);
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .signup-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--color-text-light);
+    margin-bottom: 14px;
+  }
+
+  .signup-desc {
+    font-size: 1rem;
+    color: rgba(250, 250, 250, 0.55);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+
+  .signup-row {
+    display: flex;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .signup-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+
+  .signup-input::placeholder { color: rgba(250, 250, 250, 0.3); }
+
+  .signup-input:focus {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .signup-btn {
+    background: var(--color-accent);
+    color: var(--color-dark);
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px 22px;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .signup-btn:hover { opacity: 0.88; }
+  .signup-btn:active { transform: scale(0.97); }
+  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .signup-fine {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 250, 0.3);
+  }
+
+  .signup-success {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 12px 0 4px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .signup-success.visible {
+    display: flex;
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .signup { padding: 60px 24px 80px; }
+    .signup-card { padding: 40px 28px; }
+    .signup-row { flex-direction: column; }
+    .signup-btn { width: 100%; padding: 16px; }
   }
 </style>
