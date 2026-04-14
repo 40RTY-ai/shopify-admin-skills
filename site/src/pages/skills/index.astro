@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import SignupSection from '../../components/SignupSection.astro';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
@@ -142,6 +143,8 @@ function humanName(slug: string): string {
       })}
     </div>
   </section>
+
+  <SignupSection />
 
 </Base>
 
