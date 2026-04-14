@@ -267,7 +267,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   <!-- SIGNUP SECTION -->
   <section class="signup" id="signup">
     <div class="signup-card">
-      <span class="signup-eyebrow">From 40rty</span>
+      <span class="signup-eyebrow signup-eyebrow-flex">From <img src="/40rty-logo.png" alt="40rty" class="signup-eyebrow-logo" /></span>
       <h2 class="signup-heading">Get new skills first.</h2>
       <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
       <form class="signup-form" id="signup-form" novalidate>
@@ -1326,6 +1326,18 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       margin-bottom: 20px;
       z-index: 10;
     }
+  }
+
+  .signup-eyebrow-flex {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .signup-eyebrow-logo {
+    height: 14px;
+    width: auto;
+    opacity: 0.85;
+    transform: translateY(-1px);
   }
 
 </style>
