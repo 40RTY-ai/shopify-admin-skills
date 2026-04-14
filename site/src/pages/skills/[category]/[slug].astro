@@ -210,7 +210,7 @@ const renderedContent = renderMarkdown(content);
             You're in! Tell us more.
           </p>
           <form id="ss-request-form" novalidate>
-            <input type="text" id="ss-domain" placeholder="your-store.myshopify.com" class="ss-input" />
+            <input type="text" id="ss-domain" placeholder="your store domain" class="ss-input" />
             <input type="text" id="ss-skill" placeholder="Skill you'd love to see?" class="ss-input" />
             <button type="submit" class="ss-btn">Send</button>
           </form>
@@ -368,7 +368,7 @@ const renderedContent = renderMarkdown(content);
     box-sizing: border-box;
   }
 
-  .ss-input::placeholder { color: rgba(250,250,250,0.28); }
+  .ss-input::placeholder { color: rgba(250,250,250,0.55); }
   .ss-input:focus { border-color: var(--color-accent); }
 
   .ss-btn {
