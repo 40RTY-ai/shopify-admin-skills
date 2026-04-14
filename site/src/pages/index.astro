@@ -1093,7 +1093,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .hero {
       height: auto;
       min-height: 100dvh;
-      padding-bottom: 120px;
+      
     }
     .hero-split {
       display: flex;
@@ -1296,4 +1296,17 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .signup-row { flex-direction: column; }
     .signup-btn { width: 100%; padding: 16px; }
   }
+
+
+  @media (max-width: 768px) {
+    .signup-teaser {
+      position: fixed;
+      bottom: 24px;
+      padding: 8px 16px;
+      font-size: 0.7rem;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+  }
+
 </style>
