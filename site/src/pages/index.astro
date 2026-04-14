@@ -283,17 +283,23 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       <div id="signup-step2" class="signup-step2">
         <p class="step2-label">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          You're in! Any skill you'd love to see?
+          You're in! Tell us a bit more.
         </p>
         <form class="signup-form" id="skill-request-form" novalidate>
-          <div class="signup-row">
+          <div class="step2-fields">
+            <input
+              type="text"
+              id="domain-input"
+              placeholder="Your store domain (e.g. my-store.myshopify.com)"
+              class="signup-input"
+            />
             <input
               type="text"
               id="skill-request-input"
-              placeholder="e.g. auto-tag orders by product type"
+              placeholder="Any skill you'd love to see?"
               class="signup-input"
             />
-            <button type="submit" class="signup-btn">Send</button>
+            <button type="submit" class="signup-btn step2-submit">Send</button>
           </div>
         </form>
         <button type="button" id="skip-btn" class="skip-link">Skip &rarr;</button>
@@ -487,13 +493,13 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
     skillRequestForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const input = document.getElementById('skill-request-input') as HTMLInputElement | null;
-      const skillRequest = input?.value?.trim();
-      if (skillRequest) {
+      const skillRequest = (document.getElementById('skill-request-input') as HTMLInputElement | null)?.value?.trim();
+      const domain = (document.getElementById('domain-input') as HTMLInputElement | null)?.value?.trim();
+      if (skillRequest || domain) {
         fetch(`${apiBase}/api/skills-signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: capturedEmail, skillRequest }),
+          body: JSON.stringify({ email: capturedEmail, skillRequest, domain }),
         }).catch(() => {});
         if (typeof gtag !== 'undefined') {
           gtag('event', 'skill_request', { method: 'text' });
@@ -1324,6 +1330,19 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     color: var(--color-accent);
     font-weight: 600;
     margin-bottom: 20px;
+  }
+
+  .step2-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .step2-submit {
+    width: 100%;
+    padding: 14px;
   }
 
   .skip-link {
