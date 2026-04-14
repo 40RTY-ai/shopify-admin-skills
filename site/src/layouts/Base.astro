@@ -74,9 +74,8 @@ const schemas: Record<string, unknown>[] = jsonLd
     <meta name="twitter:site" content="@40rtyAI" />
 
     <!-- Favicons -->
-    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
-    <link rel="icon" type="image/x-icon" href={`${base}favicon.ico`} />
-
+    <link rel="icon" type="image/png" href={`${base}40rty-mark.png`} />
+    
     <!-- JSON-LD structured data -->
     {schemas.map(schema => (
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />

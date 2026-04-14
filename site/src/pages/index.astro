@@ -156,8 +156,13 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   
 
   <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-    <span class="gh-text">Star on GitHub</span>
+    <div class="gh-btn">
+      <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.46-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+      Star
+    </div>
+    <div class="gh-count" id="gh-count-container" style="display: none;">
+      <span id="gh-stars"></span>
+    </div>
   </a>
   <section class="hero">
     <div class="hero-split">
@@ -225,6 +230,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       </div>
 
       <!-- Right side: skills grid scrolling vertically -->
+      <a href="#signup" class="signup-teaser mobile-teaser">
+        Tell me more cool stuff
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </a>
+
       <div class="hero-right">
         <div class="skills-scroll-mask">
           <div class="skills-scroll-col col-up">
@@ -257,7 +267,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   <!-- SIGNUP SECTION -->
   <section class="signup" id="signup">
     <div class="signup-card">
-      <span class="signup-eyebrow">From 40rty</span>
+      <span class="signup-eyebrow signup-eyebrow-flex">From <img src="/40rty-logo.png" alt="40rty" class="signup-eyebrow-logo" /></span>
       <h2 class="signup-heading">Get new skills first.</h2>
       <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
       <!-- Step 1: email -->
@@ -314,6 +324,19 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   </section>
 
   <script>
+    // Fetch GitHub stars
+    fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills')
+      .then(res => res.json())
+      .then(data => {
+        const el = document.getElementById('gh-stars');
+        if (el && data.stargazers_count !== undefined) {
+          el.textContent = data.stargazers_count.toLocaleString();
+          const container = document.getElementById('gh-count-container');
+          if (container) container.style.display = 'flex';
+        }
+      })
+      .catch(e => console.error('Failed to fetch github stars', e));
+
     // Copy buttons — handle both .cmd and .prompt-box
     document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -520,24 +543,50 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     right: 40px;
     z-index: 100;
     display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 16px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--color-dark);
+    align-items: stretch;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     text-decoration: none;
-    border: 1px solid var(--color-card-border);
+    color: #24292f;
     border-radius: 6px;
-    transition: all 0.15s;
-    background: var(--color-card);
+    box-shadow: 0 1px 0 rgba(27,31,36,0.04), inset 0 1px 0 rgba(255,255,255,0.25);
+    background-color: #f6f8fa;
+    border: 1px solid #d0d7de;
+    overflow: hidden;
   }
 
-  .gh-top:hover {
-    background: var(--color-dark);
-    color: var(--color-text-light);
+  .gh-top:hover .gh-btn {
+    background-color: #f3f4f6;
+  }
+
+  .gh-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+    background-color: transparent;
+    border-right: 1px solid #d0d7de;
+    transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  }
+
+  .gh-btn svg {
+    color: #24292f;
+  }
+
+  .gh-count {
+    display: flex;
+    align-items: center;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+    background-color: #fff;
+  }
+
+  .gh-count:hover {
+    color: #0969da;
   }
 
   @media (max-width: 768px) {
@@ -909,32 +958,36 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .signup-teaser {
     position: absolute;
-    bottom: 28px;
+    bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 8px 18px;
-    font-size: 0.8rem;
+    gap: 8px;
+    padding: 10px 22px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--color-dark);
-    background: transparent;
-    border: 1.5px solid var(--color-card-border);
+    
+    color: var(--color-text-light);
+    background: var(--color-dark);
+    border: 1px solid var(--color-dark);
     border-radius: 999px;
     text-decoration: none;
     white-space: nowrap;
-    transition: border-color 0.15s, background 0.15s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   .signup-teaser:hover {
-    border-color: var(--color-accent);
-    background: rgba(232, 168, 56, 0.08);
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    color: var(--color-accent);
   }
 
   .teaser-arrow {
     color: var(--color-accent);
-    transition: transform 0.25s;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .signup-teaser:hover .teaser-arrow {
@@ -1070,8 +1123,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     font-family: var(--font-mono);
     font-size: 0.58rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    
     padding: 2px 7px;
     border-radius: 4px;
     margin-bottom: 6px;
@@ -1106,6 +1158,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .hero {
       height: auto;
       min-height: 100dvh;
+      
     }
     .hero-split {
       display: flex;
@@ -1134,7 +1187,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     
     .hero-right {
       flex: 0 0 auto;
-      margin-top: 20px; width: 100%; box-sizing: border-box; overflow: hidden;
+      margin-top: 48px; width: 100%; box-sizing: border-box; overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -1174,7 +1227,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-chip { padding: 16px 20px; border-radius: 12px; }
     .s-name { font-size: 1rem; white-space: nowrap; }
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
-    .browse-link { display: inline-flex; order: -1; margin-top: 0px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600; padding: 12px 20px; border: 2px solid var(--color-dark); border-radius: 10px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+    .browse-link { display: inline-flex; order: -1; margin-top: 10px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; padding: 10px 16px; border: 1.5px solid var(--color-dark); border-radius: 8px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
   }
 
@@ -1235,42 +1288,47 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .signup-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--radius);
-    padding: 14px 18px;
-    font-family: var(--font-body);
-    font-size: 0.95rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
     color: var(--color-text-light);
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 0;
   }
 
-  .signup-input::placeholder { color: rgba(250, 250, 250, 0.3); }
+  .signup-input::placeholder { color: rgba(250, 250, 250, 0.4); }
 
   .signup-input:focus {
     border-color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 2px rgba(232, 168, 56, 0.2);
   }
 
   .signup-btn {
     background: var(--color-accent);
     color: var(--color-dark);
     border: none;
-    border-radius: var(--radius);
-    padding: 14px 22px;
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
+    border-radius: 12px;
+    padding: 16px 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
     font-weight: 700;
+    
     cursor: pointer;
     white-space: nowrap;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .signup-btn:hover { opacity: 0.88; }
-  .signup-btn:active { transform: scale(0.97); }
-  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .signup-btn:hover { 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232, 168, 56, 0.3);
+  }
+  .signup-btn:active { transform: translateY(1px); }
+  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .signup-fine {
     margin-top: 14px;
@@ -1362,4 +1420,44 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .signup-row { flex-direction: column; }
     .signup-btn { width: 100%; padding: 16px; }
   }
+
+
+  @media (max-width: 768px) {
+    .signup-teaser {
+    }
+  }
+
+  .mobile-teaser {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .signup-teaser:not(.mobile-teaser) {
+      display: none !important;
+    }
+    .mobile-teaser {
+      display: inline-flex;
+      position: relative;
+      bottom: auto;
+      left: auto;
+      transform: none;
+      align-self: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+  }
+
+  .signup-eyebrow-flex {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .signup-eyebrow-logo {
+    filter: brightness(0) saturate(100%) invert(77%) sepia(35%) saturate(3015%) hue-rotate(345deg) brightness(96%) contrast(88%);
+    height: 14px;
+    width: auto;
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
 </style>
