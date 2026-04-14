@@ -230,6 +230,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       </div>
 
       <!-- Right side: skills grid scrolling vertically -->
+      <a href="#signup" class="signup-teaser mobile-teaser">
+        Tell me more cool stuff
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </a>
+
       <div class="hero-right">
         <div class="skills-scroll-mask">
           <div class="skills-scroll-col col-up">
@@ -1300,12 +1305,26 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   @media (max-width: 768px) {
     .signup-teaser {
-      position: fixed;
-      bottom: 24px;
-      padding: 8px 16px;
-      font-size: 0.7rem;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+  }
+
+  .mobile-teaser {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .signup-teaser:not(.mobile-teaser) {
+      display: none !important;
+    }
+    .mobile-teaser {
+      display: inline-flex;
+      position: relative;
+      bottom: auto;
+      left: auto;
+      transform: none;
+      align-self: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      z-index: 10;
     }
   }
 
