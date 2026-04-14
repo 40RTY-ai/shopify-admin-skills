@@ -252,7 +252,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     </div>
 
     <a href="#signup" class="signup-teaser">
-      Tell me more cool stuff
+      Get new agent skills
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
     </a>
   </section>
@@ -896,32 +896,37 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .signup-teaser {
     position: absolute;
-    bottom: 28px;
+    bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 8px 18px;
-    font-size: 0.8rem;
+    gap: 8px;
+    padding: 10px 22px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--color-dark);
-    background: transparent;
-    border: 1.5px solid var(--color-card-border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-light);
+    background: var(--color-dark);
+    border: 1px solid var(--color-dark);
     border-radius: 999px;
     text-decoration: none;
     white-space: nowrap;
-    transition: border-color 0.15s, background 0.15s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   .signup-teaser:hover {
-    border-color: var(--color-accent);
-    background: rgba(232, 168, 56, 0.08);
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    color: var(--color-accent);
   }
 
   .teaser-arrow {
     color: var(--color-accent);
-    transition: transform 0.25s;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .signup-teaser:hover .teaser-arrow {
