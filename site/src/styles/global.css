@@ -21,7 +21,9 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; max-width: 100vw; }
+/* overflow-x: clip instead of hidden — clip doesn't create a scroll container,
+   so position: sticky works correctly on descendant elements */
+html { scroll-behavior: smooth; overflow-x: clip; width: 100%; max-width: 100vw; }
 
 body {
   max-width: 100vw;
@@ -30,7 +32,7 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a { color: inherit; text-decoration: none; }
