@@ -75,8 +75,7 @@ const schemas: Record<string, unknown>[] = jsonLd
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
-    <link rel="icon" type="image/x-icon" href={`${base}favicon.ico`} />
-
+    
     <!-- JSON-LD structured data -->
     {schemas.map(schema => (
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
