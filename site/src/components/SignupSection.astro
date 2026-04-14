@@ -1,0 +1,300 @@
+---
+// Reusable signup section — two-step form (email → skill request + domain)
+---
+
+<section class="signup" id="signup">
+  <div class="signup-card">
+    <span class="signup-eyebrow">From 40rty</span>
+    <h2 class="signup-heading">Get new skills first.</h2>
+    <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
+
+    <!-- Step 1: email -->
+    <div id="signup-step1">
+      <form class="signup-form" id="signup-form" novalidate>
+        <div class="signup-row">
+          <input
+            type="email"
+            name="email"
+            id="signup-email"
+            placeholder="your@email.com"
+            required
+            class="signup-input"
+            autocomplete="email"
+          />
+          <button type="submit" class="signup-btn">Get updates</button>
+        </div>
+        <p class="signup-fine">No spam. Unsubscribe any time.</p>
+      </form>
+    </div>
+
+    <!-- Step 2: skill request + domain -->
+    <div id="signup-step2" class="signup-step2">
+      <p class="step2-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        You're in! Tell us a bit more.
+      </p>
+      <form class="signup-form" id="skill-request-form" novalidate>
+        <div class="step2-fields">
+          <input
+            type="text"
+            id="domain-input"
+            placeholder="Your store domain (e.g. my-store.myshopify.com)"
+            class="signup-input"
+          />
+          <input
+            type="text"
+            id="skill-request-input"
+            placeholder="Any skill you'd love to see?"
+            class="signup-input"
+          />
+          <button type="submit" class="signup-btn step2-submit">Send</button>
+        </div>
+      </form>
+      <button type="button" id="skip-btn" class="skip-link">Skip &rarr;</button>
+    </div>
+
+    <!-- Final success -->
+    <div class="signup-success" id="signup-success">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>You're in — we'll be in touch.</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : 'https://audit.40rty.ai';
+  let capturedEmail = '';
+
+  function showSuccess() {
+    document.getElementById('signup-step2')?.classList.remove('visible');
+    document.getElementById('signup-success')?.classList.add('visible');
+  }
+
+  // Step 1 — email
+  const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
+  const signupBtn = signupForm?.querySelector('.signup-btn') as HTMLButtonElement | null;
+
+  signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+    const email = emailInput?.value?.trim();
+    if (!email) return;
+
+    capturedEmail = email;
+    if (signupBtn) { signupBtn.textContent = 'Sending…'; signupBtn.disabled = true; }
+
+    fetch(`${apiBase}/api/skills-signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).catch(() => {});
+
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'skills_signup', { method: 'email' });
+    }
+
+    document.getElementById('signup-step1')?.classList.add('done');
+    setTimeout(() => {
+      document.getElementById('signup-step1')?.classList.add('hidden');
+      document.getElementById('signup-step2')?.classList.add('visible');
+      document.getElementById('skill-request-input')?.focus();
+    }, 300);
+  });
+
+  // Step 2 — skill request + domain
+  const skillRequestForm = document.getElementById('skill-request-form') as HTMLFormElement | null;
+
+  skillRequestForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const skillRequest = (document.getElementById('skill-request-input') as HTMLInputElement | null)?.value?.trim();
+    const domain = (document.getElementById('domain-input') as HTMLInputElement | null)?.value?.trim();
+    if (skillRequest || domain) {
+      fetch(`${apiBase}/api/skills-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: capturedEmail, skillRequest, domain }),
+      }).catch(() => {});
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'skill_request', { method: 'text' });
+      }
+    }
+    showSuccess();
+  });
+
+  document.getElementById('skip-btn')?.addEventListener('click', showSuccess);
+</script>
+
+<style>
+  .signup {
+    padding: 100px 40px 120px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .signup-card {
+    background: var(--color-dark);
+    border-radius: 24px;
+    padding: 60px 64px;
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .signup-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    background: rgba(232, 168, 56, 0.12);
+    border: 1px solid rgba(232, 168, 56, 0.25);
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .signup-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--color-text-light);
+    margin-bottom: 14px;
+  }
+
+  .signup-desc {
+    font-size: 1rem;
+    color: rgba(250, 250, 250, 0.55);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+
+  .signup-row {
+    display: flex;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .signup-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-light);
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+
+  .signup-input::placeholder { color: rgba(250, 250, 250, 0.3); }
+  .signup-input:focus {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .signup-btn {
+    background: var(--color-accent);
+    color: var(--color-dark);
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px 22px;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .signup-btn:hover { opacity: 0.88; }
+  .signup-btn:active { transform: scale(0.97); }
+  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .signup-fine {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 250, 0.3);
+  }
+
+  .signup-success {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 12px 0 4px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .signup-success.visible {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* Step transitions */
+  #signup-step1 { transition: opacity 0.25s, transform 0.25s; }
+  #signup-step1.done { opacity: 0; transform: translateY(-6px); }
+  #signup-step1.hidden { display: none; }
+
+  .signup-step2 {
+    display: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .signup-step2.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .step2-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .step2-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .step2-submit { width: 100%; padding: 14px; }
+
+  .skip-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 250, 0.3);
+    transition: color 0.15s;
+  }
+  .skip-link:hover { color: rgba(250, 250, 250, 0.6); }
+
+  @media (max-width: 768px) {
+    .signup { padding: 60px 24px 80px; }
+    .signup-card { padding: 40px 28px; }
+    .signup-row { flex-direction: column; }
+    .signup-btn { width: 100%; padding: 16px; }
+  }
+</style>
