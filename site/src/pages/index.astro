@@ -1227,42 +1227,48 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .signup-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--radius);
-    padding: 14px 18px;
-    font-family: var(--font-body);
-    font-size: 0.95rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
     color: var(--color-text-light);
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 0;
   }
 
-  .signup-input::placeholder { color: rgba(250, 250, 250, 0.3); }
+  .signup-input::placeholder { color: rgba(250, 250, 250, 0.4); }
 
   .signup-input:focus {
     border-color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 2px rgba(232, 168, 56, 0.2);
   }
 
   .signup-btn {
     background: var(--color-accent);
     color: var(--color-dark);
     border: none;
-    border-radius: var(--radius);
-    padding: 14px 22px;
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
+    border-radius: 12px;
+    padding: 16px 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
     white-space: nowrap;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .signup-btn:hover { opacity: 0.88; }
-  .signup-btn:active { transform: scale(0.97); }
-  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .signup-btn:hover { 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232, 168, 56, 0.3);
+  }
+  .signup-btn:active { transform: translateY(1px); }
+  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .signup-fine {
     margin-top: 14px;
