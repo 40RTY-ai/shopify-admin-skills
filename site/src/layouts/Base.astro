@@ -1,4 +1,7 @@
 ---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
 interface Props {
   title: string;
   description?: string;
@@ -101,7 +104,11 @@ const schemas: Record<string, unknown>[] = jsonLd
       <div class="mesh-orb mesh-3"></div>
     </div>
 
-    <slot />
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
   </body>
 </html>
 
@@ -166,45 +173,7 @@ const schemas: Record<string, unknown>[] = jsonLd
     z-index: 1;
   }
 
-  .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 999;
-    border-top: 1px solid var(--color-card-border);
-    padding: 8px 40px;
-    background: rgba(250, 250, 250, 0.85);
-    backdrop-filter: blur(10px);
-  }
-
-  .footer-inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 0.75rem;
-    color: var(--color-muted);
-  }
-
-  .footer-logo-link {
-    display: flex;
-    align-items: center;
-  }
-
-  .footer-logo-img {
-    height: 20px;
-    width: auto;
-  }
-
-  .footer-sep { opacity: 0.4; }
-  .footer a:hover { color: var(--color-dark); }
-
   @media (max-width: 768px) {
-    .footer { padding: 6px 16px; }
-    .footer-inner { gap: 10px; font-size: 0.65rem; }
-    .footer-logo-img { height: 14px; }
     .mesh-1 { width: 400px; height: 400px; }
     .mesh-2 { width: 300px; height: 300px; }
   }
