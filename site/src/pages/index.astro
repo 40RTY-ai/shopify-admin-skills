@@ -171,11 +171,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
-          <span class="line stroke typewriter" id="t2">Admin</span>
-          <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
+          <span class="line typewriter" id="t2">Admin</span>
+          <span class="line typewriter" id="t3">Skills</span>
         </h1>
         <p class="hero-sub">
-          <a id="rotating-link" href="#"><span id="rotating-text"></span></a>
+          <span id="rotating-text"></span>
         </p>
         <p class="hero-sub-static">through your AI agent.</p>
         <div class="hero-cta">
@@ -403,7 +403,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     ];
 
     const rotEl = document.getElementById('rotating-text');
-    const rotLink = document.getElementById('rotating-link') as HTMLAnchorElement | null;
     let currentIdx = 0;
     let typeInterval: number | null = null;
     let eraseTimeout: number | null = null;
@@ -428,10 +427,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       }, 35);
     }
 
-    function updateLink(idx: number) {
-      if (rotLink) rotLink.href = base + abilities[idx][1];
-    }
-
     function eraseAndType() {
       if (!rotEl || document.hidden) return;
       clearTimers();
@@ -439,7 +434,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       eraseTimeout = window.setTimeout(() => {
         currentIdx = (currentIdx + 1) % abilities.length;
         rotEl.style.opacity = '1';
-        updateLink(currentIdx);
         typeText(abilities[currentIdx][0], rotEl);
       }, 300);
     }
@@ -450,7 +444,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     }
 
     if (rotEl) {
-      updateLink(0);
       typeText(abilities[0][0], rotEl);
       startRotation();
     }
@@ -534,9 +527,9 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 <style>
   .gh-top {
     position: fixed;
-    top: 24px;
+    top: 108px;
     right: 24px;
-    z-index: 100;
+    z-index: 99;
     
     /* Spell UI "Rich Button" Base */
     display: inline-flex;
@@ -604,7 +597,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   @media (max-width: 768px) {
-    .gh-top { top: 14px; right: 14px; font-size: 0.78rem; height: 32px; padding: 0.35rem 0.8rem; }
+    .gh-top { top: 108px; right: 14px; font-size: 0.78rem; height: 32px; padding: 0.35rem 0.8rem; }
     .gh-text { display: none; }
   }
 
@@ -684,15 +677,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     font-size: 1.1rem;
     color: var(--color-muted);
     margin-top: 4px;
-  }
-
-  #rotating-link {
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  #rotating-link:hover #rotating-text {
-    background: linear-gradient(to top, rgba(232, 168, 56, 0.45) 40%, transparent 40%);
   }
 
   #rotating-text {
