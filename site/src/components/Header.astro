@@ -1,0 +1,226 @@
+---
+const navItems = [
+  { name: "Pricing", href: "https://40rty.ai/#pricing-section", external: true },
+  { name: "The backlog", href: "https://40rty.ai/blog", external: true },
+  { name: "Find your products", href: "https://audit.40rty.ai/catalog/search", external: true },
+  { name: "Shopify skills", href: "/", active: true },
+  { name: "Login", href: "https://apps.shopify.com/fourty-ai", external: true },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Logo -->
+    <a href="https://40rty.ai" class="header-logo" target="_blank" rel="noopener noreferrer">
+      <img src="/40rty-logo-black.png" alt="40rty" height="32" />
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="header-nav" aria-label="Main navigation">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`nav-link${item.active ? ' nav-link--active' : ''}`}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Mobile toggle -->
+    <div class="header-right">
+      <button class="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="mobile-nav">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav drawer -->
+  <div id="mobile-nav" class="mobile-nav" aria-hidden="true">
+    <nav>
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`mobile-nav-link${item.active ? ' nav-link--active' : ''}`}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+  }
+
+  .site-header.scrolled {
+    background: rgba(250, 250, 250, 0.85);
+    border-bottom-color: var(--color-card-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .header-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .header-logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .header-logo img {
+    height: 32px;
+    width: auto;
+  }
+
+  .header-nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .nav-link {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(10, 10, 10, 0.7);
+    text-decoration: none;
+    transition: color 0.15s;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover,
+  .nav-link--active {
+    color: var(--color-dark);
+  }
+
+  .header-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-demo {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--color-dark);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-demo:hover {
+    background: #222;
+    color: #fff;
+  }
+
+  .mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--color-dark);
+    line-height: 0;
+  }
+
+  .mobile-nav {
+    display: none;
+    border-top: 1px solid var(--color-card-border);
+    background: #fff;
+    padding: 16px 24px 24px;
+  }
+
+  .mobile-nav nav {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobile-nav-link {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(10, 10, 10, 0.7);
+    text-decoration: none;
+    padding: 8px 0;
+    transition: color 0.15s;
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link.nav-link--active {
+    color: var(--color-dark);
+  }
+
+  .btn-demo--mobile {
+    display: inline-flex;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  /* Mobile breakpoint */
+  @media (max-width: 768px) {
+    .header-nav { display: none; }
+    .btn-demo:not(.btn-demo--mobile) { display: none; }
+    .mobile-menu-toggle { display: flex; }
+
+    .mobile-nav.is-open {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector('.mobile-menu-toggle') as HTMLButtonElement;
+  const mobileNav = document.getElementById('mobile-nav');
+  const header = document.querySelector('.site-header') as HTMLElement;
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = mobileNav?.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    mobileNav?.setAttribute('aria-hidden', String(!isOpen));
+  });
+
+  function onScroll() {
+    if (window.scrollY > 10) {
+      header?.classList.add('scrolled');
+    } else {
+      header?.classList.remove('scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
