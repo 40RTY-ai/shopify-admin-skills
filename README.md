@@ -1,5 +1,8 @@
 <h1 align="center">Shopify Admin Skills.</h1>
 
+<img width="1788" height="744" alt="Screenshot 2026-04-13 at 14 25 45 (1)" src="https://github.com/user-attachments/assets/e52d1227-dddf-4e19-a5b9-5f7379caf8e0" />
+
+
 <p align="center">
   <strong>AI agent skills to operate your Shopify store with extended capabilities.</strong>
   <br />
