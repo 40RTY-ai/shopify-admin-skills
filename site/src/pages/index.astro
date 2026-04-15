@@ -205,12 +205,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
                 <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
                 <span class="cmd-toast">Copied!</span>
               </button>
-              <button class="prompt-expand-btn" type="button" aria-expanded="false" aria-controls="prompt-full">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="expand-chevron"><polyline points="6 9 12 15 18 9"/></svg>
-                <span class="expand-label-closed">View full prompt</span>
-                <span class="expand-label-open">Hide prompt</span>
-              </button>
-              <pre class="prompt-full" id="prompt-full" hidden>{installPrompt}</pre>
             </div>
           </div>
 
@@ -875,69 +869,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     z-index: 10;
     pointer-events: none;
-  }
-
-  .prompt-expand-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 2px;
-    background: none;
-    border: none;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-
-  .prompt-expand-btn:hover { color: var(--color-dark); }
-
-  .expand-chevron {
-    transition: transform 0.2s;
-  }
-
-  .prompt-expand-btn[aria-expanded="true"] .expand-chevron {
-    transform: rotate(180deg);
-  }
-
-  .expand-label-open { display: none; }
-  .prompt-expand-btn[aria-expanded="true"] .expand-label-closed { display: none; }
-  .prompt-expand-btn[aria-expanded="true"] .expand-label-open { display: inline; }
-
-  .prompt-full {
-    width: 100%;
-    max-width: 560px;
-    max-height: 280px;
-    background: var(--color-card);
-    border: 1px solid var(--color-card-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.55;
-    color: var(--color-text);
-    white-space: pre-wrap;
-    overflow-y: auto;
-    overflow-x: auto;
-    margin: 0;
-    animation: panelIn 0.2s ease forwards;
-    overscroll-behavior: contain;
-  }
-
-  .prompt-full::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  .prompt-full::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .prompt-full::-webkit-scrollbar-thumb {
-    background: var(--color-card-border);
-    border-radius: 4px;
-  }
-  .prompt-full::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted);
   }
 
   @media (hover: none) {
