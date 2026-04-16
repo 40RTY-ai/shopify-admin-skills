@@ -4,7 +4,7 @@ const navItems = [
   { name: "The backlog", href: "https://40rty.ai/blog", external: true },
   { name: "Find your products", href: "https://audit.40rty.ai/catalog/search", external: true },
   { name: "Shopify skills", href: "/", active: true },
-  { name: "Login", href: "https://apps.shopify.com/fourty-ai", external: true },
+  { name: "Login", href: "https://apps.shopify.com/fourty-ai", external: true, isButton: true },
 ];
 ---
 
@@ -20,7 +20,7 @@ const navItems = [
       {navItems.map((item) => (
         <a
           href={item.href}
-          class={`nav-link${item.active ? ' nav-link--active' : ''}`}
+          class={`nav-link${item.active ? ' nav-link--active' : ''}${item.isButton ? ' btn-demo' : ''}`}
           target={item.external ? '_blank' : undefined}
           rel={item.external ? 'noopener noreferrer' : undefined}
         >
@@ -53,6 +53,7 @@ const navItems = [
 
   <!-- Mobile nav drawer -->
   <div id="mobile-nav" class="mobile-nav" aria-hidden="true">
+    <button class="mobile-menu-close" aria-label="Close navigation"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <nav>
       {navItems.map((item) => (
         <a
@@ -134,7 +135,7 @@ const navItems = [
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
   }
 
   .btn-demo {
@@ -153,6 +154,22 @@ const navItems = [
   .btn-demo:hover {
     background: #222;
     color: #fff;
+  }
+
+  .mobile-menu-toggle:hover {
+    opacity: 0.7;
+  }
+
+  .mobile-menu-close {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--color-dark);
+    line-height: 0;
   }
 
   .mobile-menu-toggle {
@@ -283,27 +300,59 @@ const navItems = [
 </style>
 
 <script>
-  fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills')
-      .then(res => res.json())
-      .then(data => {
-        const el = document.getElementById('gh-stars');
-        if (el && data.stargazers_count !== undefined) {
-          el.textContent = data.stargazers_count.toLocaleString();
-          const container = document.getElementById('gh-count-container');
-          if (container) container.style.display = 'flex';
-        }
-      })
-      .catch(e => console.error('Failed to fetch github stars', e));
-
-  const toggle = document.querySelector('.mobile-menu-toggle') as HTMLButtonElement;
+  
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  const closeBtn = document.querySelector('.mobile-menu-close');
   const mobileNav = document.getElementById('mobile-nav');
-  const header = document.querySelector('.site-header') as HTMLElement;
+  const header = document.querySelector('.site-header');
+
+  let focusableElements = [];
+  
+  function openMenu() {
+    mobileNav.classList.add('is-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    mobileNav.setAttribute('aria-hidden', 'false');
+    
+    focusableElements = Array.from(mobileNav.querySelectorAll('a, button'));
+    focusableElements[0]?.focus();
+    
+    document.addEventListener('keydown', trapFocus);
+  }
+  
+  function closeMenu() {
+    mobileNav.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    mobileNav.setAttribute('aria-hidden', 'true');
+    toggle.focus();
+    document.removeEventListener('keydown', trapFocus);
+  }
+
+  function trapFocus(e) {
+    const isTabPressed = e.key === 'Tab' || e.keyCode === 9;
+    if (!isTabPressed) return;
+
+    const firstEl = focusableElements[0];
+    const lastEl = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) { // shift + tab
+      if (document.activeElement === firstEl) {
+        lastEl.focus();
+        e.preventDefault();
+      }
+    } else { // tab
+      if (document.activeElement === lastEl) {
+        firstEl.focus();
+        e.preventDefault();
+      }
+    }
+  }
 
   toggle?.addEventListener('click', () => {
-    const isOpen = mobileNav?.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', String(isOpen));
-    mobileNav?.setAttribute('aria-hidden', String(!isOpen));
+    const isOpen = mobileNav.classList.contains('is-open');
+    isOpen ? closeMenu() : openMenu();
   });
+  
+  closeBtn?.addEventListener('click', closeMenu);
 
   function onScroll() {
     if (window.scrollY > 10) {
@@ -315,4 +364,5 @@ const navItems = [
 
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
 </script>
