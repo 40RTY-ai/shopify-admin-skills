@@ -40,8 +40,8 @@
       </div>
 
       <!-- Product column -->
-      <div class="footer-col">
-        <h4>Product</h4>
+      <div class="footer-col" data-collapsible>
+        <button class="footer-col-toggle" aria-expanded="false"><h4>Product</h4><svg class="footer-col-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
         <ul>
           <li><a href="https://40rty.ai/#solution-section">Features</a></li>
           <li><a href="https://40rty.ai/#pricing-section">Pricing</a></li>
@@ -51,8 +51,8 @@
       </div>
 
       <!-- Company column -->
-      <div class="footer-col">
-        <h4>Company</h4>
+      <div class="footer-col" data-collapsible>
+        <button class="footer-col-toggle" aria-expanded="false"><h4>Company</h4><svg class="footer-col-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
         <ul>
           <li><a href="https://40rty.ai">About</a></li>
           <li><a href="https://40rty.ai/blog">Blog</a></li>
@@ -62,8 +62,8 @@
       </div>
 
       <!-- Resources column -->
-      <div class="footer-col">
-        <h4>Resources</h4>
+      <div class="footer-col" data-collapsible>
+        <button class="footer-col-toggle" aria-expanded="false"><h4>Resources</h4><svg class="footer-col-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
         <ul>
           <li><a href="https://intercom.help/40rtyai/en/" target="_blank" rel="noopener noreferrer">Documentation</a></li>
           <li><a href="https://intercom.help/40rtyai/en/" target="_blank" rel="noopener noreferrer">Help Center</a></li>
@@ -231,4 +231,46 @@
       grid-template-columns: 1fr;
     }
   }
+
+  .footer-col-toggle {
+    display: none;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  .footer-col-icon {
+    transition: transform 0.2s;
+  }
+  .footer-col.is-open .footer-col-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (max-width: 480px) {
+    .footer-col-toggle {
+      display: flex;
+    }
+    .footer-col[data-collapsible] ul {
+      display: none;
+      padding-top: 8px;
+    }
+    .footer-col[data-collapsible].is-open ul {
+      display: flex;
+    }
+  }
+
 </style>
+
+<script>
+  document.querySelectorAll('[data-collapsible] .footer-col-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const parentCol = button.parentElement;
+      const isOpen = parentCol.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    });
+  });
+</script>
