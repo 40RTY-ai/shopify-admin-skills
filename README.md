@@ -30,18 +30,18 @@ npx skills add 40RTY-ai/shopify-admin-skills
 
 ## Skills
 
-63 skills across 10 categories:
+66 skills across 10 categories:
 
 | Category | Skills | Examples |
 |---|---|---|
 | [Marketing](skills/marketing/) | 3 | Abandoned cart recovery, win-back, loyalty exports |
-| [Merchandising](skills/merchandising/) | 18 | Bulk pricing, inventory audits, SEO, dead stock, metafields |
+| [Merchandising](skills/merchandising/) | 19 | Bulk pricing, inventory audits, SEO, dead stock, variant performance |
 | [Customer Support](skills/customer-support/) | 5 | Order lookup, refunds, returns, address correction, WISMO |
 | [Customer Ops](skills/customer-ops/) | 6 | Duplicate finder, spend tiers, cohort analysis, B2B |
-| [Conversion](skills/conversion-optimization/) | 4 | Discount A/B, abandonment reports, gift cards |
+| [Conversion](skills/conversion-optimization/) | 5 | Discount A/B, abandonment reports, gift cards, traffic by page |
 | [Fulfillment Ops](skills/fulfillment-ops/) | 8 | Digest, holds, routing, tracking, delivery SLA |
 | [Finance](skills/finance/) | 7 | Revenue, refund rates, AOV, tax, shipping costs |
-| [Order Intelligence](skills/order-intelligence/) | 4 | Fraud risk, high-risk tagging, repeat purchase |
+| [Order Intelligence](skills/order-intelligence/) | 5 | Fraud risk, high-risk tagging, repeat purchase, product affinity |
 | [Returns](skills/returns/) | 3 | Reason analysis, exchange ratios, SLA |
 | [Store Management](skills/store-management/) | 5 | Redirects, drafts, discounts, pages, channels |
 
