@@ -22,7 +22,7 @@ pnpm validate:index  # should pass on a clean clone
 ### 1. Choose a workflow
 
 Skills live under `skills/<role>/` where role is one of:
-`marketing` | `merchandising` | `customer-support` | `conversion-optimization`
+`marketing` | `merchandising` | `customer-support` | `customer-ops` | `conversion-optimization` | `fulfillment-ops` | `finance` | `order-intelligence` | `returns` | `store-management`
 
 A valid skill must:
 - Be achievable with native Shopify Admin GraphQL only (no 3rd-party APIs)
@@ -62,6 +62,23 @@ pnpm lint             # must pass
 # Smoke test: run the skill's GraphQL operations against a dev store
 shopify store execute --store <your-dev-store> --query '<query from SKILL.md>'
 ```
+
+**Scope reference by skill type:**
+
+| Skill type | Required scopes |
+|---|---|
+| Orders / refunds / returns | `read_orders` + `read_products` (line items traverse the product graph) |
+| Products / variants / inventory | `read_products`, `read_inventory` |
+| Customers | `read_customers` |
+| Analytics (ShopifyQL) | `read_reports` — **not** `read_analytics` |
+| Mutations (pricing, tagging, fulfillment) | Corresponding `write_*` scope |
+
+**ShopifyQL notes (`FROM sessions` and analytics queries):**
+- `LIKE` is not a supported ShopifyQL operator — filter string columns in-memory after fetching
+- Do not alias a column to a name that is already a reserved column name (e.g., `count() AS sessions` fails because `sessions` already exists)
+- Available metrics vary by data source; confirm by running the query and inspecting `tableData.columns` — do not assume column names from documentation examples
+- `converted_sessions` and `bounce_rate` are **not** available in `FROM sessions`; use `conversion_rate` (returned as a decimal)
+- Skills using `shopifyqlQuery` require `read_reports` scope and Shopify Basic plan or above
 
 ### 6. Submit a PR
 
