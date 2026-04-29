@@ -1,0 +1,365 @@
+---
+import Base from '../../layouts/Base.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+
+const base = import.meta.env.BASE_URL;
+
+interface Routine {
+  id: string;
+  description: string;
+  cron: string;
+  scheduleHuman: string;
+  skillsUsed: string[];
+  notify: string;
+  file: string;
+}
+
+const routinesRoot = path.resolve(process.cwd(), '../routines');
+const routines: Routine[] = [];
+
+if (fs.existsSync(routinesRoot)) {
+  const files = fs.readdirSync(routinesRoot)
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
+  for (const file of files) {
+    const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
+    const { data } = matter(content);
+    if (data.routine_id && data.cron) {
+      routines.push({
+        id: data.routine_id,
+        description: data.description || '',
+        cron: data.cron,
+        scheduleHuman: cronToHuman(data.cron),
+        skillsUsed: data.skills_used || [],
+        notify: data.notify || '',
+        file: file.replace('.md', ''),
+      });
+    }
+  }
+}
+
+function cronToHuman(cron: string): string {
+  const map: Record<string, string> = {
+    '0 8 * * *': 'Daily at 8 AM',
+    '0 7 * * *': 'Daily at 7 AM',
+    '0 6 * * *': 'Daily at 6 AM',
+    '0 */4 * * *': 'Every 4 hours',
+    '0 */2 * * *': 'Every 2 hours',
+    '0 10,15 * * 1-5': 'Weekdays at 10 AM & 3 PM',
+    '0 8 * * 1': 'Mondays at 8 AM',
+    '0 8 * * 3': 'Wednesdays at 8 AM',
+  };
+  return map[cron] || cron;
+}
+
+const installPrompt = `Install all routines from routines/ in this repo. For each .md file in routines/ (skip README.md), parse the YAML frontmatter to get routine_id, description, and cron, then extract the prompt from the "### Prompt" code block.
+
+For each routine, call mcp__scheduled-tasks__create_scheduled_task with:
+  taskId: <routine_id>
+  cronExpression: <cron>
+  description: <description>
+  prompt: <extracted prompt>
+  notifyOnCompletion: true
+
+After all routines are created, run mcp__scheduled-tasks__list_scheduled_tasks and confirm each routine is enabled and shows next run time.`;
+---
+
+<Base title="Routines — Shopify Admin Skills">
+
+  <section class="page-header">
+    <div class="header-inner">
+      <a href={base} class="back">&larr; Back</a>
+      <h1>Routines<span class="dot">.</span></h1>
+      <p class="header-sub">Always-on scheduled agents that run skills on your store automatically.</p>
+    </div>
+  </section>
+
+  <section class="install-section">
+    <div class="install-inner">
+      <h2>Install all routines</h2>
+      <p class="install-hint">Paste this into Claude Code — Claude will read each routine file and create the scheduled task via MCP.</p>
+      <button class="cmd cmd-prompt" data-cmd={installPrompt}>
+        <span class="cmd-dollar">✨</span>
+        <code>Install all routines from routines/ in this repo…</code>
+        <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+        <span class="cmd-toast">Copied!</span>
+      </button>
+      <details class="alt-install">
+        <summary>Other install paths</summary>
+        <ul>
+          <li><strong>Per-routine:</strong> use the built-in <code>/schedule</code> command in Claude Code</li>
+          <li><strong>Programmatic:</strong> <code>node scripts/install-routines.mjs</code> (prints config + install prompt)</li>
+          <li><strong>Web UI:</strong> paste any routine prompt at <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> Routines panel</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <section class="routines-grid-section">
+    <div class="routines-grid">
+      {routines.map(r => (
+        <a href={`https://github.com/40RTY-ai/shopify-admin-skills/blob/main/routines/${r.file}.md`} target="_blank" rel="noopener" class="routine-card">
+          <div class="routine-head">
+            <code class="routine-id">{r.id}</code>
+            <span class="routine-schedule">⏱ {r.scheduleHuman}</span>
+          </div>
+          <p class="routine-desc">{r.description}</p>
+          <div class="routine-meta">
+            <span class="meta-chip">📦 {r.skillsUsed.length} skill{r.skillsUsed.length !== 1 ? 's' : ''}</span>
+            {r.notify && <span class="meta-chip">📢 {r.notify}</span>}
+            <code class="cron-chip">{r.cron}</code>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const cmd = btn.getAttribute('data-cmd') || '';
+        await navigator.clipboard.writeText(cmd);
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 1500);
+      });
+    });
+  </script>
+
+</Base>
+
+<style>
+  .page-header {
+    padding: 80px 40px 40px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .header-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .back:hover {
+    color: var(--color-dark);
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.04em;
+  }
+
+  .dot {
+    color: var(--color-accent, #E85D75);
+  }
+
+  .header-sub {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .install-section {
+    padding: 0 40px 40px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .install-inner {
+    background: var(--color-card);
+    border: 1px solid var(--color-card-border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .install-inner h2 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .install-hint {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin: 0 0 16px;
+  }
+
+  .cmd-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .cmd-prompt:hover {
+    border-color: var(--color-dark);
+  }
+
+  .cmd-prompt code {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cmd-dollar { font-size: 1.1rem; }
+
+  .cmd-copy {
+    color: var(--color-muted);
+    display: flex;
+    align-items: center;
+  }
+
+  .cmd-toast {
+    position: absolute;
+    right: 18px;
+    background: var(--color-dark);
+    color: var(--color-text-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .cmd-prompt.copied .cmd-toast {
+    opacity: 1;
+  }
+
+  .alt-install {
+    margin-top: 16px;
+    font-size: 0.85rem;
+  }
+
+  .alt-install summary {
+    cursor: pointer;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+  }
+
+  .alt-install ul {
+    margin: 12px 0 0;
+    padding-left: 20px;
+    color: var(--color-muted);
+  }
+
+  .alt-install li {
+    margin-bottom: 6px;
+  }
+
+  .alt-install code {
+    background: var(--color-bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  .routines-grid-section {
+    padding: 0 40px 80px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .routines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+  }
+
+  .routine-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-card-border);
+    border-radius: 10px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--color-dark);
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .routine-card:hover {
+    border-color: var(--color-dark);
+    transform: translateY(-2px);
+  }
+
+  .routine-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .routine-id {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .routine-schedule {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+
+  .routine-desc {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    line-height: 1.5;
+  }
+
+  .routine-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .meta-chip {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    background: var(--color-bg);
+    border-radius: 4px;
+    color: var(--color-muted);
+  }
+
+  .cron-chip {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    background: var(--color-bg);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 768px) {
+    .page-header { padding: 60px 20px 24px; }
+    .install-section, .routines-grid-section { padding-left: 20px; padding-right: 20px; }
+    .routines-grid { grid-template-columns: 1fr; }
+  }
+</style>
