@@ -1,175 +1,233 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import './TerminalDemo.css';
 
-type Step = {
-  prompt: string;
-  output: string[];
-};
+type LineKind = 'log' | 'success';
+type Line = { kind: LineKind; text: string };
 
 type Demo = {
   command: string;
-  steps: Step[];
+  skill: string;
+  lines: Line[];
+  result: string;
 };
 
 const demos: Demo[] = [
   {
     command: 'find variants below reorder threshold',
-    steps: [
-      { prompt: '↪ matching skill', output: ['shopify-admin-low-inventory-restock'] },
-      {
-        prompt: '↪ querying store',
-        output: [
-          '✓ Connected to my-store.myshopify.com',
-          '✓ Scanning 1,247 active variants…',
-          '✓ Found 23 SKUs below threshold',
-        ],
-      },
-      { prompt: '↪ output', output: ['Saved restock_2026-04-29.csv (23 rows)'] },
+    skill: 'low-inventory-restock',
+    lines: [
+      { kind: 'log', text: 'Connecting to my-store.myshopify.com' },
+      { kind: 'log', text: 'Scanning 1,247 active variants' },
+      { kind: 'success', text: '23 SKUs below reorder point' },
     ],
+    result: 'Saved restock_2026-04-29.csv',
   },
   {
     command: 'audit products missing SEO titles',
-    steps: [
-      { prompt: '↪ matching skill', output: ['shopify-admin-seo-metadata-audit'] },
-      {
-        prompt: '↪ querying store',
-        output: [
-          '✓ Auditing 1,247 products across 8 collections',
-          '✓ 84 missing meta title',
-          '✓ 156 missing meta description',
-        ],
-      },
-      { prompt: '↪ output', output: ['Saved seo_audit_2026-04-29.csv (240 rows)'] },
+    skill: 'seo-metadata-audit',
+    lines: [
+      { kind: 'log', text: 'Reviewing 1,247 products' },
+      { kind: 'log', text: 'Checking title + description coverage' },
+      { kind: 'success', text: '240 products need attention' },
     ],
+    result: 'Saved seo_audit_2026-04-29.csv',
   },
   {
-    command: 'recover abandoned checkouts from last 24 hours',
-    steps: [
-      { prompt: '↪ matching skill', output: ['shopify-admin-abandoned-cart-recovery'] },
-      {
-        prompt: '↪ querying store',
-        output: [
-          '✓ Found 47 abandoned checkouts',
-          '✓ Generating 47 unique recovery codes',
-          '✓ Sent recovery emails',
-        ],
-      },
-      { prompt: '↪ output', output: ['$8,420 in pending recovery'] },
+    command: 'recover abandoned checkouts last 24h',
+    skill: 'abandoned-cart-recovery',
+    lines: [
+      { kind: 'log', text: 'Found 47 abandoned checkouts' },
+      { kind: 'log', text: 'Generating unique recovery codes' },
+      { kind: 'success', text: 'Sent 47 recovery emails' },
     ],
+    result: '$8,420 in pending recovery',
   },
   {
-    command: 'flag high-risk orders from this morning',
-    steps: [
-      { prompt: '↪ matching skill', output: ['shopify-admin-high-risk-order-tagger'] },
-      {
-        prompt: '↪ querying store',
-        output: ['✓ Reviewing 184 orders', '✓ Risk-scoring with Shopify Fraud signals', '✓ 3 orders flagged'],
-      },
-      { prompt: '↪ output', output: ['Tagged 3 orders with `risk:review`'] },
+    command: 'flag high-risk orders this morning',
+    skill: 'high-risk-order-tagger',
+    lines: [
+      { kind: 'log', text: 'Reviewing 184 new orders' },
+      { kind: 'log', text: 'Risk-scoring with Shopify Fraud signals' },
+      { kind: 'success', text: '3 orders flagged for review' },
     ],
+    result: 'Tagged 3 orders · risk:review',
   },
 ];
 
+type Phase = 'typing' | 'thinking' | 'streaming' | 'result' | 'pause';
+
+const ClaudeMark = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M16 4.5c2 5 4 8 7 9.5-3 1.5-5 4.5-7 9.5-2-5-4-8-7-9.5 3-1.5 5-4.5 7-9.5z"
+      fill="#DA7756"
+    />
+  </svg>
+);
+
 export default function TerminalDemo() {
   const [demoIdx, setDemoIdx] = useState(0);
-  const [phase, setPhase] = useState<'typing' | 'running' | 'done'>('typing');
-  const [typedCommand, setTypedCommand] = useState('');
-  const [stepIdx, setStepIdx] = useState(0);
-  const [outputLines, setOutputLines] = useState<string[]>([]);
+  const [phase, setPhase] = useState<Phase>('typing');
+  const [typed, setTyped] = useState('');
+  const [streamIdx, setStreamIdx] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const demo = demos[demoIdx];
 
-  // Type the command character-by-character
+  // typing: 50–85ms per character — natural human cadence
   useEffect(() => {
     if (phase !== 'typing') return;
-    if (typedCommand.length === demo.command.length) {
-      const t = setTimeout(() => setPhase('running'), 350);
-      return () => clearTimeout(t);
+    if (typed.length === demo.command.length) {
+      timerRef.current = setTimeout(() => setPhase('thinking'), 700);
+      return () => clearTimeout(timerRef.current!);
     }
-    const t = setTimeout(() => {
-      setTypedCommand(demo.command.slice(0, typedCommand.length + 1));
-    }, 28 + Math.random() * 22);
-    return () => clearTimeout(t);
-  }, [phase, typedCommand, demo.command]);
+    timerRef.current = setTimeout(() => {
+      setTyped(demo.command.slice(0, typed.length + 1));
+    }, 55 + Math.random() * 40);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase, typed, demo.command]);
 
-  // Stream steps + their output lines one by one
+  // thinking: pause for "Claude is responding..." dots
   useEffect(() => {
-    if (phase !== 'running') return;
-    if (stepIdx >= demo.steps.length) {
-      const t = setTimeout(() => setPhase('done'), 1300);
-      return () => clearTimeout(t);
-    }
-    const step = demo.steps[stepIdx];
-    const allLines = [step.prompt, ...step.output];
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i >= allLines.length) {
-        clearInterval(interval);
-        setTimeout(() => setStepIdx(s => s + 1), 450);
-        return;
-      }
-      setOutputLines(prev => [...prev, allLines[i]]);
-      i++;
-    }, 280);
-    return () => clearInterval(interval);
-  }, [phase, stepIdx, demo.steps]);
-
-  // After done, advance to next demo
-  useEffect(() => {
-    if (phase !== 'done') return;
-    const t = setTimeout(() => {
-      setOutputLines([]);
-      setTypedCommand('');
-      setStepIdx(0);
-      setDemoIdx(i => (i + 1) % demos.length);
-      setPhase('typing');
-    }, 1800);
-    return () => clearTimeout(t);
+    if (phase !== 'thinking') return;
+    timerRef.current = setTimeout(() => setPhase('streaming'), 1400);
+    return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
+  // streaming: reveal lines one-by-one
+  useEffect(() => {
+    if (phase !== 'streaming') return;
+    if (streamIdx >= demo.lines.length) {
+      timerRef.current = setTimeout(() => setPhase('result'), 700);
+      return () => clearTimeout(timerRef.current!);
+    }
+    timerRef.current = setTimeout(() => setStreamIdx(i => i + 1), 850);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase, streamIdx, demo.lines.length]);
+
+  // result: hold for read
+  useEffect(() => {
+    if (phase !== 'result') return;
+    timerRef.current = setTimeout(() => setPhase('pause'), 2600);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase]);
+
+  // pause then advance
+  useEffect(() => {
+    if (phase !== 'pause') return;
+    timerRef.current = setTimeout(() => {
+      setTyped('');
+      setStreamIdx(0);
+      setDemoIdx(i => (i + 1) % demos.length);
+      setPhase('typing');
+    }, 800);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase]);
+
+  const showSkillCard = phase === 'streaming' || phase === 'result' || phase === 'pause';
+  const showResult = phase === 'result' || phase === 'pause';
+
   return (
-    <div className="terminal-demo">
-      <div className="terminal-chrome">
-        <div className="terminal-dots">
-          <span className="dot dot-red" />
-          <span className="dot dot-yellow" />
-          <span className="dot dot-green" />
+    <div className="claude-chat">
+      <div className="claude-chat-header">
+        <div className="claude-chat-brand">
+          <ClaudeMark size={16} />
+          <span className="claude-chat-name">Claude</span>
+          <span className="claude-chat-model">Sonnet 4.5</span>
         </div>
-        <div className="terminal-title">claude code · shopify-admin-skills</div>
-        <div className="terminal-status">
-          <span className="status-dot" />
-          <span>connected</span>
+        <div className="claude-chat-status">
+          <span className="status-pulse" />
+          <span>connected to my-store</span>
         </div>
       </div>
-      <div className="terminal-body">
-        <div className="terminal-line terminal-prompt-line">
-          <span className="terminal-glyph">$</span>
-          <span className="terminal-prompt-text">claude</span>
+
+      <div className="claude-chat-body">
+        {/* User message */}
+        <div className="claude-msg claude-msg-user">
+          <div className="msg-avatar msg-avatar-user">you</div>
+          <div className="msg-content">
+            <div className="msg-text">
+              {typed || ' '}
+              {phase === 'typing' && <span className="msg-caret">▍</span>}
+            </div>
+          </div>
         </div>
-        <div className="terminal-line terminal-prompt-line">
-          <span className="terminal-glyph terminal-glyph-accent">›</span>
-          <span className="terminal-user-input">
-            {typedCommand}
-            {phase === 'typing' && <span className="terminal-caret">▍</span>}
-          </span>
-        </div>
-        <AnimatePresence mode="popLayout">
-          {outputLines.map((line, i) => (
+
+        {/* Assistant message — streamed once typing done */}
+        <AnimatePresence>
+          {phase !== 'typing' && (
             <motion.div
-              key={`${demoIdx}-${i}`}
-              className="terminal-line terminal-output"
-              initial={{ opacity: 0, y: 4 }}
+              key={`msg-${demoIdx}`}
+              className="claude-msg claude-msg-assistant"
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
             >
-              <span className={line.startsWith('↪') ? 'terminal-arrow' : 'terminal-tick'}>
-                {line.startsWith('↪') || line.startsWith('✓') ? line.slice(0, 1) : ' '}
-              </span>
-              <span>{line.startsWith('↪') || line.startsWith('✓') ? line.slice(2) : line}</span>
+              <div className="msg-avatar msg-avatar-claude">
+                <ClaudeMark size={14} />
+              </div>
+              <div className="msg-content">
+                {phase === 'thinking' ? (
+                  <div className="msg-thinking">
+                    <span className="thinking-dot" />
+                    <span className="thinking-dot" />
+                    <span className="thinking-dot" />
+                  </div>
+                ) : (
+                  <>
+                    {showSkillCard && (
+                      <motion.div
+                        className="msg-skill-card"
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <div className="skill-card-row">
+                          <span className="skill-card-label">Running skill</span>
+                          <code className="skill-card-name">{demo.skill}</code>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    <div className="msg-stream">
+                      {demo.lines.slice(0, streamIdx).map((line, i) => (
+                        <motion.div
+                          key={`${demoIdx}-line-${i}`}
+                          className={`stream-line stream-${line.kind}`}
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, ease: 'easeOut' }}
+                        >
+                          <span className="stream-bullet">
+                            {line.kind === 'success' ? '✓' : '·'}
+                          </span>
+                          <span className="stream-text">{line.text}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {showResult && (
+                      <motion.div
+                        className="msg-result"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <span className="result-tick">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                        <span>{demo.result}</span>
+                      </motion.div>
+                    )}
+                  </>
+                )}
+              </div>
             </motion.div>
-          ))}
+          )}
         </AnimatePresence>
       </div>
     </div>
