@@ -12,7 +12,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Predicts which customers are at risk of churning by analyzing their purchase patterns against their historical buying frequency. Calculates an expected next-purchase date for each repeat customer, then scores churn risk based on how overdue they are. Replicates core functionality of apps like EigenAI Analytics, RetentionX, and Stay AI. Read-only — no mutations.
+Predicts which customers are at risk of churning by analyzing their purchase patterns against their historical buying frequency. Calculates an expected next-purchase date for each repeat customer, then scores churn risk based on how overdue they are. Read-only — no mutations.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_customers`

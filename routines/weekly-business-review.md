@@ -86,7 +86,3 @@ KEY TAKEAWAYS:
 • [Recommendation]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-
-### What It Replaces
-- Manual weekly reporting from Shopify analytics
-- Features from apps like: Triple Whale (weekly digest), BeProfit (weekly P&L), Lifetimely (cohort reports)

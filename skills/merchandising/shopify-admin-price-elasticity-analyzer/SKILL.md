@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Analyzes price-to-velocity relationships across the product catalog to identify which products are price-sensitive and where optimal price points might exist. Compares products within the same category/vendor at different price tiers, and examines how products with compare-at prices (on sale) perform vs. full-price items. Inspired by dynamic pricing apps like Prisync and Intelis. Read-only — no mutations.
+Analyzes price-to-velocity relationships across the product catalog to identify which products are price-sensitive and where optimal price points might exist. Compares products within the same category/vendor at different price tiers, and examines how products with compare-at prices (on sale) perform vs. full-price items. Read-only — no mutations.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_products`

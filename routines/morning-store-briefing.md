@@ -54,7 +54,3 @@ AOV: $[amount] (vs 7d avg: $[amount]) [↑/↓]
 
 If no issues found, end with: ✅ All clear — store running smoothly.
 ```
-
-### What It Replaces
-- Manual morning check of Shopify admin dashboard
-- Features from apps like: Triple Whale (daily digest), BeProfit (daily P&L summary)

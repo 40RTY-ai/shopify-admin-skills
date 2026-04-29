@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Categorizes all inventory into aging buckets based on how long items have been sitting without selling. Calculates carrying cost exposure by bucket to prioritize markdown or liquidation decisions. Goes deeper than dead-stock identification by providing aging granularity. Inspired by warehouse management features in apps like Prediko and Inventory Planner. Read-only — no mutations.
+Categorizes all inventory into aging buckets based on how long items have been sitting without selling. Calculates carrying cost exposure by bucket to prioritize markdown or liquidation decisions. Goes deeper than dead-stock identification by providing aging granularity. Read-only — no mutations.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_products,read_inventory`

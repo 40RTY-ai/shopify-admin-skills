@@ -12,7 +12,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Applies tags to orders based on configurable rule sets — geography-based (domestic/international), value-based (high-value, low-value), product-type-based, customer-tier-based, or custom conditions. Replicates the core functionality of apps like Shopify Flow, Leap Auto Tags, and TagRobot. Supports dry-run mode for safe preview.
+Applies tags to orders based on configurable rule sets — geography-based (domestic/international), value-based (high-value, low-value), product-type-based, customer-tier-based, or custom conditions. Supports dry-run mode for safe preview.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_orders`
@@ -172,5 +172,5 @@ CSV file `order_tags_<YYYY-MM-DD>.csv` with columns:
 - Always run `dry_run: true` first to preview changes.
 - Tags are additive — this skill never removes existing tags.
 - Use with `order-risk-report` to auto-tag risk levels.
-- Combine with Shopify Flow for post-tagging automation (e.g., tag "high-value" → assign to VIP fulfillment queue).
+- Combine with downstream automation tooling for post-tagging actions (e.g., tag "high-value" → assign to VIP fulfillment queue).
 - Useful for filtering orders in Shopify admin — tags make complex order segments searchable.

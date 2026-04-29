@@ -52,7 +52,3 @@ Compile and send to #fulfillment-ops:
 If everything on track:
 ✅ All fulfillments within SLA — [n] orders pending, oldest is [hours]h.
 ```
-
-### What It Replaces
-- Manual fulfillment queue monitoring
-- Features from apps like: AfterShip (shipment tracking alerts), ShipStation (fulfillment SLA monitoring)

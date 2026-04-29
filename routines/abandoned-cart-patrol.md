@@ -45,7 +45,3 @@ Recovery rate: [pct]% (if data available)
 If no abandoned carts in window:
 ✅ No abandoned carts in the last 4 hours.
 ```
-
-### What It Replaces
-- Manual checking of abandoned checkouts
-- Features from apps like: Klaviyo (abandoned cart flows), Omnisend (cart recovery automation)

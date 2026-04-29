@@ -49,7 +49,3 @@ If no low-stock items found:
 
 Always save results to low_stock_report_[date].csv in the current directory.
 ```
-
-### What It Replaces
-- Manual inventory checks in Shopify admin
-- Features from apps like: Prediko (restock alerts), Inventory Planner (automated reorder alerts), Forthcast (AI demand alerts)

@@ -47,7 +47,3 @@ MEDIUM RISK (monitor):
 If no high-risk orders found, do NOT send a message (silent pass).
 Only alert on HIGH risk to avoid alert fatigue.
 ```
-
-### What It Replaces
-- Manual order review for fraud
-- Features from apps like: Signifyd (real-time fraud screening), NoFraud/Wyllo (auto-cancel high risk), FraudBlock (automated cancellation)

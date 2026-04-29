@@ -12,7 +12,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Performs full RFM (Recency, Frequency, Monetary) analysis across the entire customer base. Each customer is scored 1-5 on three dimensions — how recently they purchased, how often they purchase, and how much they spend — then classified into actionable segments: Champions, Loyal Customers, Potential Loyalists, At-Risk, Hibernating, and Lost. Replicates core functionality of apps like Omniconvert Reveal, RetentionX, and Lifetimely. Read-only — no mutations.
+Performs full RFM (Recency, Frequency, Monetary) analysis across the entire customer base. Each customer is scored 1-5 on three dimensions — how recently they purchased, how often they purchase, and how much they spend — then classified into actionable segments: Champions, Loyal Customers, Potential Loyalists, At-Risk, Hibernating, and Lost. Read-only — no mutations.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_customers`

@@ -71,7 +71,3 @@ RECOMMENDED ACTIONS:
 
 Save detailed churn report to churn_watch_[date].csv
 ```
-
-### What It Replaces
-- Manual customer analytics review
-- Features from apps like: RetentionX (churn prediction), EigenAI (AI churn scoring), Omniconvert Reveal (RFM alerts), Stay AI (retention intelligence)
