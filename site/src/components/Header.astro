@@ -1,20 +1,36 @@
 ---
 const base = import.meta.env.BASE_URL;
 
-// Fetch GitHub star count at build time
-let starCount = '';
-try {
-  const res = await fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills', {
-    headers: { 'Accept': 'application/vnd.github+json' },
-  });
-  if (res.ok) {
-    const data = await res.json();
-    const n = data.stargazers_count || 0;
-    starCount = n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-  }
-} catch {
-  starCount = '';
+// Fetch GitHub star count at build time. Try GitHub API first; fall back to
+// shields.io which proxies/caches the count (no rate limit). Hardcoded last-
+// known value as a final fallback so the badge never renders empty.
+async function fetchStars(): Promise<number | null> {
+  // 1. GitHub API (rate-limited from build IPs)
+  try {
+    const res = await fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills', {
+      headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'shopify-admin-skills-site' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (typeof data.stargazers_count === 'number') return data.stargazers_count;
+    }
+  } catch {}
+  // 2. shields.io JSON (no auth, cached)
+  try {
+    const res = await fetch('https://img.shields.io/github/stars/40RTY-ai/shopify-admin-skills.json');
+    if (res.ok) {
+      const data = await res.json();
+      const n = parseInt(data.value || data.message || '', 10);
+      if (!isNaN(n)) return n;
+    }
+  } catch {}
+  return null;
 }
+
+const stargazers = await fetchStars();
+const FALLBACK_STARS = 104; // updated when build can't reach GitHub
+const finalStars = stargazers ?? FALLBACK_STARS;
+const starCount = finalStars >= 1000 ? `${(finalStars / 1000).toFixed(1)}k` : String(finalStars);
 
 const navItems = [
   { name: "Skills", href: `${base}skills/` },
@@ -471,20 +487,33 @@ const navItems = [
       showStarCount(cached);
     }
 
-    // 2. Fetch fresh count
-    fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills', {
-      headers: { 'Accept': 'application/vnd.github+json' },
-    })
-      .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(d => {
-        const n = d.stargazers_count ?? 0;
-        const formatted = n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-        showStarCount(formatted);
-        localStorage.setItem('gh-star-count', formatted);
-      })
-      .catch(() => {
-        // Rate limited — use cache if available, otherwise count stays hidden
-        if (cached) showStarCount(cached);
-      });
+    // 2. Fetch fresh count. Try GitHub first, fall back to shields.io.
+    const tryFetch = async (): Promise<number | null> => {
+      try {
+        const r = await fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills', {
+          headers: { 'Accept': 'application/vnd.github+json' },
+        });
+        if (r.ok) {
+          const d = await r.json();
+          if (typeof d.stargazers_count === 'number') return d.stargazers_count;
+        }
+      } catch {}
+      try {
+        const r = await fetch('https://img.shields.io/github/stars/40RTY-ai/shopify-admin-skills.json');
+        if (r.ok) {
+          const d = await r.json();
+          const n = parseInt(d.value || d.message || '', 10);
+          if (!isNaN(n)) return n;
+        }
+      } catch {}
+      return null;
+    };
+
+    tryFetch().then(n => {
+      if (n === null) return;
+      const formatted = n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+      showStarCount(formatted);
+      localStorage.setItem('gh-star-count', formatted);
+    });
   }
 </script>
