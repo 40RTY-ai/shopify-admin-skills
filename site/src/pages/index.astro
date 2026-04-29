@@ -196,21 +196,15 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
           <div class="install-panel" data-panel="claude-code">
             <p class="install-hint">
-              Paste into Claude Code — it'll install everything for you.
+              Copy this prompt and paste it into Claude Code — Claude will install everything for you.
             </p>
             <div class="prompt-wrap">
-              <button class="cmd cmd-prompt" data-cmd={installPrompt} data-tooltip={installPrompt.slice(0, 120) + '…'}>
+              <button class="cmd cmd-prompt" data-cmd={installPrompt}>
                 <span class="cmd-dollar">✨</span>
                 <code>Install Shopify Admin Skills for me</code>
                 <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
                 <span class="cmd-toast">Copied!</span>
               </button>
-              <button class="prompt-expand-btn" type="button" aria-expanded="false" aria-controls="prompt-full">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="expand-chevron"><polyline points="6 9 12 15 18 9"/></svg>
-                <span class="expand-label-closed">View full prompt</span>
-                <span class="expand-label-open">Hide prompt</span>
-              </button>
-              <pre class="prompt-full" id="prompt-full" hidden>{installPrompt}</pre>
             </div>
           </div>
 
@@ -256,16 +250,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         btn.classList.add('copied');
         setTimeout(() => btn.classList.remove('copied'), 1500);
       });
-    });
-
-    // Expand/collapse full prompt
-    const expandBtn = document.querySelector<HTMLButtonElement>('.prompt-expand-btn');
-    const promptFull = document.getElementById('prompt-full');
-    expandBtn?.addEventListener('click', () => {
-      if (!promptFull) return;
-      const expanded = expandBtn.getAttribute('aria-expanded') === 'true';
-      expandBtn.setAttribute('aria-expanded', (!expanded).toString());
-      promptFull.hidden = expanded;
     });
 
     // Install tabs
@@ -872,13 +856,15 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     color: var(--color-muted);
   }
 
-  /* RIGHT SIDE — live illustration */
+  /* RIGHT SIDE — live illustration, centered vertically in hero */
   .hero-right {
     height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
     position: relative;
+    gap: 18px;
   }
 
   .hero-illustration {
@@ -886,15 +872,15 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px 0;
   }
 
   .illustration-stack {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
     width: 100%;
-    max-width: 560px;
+    max-width: 540px;
+    align-items: center;
   }
 
   .skills-scroll-mask {

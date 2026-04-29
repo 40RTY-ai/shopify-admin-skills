@@ -5,59 +5,60 @@ import './TerminalDemo.css';
 type Demo = {
   command: string;
   prelude: string;
-  toolCall: string;
+  skillLabel: string;
   toolOutput: string[];
   closing: string;
 };
 
+// Plain language. Written for a store manager, not a developer.
 const demos: Demo[] = [
   {
-    command: 'find variants below reorder threshold and export a restock list',
-    prelude: 'I\'ll scan all active variants for ones below their reorder threshold.',
-    toolCall: 'shopify-admin-low-inventory-restock',
+    command: "What's running low? Make me a restock list.",
+    prelude: "Sure. I'll check every product and find the ones below your reorder point.",
+    skillLabel: 'Low Stock Watchdog',
     toolOutput: [
-      'Connected to my-store.myshopify.com',
-      'Scanning 1,247 active variants…',
-      'Found 23 SKUs below reorder point',
-      'Saved restock_2026-04-29.csv',
+      'Connecting to your store',
+      'Reviewing 1,247 products',
+      'Found 23 that need reordering',
+      'Saved your restock list',
     ],
-    closing: '23 SKUs need reordering. CSV saved to your working directory.',
+    closing: '23 products need reordering — full list saved as a CSV you can hand to your supplier.',
   },
   {
-    command: 'audit products missing SEO titles or descriptions',
-    prelude: 'Checking every product for title and description coverage.',
-    toolCall: 'shopify-admin-seo-metadata-audit',
+    command: 'Find products missing SEO titles or descriptions.',
+    prelude: "On it. Auditing every product for missing SEO data.",
+    skillLabel: 'SEO Audit',
     toolOutput: [
       'Reviewing 1,247 products',
-      'Cross-referencing 8 collections',
-      '240 products need attention',
-      'Saved seo_audit_2026-04-29.csv',
+      'Checking titles and descriptions',
+      '240 need attention',
+      'Saved the gap report',
     ],
-    closing: '240 products need SEO updates. Full list in seo_audit_2026-04-29.csv.',
+    closing: '240 products need SEO updates. Sorted by traffic so you can fix the biggest ones first.',
   },
   {
-    command: 'recover abandoned checkouts from the last 24 hours',
-    prelude: 'Pulling abandoned checkouts and generating recovery codes.',
-    toolCall: 'shopify-admin-abandoned-cart-recovery',
+    command: 'Recover abandoned checkouts from yesterday.',
+    prelude: "I'll pull abandoned checkouts and send personalized recovery emails.",
+    skillLabel: 'Cart Recovery',
     toolOutput: [
-      'Found 47 abandoned checkouts',
-      'Generating unique discount codes',
-      'Sending recovery emails',
-      '$8,420 in pending recovery',
+      '47 abandoned checkouts',
+      'Generating recovery codes',
+      'Emails sent',
+      'About $8,420 in flight',
     ],
-    closing: 'Sent 47 recovery emails. ~$8,420 of cart value in flight.',
+    closing: 'Sent 47 recovery emails. Roughly $8,420 of cart value is now back in play.',
   },
   {
-    command: 'flag any high-risk orders from this morning',
-    prelude: 'Risk-scoring new orders against Shopify Fraud signals.',
-    toolCall: 'shopify-admin-high-risk-order-tagger',
+    command: 'Flag any high-risk orders from this morning.',
+    prelude: "Reviewing every new order and risk-scoring it.",
+    skillLabel: 'Fraud Watch',
     toolOutput: [
-      'Reviewing 184 new orders',
+      '184 new orders this morning',
       'Risk-scoring with Shopify signals',
-      '3 orders flagged for review',
-      'Tagged · risk:review',
+      '3 orders look suspicious',
+      'Flagged for your team',
     ],
-    closing: '3 high-risk orders flagged. Tagged with `risk:review` for the ops team.',
+    closing: '3 orders flagged for manual review — your ops team will see them in their queue.',
   },
 ];
 
@@ -84,18 +85,18 @@ export default function ClaudeCodeChat() {
   useEffect(() => {
     if (phase !== 'typing') return;
     if (typed.length === demo.command.length) {
-      timerRef.current = setTimeout(() => setPhase('thinking'), 700);
+      timerRef.current = setTimeout(() => setPhase('thinking'), 600);
       return () => clearTimeout(timerRef.current!);
     }
     timerRef.current = setTimeout(() => {
       setTyped(demo.command.slice(0, typed.length + 1));
-    }, 28 + Math.random() * 22);
+    }, 32 + Math.random() * 22);
     return () => clearTimeout(timerRef.current!);
   }, [phase, typed, demo.command]);
 
   useEffect(() => {
     if (phase !== 'thinking') return;
-    timerRef.current = setTimeout(() => setPhase('prelude'), 1200);
+    timerRef.current = setTimeout(() => setPhase('prelude'), 1100);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
@@ -107,23 +108,23 @@ export default function ClaudeCodeChat() {
 
   useEffect(() => {
     if (phase !== 'tool') return;
-    timerRef.current = setTimeout(() => setPhase('output'), 700);
+    timerRef.current = setTimeout(() => setPhase('output'), 600);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
   useEffect(() => {
     if (phase !== 'output') return;
     if (outputIdx >= demo.toolOutput.length) {
-      timerRef.current = setTimeout(() => setPhase('closing'), 600);
+      timerRef.current = setTimeout(() => setPhase('closing'), 500);
       return () => clearTimeout(timerRef.current!);
     }
-    timerRef.current = setTimeout(() => setOutputIdx(i => i + 1), 600);
+    timerRef.current = setTimeout(() => setOutputIdx(i => i + 1), 500);
     return () => clearTimeout(timerRef.current!);
   }, [phase, outputIdx, demo.toolOutput.length]);
 
   useEffect(() => {
     if (phase !== 'closing') return;
-    timerRef.current = setTimeout(() => setPhase('pause'), 2800);
+    timerRef.current = setTimeout(() => setPhase('pause'), 2600);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
@@ -134,7 +135,7 @@ export default function ClaudeCodeChat() {
       setOutputIdx(0);
       setDemoIdx(i => (i + 1) % demos.length);
       setPhase('typing');
-    }, 700);
+    }, 600);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
@@ -147,93 +148,74 @@ export default function ClaudeCodeChat() {
 
   return (
     <div className="cc-shell">
-      {/* Window chrome */}
+      {/* Minimal chrome — just lights and Claude mark, no model pill, no cwd */}
       <div className="cc-titlebar">
         <div className="cc-traffic">
           <span className="cc-light cc-light-red" />
           <span className="cc-light cc-light-yellow" />
           <span className="cc-light cc-light-green" />
         </div>
-        <div className="cc-titlebar-title">
+        <div className="cc-titlebar-brand">
           <ClaudeMark size={12} />
-          <span>claude</span>
-          <span className="cc-titlebar-sep">·</span>
-          <span className="cc-titlebar-cwd">~/my-store</span>
+          <span>Claude</span>
         </div>
-        <div className="cc-titlebar-model">sonnet 4.5</div>
+        <div className="cc-titlebar-spacer" />
       </div>
 
-      {/* Conversation surface */}
       <div className="cc-surface">
-        <div className="cc-thread">
-          {/* User input echoed in the same surface */}
-          <div className="cc-line cc-line-user">
-            <span className="cc-glyph cc-glyph-prompt">&gt;</span>
-            <span className="cc-line-text">
-              {typed || ' '}
-              {phase === 'typing' && <span className="cc-caret" />}
-            </span>
+        {/* User turn */}
+        <div className="cc-user">
+          <div className="cc-user-bubble">
+            {typed || ' '}
+            {phase === 'typing' && <span className="cc-caret" />}
+          </div>
+        </div>
+
+        {/* Assistant region — fixed-slot stack, blocks fade in by opacity, no reflow */}
+        <div className="cc-assistant">
+          <div className="cc-slot cc-slot-prelude">
+            <div className="cc-avatar"><ClaudeMark size={12} /></div>
+            <div className="cc-slot-content">
+              {showAssistant && phase === 'thinking' ? (
+                <span className="cc-thinking">
+                  <span className="cc-thinking-dot" />
+                  <span className="cc-thinking-dot" />
+                  <span className="cc-thinking-dot" />
+                </span>
+              ) : (
+                <span className={`cc-prose ${showPrelude ? 'is-shown' : ''}`}>{demo.prelude}</span>
+              )}
+            </div>
           </div>
 
-          {/* Assistant turn — fixed slots so nothing reflows */}
-          <div className="cc-assistant">
-            <div className={`cc-block cc-prelude ${showPrelude ? 'is-shown' : ''}`}>
-              <span className="cc-glyph cc-glyph-mark">⏺</span>
-              <span className="cc-line-text cc-prose">
-                {phase === 'thinking' ? (
-                  <span className="cc-thinking">
-                    <span className="cc-thinking-dot" />
-                    <span className="cc-thinking-dot" />
-                    <span className="cc-thinking-dot" />
-                  </span>
-                ) : (
-                  demo.prelude
-                )}
-              </span>
+          <div className="cc-slot cc-slot-tool">
+            <div className="cc-avatar cc-avatar-empty" />
+            <div className="cc-slot-content">
+              <div className={`cc-tool-card ${showTool ? 'is-shown' : ''}`}>
+                <div className="cc-tool-head">
+                  <span className="cc-tool-spinner" />
+                  <span className="cc-tool-running">Running</span>
+                  <span className="cc-tool-name">{demo.skillLabel}</span>
+                </div>
+                <div className="cc-tool-output">
+                  {demo.toolOutput.map((line, i) => (
+                    <div
+                      key={`${demoIdx}-${i}`}
+                      className={`cc-tool-line ${i < outputIdx ? 'is-shown' : ''}`}
+                    >
+                      <span className="cc-tool-cont">·</span>
+                      <span>{line}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+          </div>
 
-            <AnimatePresence>
-              {showTool && (
-                <motion.div
-                  key={`tool-${demoIdx}`}
-                  className="cc-block cc-tool is-shown"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <span className="cc-glyph cc-glyph-mark">⏺</span>
-                  <div className="cc-tool-card">
-                    <div className="cc-tool-head">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                      </svg>
-                      <span>Skill</span>
-                      <code>{demo.toolCall}</code>
-                    </div>
-                    <div className="cc-tool-output">
-                      {demo.toolOutput.slice(0, outputIdx).map((line, i) => (
-                        <div key={`${demoIdx}-${i}`} className="cc-tool-line">
-                          <span className="cc-tool-cont">⎿</span>
-                          <span>{line}</span>
-                        </div>
-                      ))}
-                      {/* Reserved space for non-yet-shown lines so layout stays stable */}
-                      {demo.toolOutput.slice(outputIdx).map((_, i) => (
-                        <div key={`ph-${demoIdx}-${i}`} className="cc-tool-line cc-tool-line-placeholder">
-                          <span className="cc-tool-cont">⎿</span>
-                          <span> </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className={`cc-block cc-closing ${showClosing ? 'is-shown' : ''}`}>
-              <span className="cc-glyph cc-glyph-mark">⏺</span>
-              <span className="cc-line-text cc-prose cc-prose-strong">{demo.closing}</span>
+          <div className="cc-slot cc-slot-closing">
+            <div className="cc-avatar cc-avatar-empty" />
+            <div className="cc-slot-content">
+              <span className={`cc-prose cc-prose-strong ${showClosing ? 'is-shown' : ''}`}>{demo.closing}</span>
             </div>
           </div>
         </div>

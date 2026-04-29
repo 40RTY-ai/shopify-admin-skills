@@ -1,7 +1,7 @@
 .rb-shell {
   width: 100%;
-  max-width: 580px;
-  height: 410px; /* fixed — never reflows */
+  max-width: 540px;
+  height: 340px; /* fixed — never reflows */
   background: #FAF9F5;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -12,48 +12,6 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.rb-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
-  background: #F1ECE2;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  color: rgba(31, 30, 27, 0.55);
-}
-
-.rb-pulse {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #6CD49A;
-  box-shadow: 0 0 0 3px rgba(108, 212, 154, 0.18);
-  animation: rb-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes rb-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(0.92); }
-}
-
-.rb-label {
-  flex: 1;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.rb-stat {
-  font-size: 0.62rem;
-  color: rgba(31, 30, 27, 0.4);
-  text-transform: lowercase;
-  letter-spacing: 0;
 }
 
 .rb-canvas {
