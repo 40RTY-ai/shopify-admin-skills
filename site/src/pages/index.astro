@@ -51,7 +51,7 @@ for (const cat of categories) {
 const routines: Routine[] = [];
 if (fs.existsSync(routinesRoot)) {
   const routineFiles = fs.readdirSync(routinesRoot)
-    .filter((f: string) => f.endsWith('.md') && f !== 'README.md' && f !== 'INSTALL.md');
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
   for (const file of routineFiles) {
     const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
     const { data } = matter(content);
@@ -64,30 +64,6 @@ if (fs.existsSync(routinesRoot)) {
     }
   }
 }
-
-// Featured routines for home — human-readable, no jargon
-const homeRoutines: { title: string; when: string; tagline: string }[] = [
-  {
-    title: 'Morning Store Briefing',
-    when: 'Every morning at 8 AM',
-    tagline: 'Yesterday\'s revenue, what shipped, what stalled, and what needs your attention — in one Slack message.',
-  },
-  {
-    title: 'Low Stock Watchdog',
-    when: 'Every morning at 7 AM',
-    tagline: 'Catches inventory falling below safe levels and tells you exactly what to reorder, by when.',
-  },
-  {
-    title: 'Fraud Sentinel',
-    when: 'Every two hours',
-    tagline: 'High-risk orders flagged for review the moment they appear — before they ship.',
-  },
-  {
-    title: 'Monthly Financial Close',
-    when: 'First of every month',
-    tagline: 'Profit and loss, payouts, taxes, refunds — reconciled and ready, no spreadsheet wrestling.',
-  },
-];
 
 const categoryColors: Record<string, string> = {
   'Marketing': '#E8A838',
@@ -128,70 +104,19 @@ const categoryIcons: Record<string, string> = {
   'Store Management': '⚙️',
 };
 
-// Humanize skill name: shopify-admin-dead-stock-identifier → Dead Stock Identifier
-function humanize(slug: string): string {
-  return slug
-    .replace(/^shopify-admin-/, '')
-    .split('-')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-// Cron → human schedule
-function scheduleLabel(cron: string): string {
-  const map: Record<string, string> = {
-    '0 8 * * *': 'Daily 8 AM',
-    '0 7 * * *': 'Daily 7 AM',
-    '0 6 * * *': 'Daily 6 AM',
-    '0 9 * * *': 'Daily 9 AM',
-    '0 10 * * *': 'Daily 10 AM',
-    '0 */4 * * *': 'Every 4h',
-    '0 */2 * * *': 'Every 2h',
-    '0 10,15 * * 1-5': 'Wkdys 10/3',
-    '0 8 * * 1': 'Mon 8 AM',
-    '0 9 * * 1': 'Mon 9 AM',
-    '0 8 * * 3': 'Wed 8 AM',
-    '0 7 * * 3': 'Wed 7 AM',
-    '0 9 * * 2': 'Tue 9 AM',
-    '0 7 * * 4': 'Thu 7 AM',
-    '0 9 * * 0': 'Sun 9 AM',
-    '0 8 1 * *': 'Monthly 1st',
-    '0 10 1 * *': 'Monthly 1st',
-    '0 7 15 * *': 'Monthly 15th',
-    '0 9 1 1,4,7,10 *': 'Quarterly',
-  };
-  return map[cron] || 'Scheduled';
-}
-
-// Build mixed marquee items: skills + routines, with type discrimination
-type MarqueeItem =
-  | { kind: 'skill'; title: string; categoryLabel: string; categoryColor: string; href: string }
-  | { kind: 'routine'; title: string; schedule: string; href: string };
-
-const skillItems: MarqueeItem[] = skills.map(s => ({
-  kind: 'skill' as const,
-  title: humanize(s.name),
-  categoryLabel: categoryLabels[s.category] || s.category,
-  categoryColor: categoryColors[s.category] || '#888',
-  href: `${base}skills/${s.categorySlug}/${s.slug}/`,
-}));
-
-const routineItems: MarqueeItem[] = routines.map(r => ({
-  kind: 'routine' as const,
-  title: humanize(r.id),
-  schedule: scheduleLabel(r.cron),
-  href: `${base}routines/`,
-}));
-
-// Shuffle and interleave skills + routines so routines appear regularly in marquee
-const allItems: MarqueeItem[] = [...skillItems, ...routineItems].sort(() => Math.random() - 0.5);
-const half = Math.ceil(allItems.length / 2);
-const col1Base = allItems.slice(0, half);
-const col2Base = allItems.slice(half);
+// Shuffle and split into 2 columns, tripled for seamless loop
+const shuffled = [...skills].sort(() => Math.random() - 0.5);
+const half = Math.ceil(shuffled.length / 2);
+const col1Base = shuffled.slice(0, half);
+const col2Base = shuffled.slice(half);
 const row1 = [...col1Base, ...col1Base, ...col1Base];
 const row2 = [...col2Base, ...col2Base, ...col2Base];
 
-const installPrompt = `Please guide me through setting up Shopify Admin Skills. Act as a concierge: walk me through each step one at a time, keep your messages short and friendly, and DO NOT paste raw command output, logs, or stack traces into the chat. Summarize results in one line ("✅ plugins installed", "✅ connected to my-store"). Only surface details if something actually fails, and then only the relevant error.
+const installPrompt = `Please guide me through setting up Shopify Admin Skills + Routines. Act as a concierge: walk me through each step one at a time, keep your messages short and friendly, and DO NOT paste raw command output, logs, or stack traces into the chat. Summarize results in one line ("✅ plugins installed", "✅ connected to my-store"). Only surface details if something actually fails, and then only the relevant error.
+
+What you're installing:
+  • SKILLS — 100+ on-demand workflows your agent can run (recover carts, audit inventory, process refunds, etc.)
+  • ROUTINES — 20 always-on scheduled agents that watch the store on a cron (morning briefing, fraud sentinel, monthly close, etc.)
 
 Follow these steps in order, confirming each before moving on:
 
@@ -214,64 +139,41 @@ Command:
   shopify store auth --store <domain> --scopes <scopes>
 and confirm with a one-line "✅ connected to <domain>".
 
-Step 4 — Now guide me into actually using the skills. Present a short menu of guided examples, like:
+Step 4 — Ask me what I want to do first:
+  a) "Try a skill — run something on demand right now"
+  b) "Set up routines — install always-on scheduled agents"
+  c) "Both — try a skill first, then set up routines"
+
+If I pick (a) or (c) — present a short menu (3–5 options) of guided skill examples like:
   • "Find variants with low inventory and export a restock list"
   • "Show abandoned checkouts from the last 7 days"
   • "Audit products missing SEO titles or descriptions"
   • "Rank my top products by revenue this month"
-  • "Set up my morning store briefing routine"
+  • "Find duplicate customer records"
+For each, give a one-sentence description. Ask me to pick one (or describe my own goal), then run the matching skill — quietly, reporting results as a clean summary, not raw JSON.
 
-For each, give a one-sentence description. Ask me to pick one (or describe my own goal), then run the matching skill quietly, reporting results as a clean summary.
-
-Step 5 — After the first skill runs, mention that the kit also includes ${routines.length} scheduled routines that run automatically on a cron — morning briefings, low-stock watchdogs, fraud sentinels, monthly financial close, and more. Ask if I'd like to set one up. Show 3–4 routine options with their schedule and a one-liner. If I pick one, walk me through enabling it.
+If I pick (b) or (c) — kick off the smart routine onboarding flow. Read the file routines/INSTALL.md from the installed plugin to get the full smart-install protocol. The short version: silently profile my store (volume, catalog size, locations, subscriptions, payments), ask 3 short questions (priorities, alert destination, aggressiveness), score routines against my profile + answers, show a tailored recommendation list with reasoning + skipped routines explained, wait for "yes / edit / cancel", then install only approved routines via mcp__scheduled-tasks__create_scheduled_task. Never install all 20 blindly. Tailor crons to my volume.
 
 Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text, no logs, no "here's what I ran" unless I ask.`;
 ---
 
-<Base
-  title="Shopify Admin Skills — AI agent skills for your store"
-  description={`${skills.length}+ pre-built AI agent skills for Shopify store operators. Recover carts, adjust prices, audit inventory, process refunds and more — directly through Claude Code, Cursor, Cline, Copilot, or Gemini CLI.`}
-  jsonLd={[
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'Shopify Admin Skills',
-      url: 'https://skills.40rty.ai',
-      description: `${skills.length}+ pre-built AI agent skills for Shopify store operators.`,
-      publisher: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Shopify Admin Skills',
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Claude Code, Cursor, Cline, Copilot, Gemini CLI',
-      url: 'https://skills.40rty.ai',
-      downloadUrl: 'https://github.com/40RTY-ai/shopify-admin-skills',
-      license: 'https://opensource.org/licenses/MIT',
-      description: `${skills.length}+ pre-built AI agent skills for Shopify: cart recovery, bulk pricing, inventory audits, refunds, fulfillment routing, SEO, and more.`,
-      author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    },
-  ]}
->
+<Base title="Shopify Admin Skills — AI agent skills for your store">
 
 
   <!-- HERO — split layout: left title, right skills grid -->
   
 
-  
   <section class="hero">
     <div class="hero-split">
       <div class="hero-left">
         
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
-          <span class="line typewriter" id="t2">Admin</span>
-          <span class="line typewriter" id="t3">Skills</span>
+          <span class="line stroke typewriter" id="t2">Admin</span>
+          <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
         </h1>
         <p class="hero-sub">
-          <span id="rotating-text"></span>
+          <a id="rotating-link" href="#"><span id="rotating-text"></span></a>
         </p>
         <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <div class="hero-cta">
@@ -292,7 +194,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
           <div class="install-panel" data-panel="claude-code">
             <p class="install-hint">
-              Paste into Claude Code — it'll install skills &amp; routines for you.
+              Paste into Claude Code — it'll install everything for you.
             </p>
             <div class="prompt-wrap">
               <button class="cmd cmd-prompt" data-cmd={installPrompt} data-tooltip={installPrompt.slice(0, 120) + '…'}>
@@ -301,6 +203,12 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
                 <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
                 <span class="cmd-toast">Copied!</span>
               </button>
+              <button class="prompt-expand-btn" type="button" aria-expanded="false" aria-controls="prompt-full">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="expand-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+                <span class="expand-label-closed">View full prompt</span>
+                <span class="expand-label-open">Hide prompt</span>
+              </button>
+              <pre class="prompt-full" id="prompt-full" hidden>{installPrompt}</pre>
             </div>
           </div>
 
@@ -321,42 +229,21 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       </div>
 
       <!-- Right side: skills grid scrolling vertically -->
-      <a href="#signup" class="signup-teaser mobile-teaser">
-        Tell me more cool stuff
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-      </a>
-
       <div class="hero-right">
         <div class="skills-scroll-mask">
           <div class="skills-scroll-col col-up">
-            {row1.map(item => item.kind === 'skill' ? (
-              <a href={item.href} class="s-chip">
-                <span class="s-cat" style={`color: ${item.categoryColor}; background: ${item.categoryColor}15;`}>{item.categoryLabel}</span>
-                <span class="s-name">{item.title}</span>
-              </a>
-            ) : (
-              <a href={item.href} class="s-chip s-chip-routine">
-                <span class="s-cat s-cat-routine">
-                  <svg class="s-routine-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  Routine · {item.schedule}
-                </span>
-                <span class="s-name">{item.title}</span>
+            {row1.map(s => (
+              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
+                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
+                <code class="s-name">{s.name}</code>
               </a>
             ))}
           </div>
           <div class="skills-scroll-col col-down">
-            {row2.map(item => item.kind === 'skill' ? (
-              <a href={item.href} class="s-chip">
-                <span class="s-cat" style={`color: ${item.categoryColor}; background: ${item.categoryColor}15;`}>{item.categoryLabel}</span>
-                <span class="s-name">{item.title}</span>
-              </a>
-            ) : (
-              <a href={item.href} class="s-chip s-chip-routine">
-                <span class="s-cat s-cat-routine">
-                  <svg class="s-routine-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  Routine · {item.schedule}
-                </span>
-                <span class="s-name">{item.title}</span>
+            {row2.map(s => (
+              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
+                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
+                <code class="s-name">{s.name}</code>
               </a>
             ))}
           </div>
@@ -368,108 +255,9 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </div>
       </div>
     </div>
-
-    <a href="#signup" class="signup-teaser">
-      Tell me more cool stuff
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-    </a>
-  </section>
-
-  <!-- ROUTINES PREVIEW -->
-  <section class="routines-preview reveal">
-    <div class="routines-preview-inner">
-      <div class="routines-intro">
-        <span class="routines-eyebrow">Always on. Always watching.</span>
-        <h2 class="routines-heading">
-          Skills run on demand.<br/>
-          <span class="routines-accent shimmer-text">Routines run while you sleep<span class="dot">.</span></span>
-        </h2>
-        <p class="routines-lede">
-          {routines.length} pre-built scheduled agents that watch your store on a cron — daily briefings, fraud sentinels, monthly close — and ping you only when something needs attention.
-        </p>
-        <a href={`${base}routines/`} class="routines-cta">
-          See routines <span aria-hidden="true">&rarr;</span>
-        </a>
-      </div>
-
-      <div class="routines-grid reveal-stagger">
-        {homeRoutines.map((r, i) => (
-          <article class="routine-preview-card">
-            <div class="routine-preview-head">
-              <span class="routine-preview-num">{String(i + 1).padStart(2, '0')}</span>
-              <span class="routine-preview-when">{r.when}</span>
-            </div>
-            <h3 class="routine-preview-title">{r.title}</h3>
-            <p class="routine-preview-tagline">{r.tagline}</p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- SIGNUP SECTION -->
-  <section class="signup reveal" id="signup">
-    <div class="signup-card">
-      <span class="signup-eyebrow signup-eyebrow-flex">From <img src="/40rty-logo.png" alt="40rty" class="signup-eyebrow-logo" /></span>
-      <h2 class="signup-heading">Get new skills first.</h2>
-      <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
-      <!-- Step 1: email -->
-      <div id="signup-step1">
-        <form class="signup-form" id="signup-form" novalidate>
-          <div class="signup-row">
-            <input
-              type="email"
-              name="email"
-              id="signup-email"
-              placeholder="your@email.com"
-              required
-              class="signup-input"
-              autocomplete="email"
-            />
-            <button type="submit" class="signup-btn">Get updates</button>
-          </div>
-          <p class="signup-fine">No spam. Unsubscribe any time.</p>
-        </form>
-      </div>
-
-      <!-- Step 2: skill request (shown after email captured) -->
-      <div id="signup-step2" class="signup-step2">
-        <p class="step2-label">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          You're in! Tell us a bit more.
-        </p>
-        <form class="signup-form" id="skill-request-form" novalidate>
-          <div class="step2-fields">
-            <input
-              type="text"
-              id="domain-input"
-              placeholder="Your store domain (e.g. my-store.myshopify.com)"
-              class="signup-input"
-            />
-            <input
-              type="text"
-              id="skill-request-input"
-              placeholder="Any skill you'd love to see?"
-              class="signup-input"
-            />
-            <button type="submit" class="signup-btn step2-submit">Send</button>
-          </div>
-        </form>
-        <button type="button" id="skip-btn" class="skip-link">Skip &rarr;</button>
-      </div>
-
-      <!-- Final success -->
-      <div class="signup-success" id="signup-success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>You're in — we'll be in touch.</span>
-      </div>
-    </div>
   </section>
 
   <script>
-    // Fetch GitHub stars
-    
-
     // Copy buttons — handle both .cmd and .prompt-box
     document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -517,8 +305,8 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     ];
     lines.forEach((el, i) => {
       if (!el) return;
-      el.style.animationDelay = `${i * 0.5}s`;
-      el.classList.add('tw-go');
+      el.style.animationDelay = `${i * 0.4}s`;
+      el.classList.add('reveal');
     });
 
     // Rotating subtitle — [text, skill-path]
@@ -541,6 +329,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     ];
 
     const rotEl = document.getElementById('rotating-text');
+    const rotLink = document.getElementById('rotating-link') as HTMLAnchorElement | null;
     let currentIdx = 0;
     let typeInterval: number | null = null;
     let eraseTimeout: number | null = null;
@@ -562,7 +351,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
           clearInterval(typeInterval);
           typeInterval = null;
         }
-      }, 45);
+      }, 35);
+    }
+
+    function updateLink(idx: number) {
+      if (rotLink) rotLink.href = base + abilities[idx][1];
     }
 
     function eraseAndType() {
@@ -572,16 +365,18 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       eraseTimeout = window.setTimeout(() => {
         currentIdx = (currentIdx + 1) % abilities.length;
         rotEl.style.opacity = '1';
+        updateLink(currentIdx);
         typeText(abilities[currentIdx][0], rotEl);
-      }, 500);
+      }, 300);
     }
 
     function startRotation() {
       if (rotateInterval !== null) clearInterval(rotateInterval);
-      rotateInterval = window.setInterval(eraseAndType, 5000);
+      rotateInterval = window.setInterval(eraseAndType, 3500);
     }
 
     if (rotEl) {
+      updateLink(0);
       typeText(abilities[0][0], rotEl);
       startRotation();
     }
@@ -596,87 +391,42 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         startRotation();
       }
     });
-
-    const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : 'https://audit.40rty.ai';
-    let capturedEmail = '';
-
-    function showSuccess() {
-      document.getElementById('signup-step2')?.classList.remove('visible');
-      document.getElementById('signup-success')?.classList.add('visible');
-    }
-
-    // Step 1 — email
-    const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
-    const signupBtn = signupForm?.querySelector('.signup-btn') as HTMLButtonElement | null;
-
-    signupForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
-      const email = emailInput?.value?.trim();
-      if (!email) return;
-
-      capturedEmail = email;
-      if (signupBtn) { signupBtn.textContent = 'Sending…'; signupBtn.disabled = true; }
-
-      fetch(`${apiBase}/api/skills-signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      }).catch(() => {});
-
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'skills_signup', { method: 'email' });
-      }
-
-      // Move to step 2
-      document.getElementById('signup-step1')?.classList.add('done');
-      setTimeout(() => {
-        document.getElementById('signup-step1')?.classList.add('hidden');
-        document.getElementById('signup-step2')?.classList.add('visible');
-        document.getElementById('skill-request-input')?.focus();
-      }, 300);
-    });
-
-    // Step 2 — skill request
-    const skillRequestForm = document.getElementById('skill-request-form') as HTMLFormElement | null;
-
-    skillRequestForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const skillRequest = (document.getElementById('skill-request-input') as HTMLInputElement | null)?.value?.trim();
-      const domain = (document.getElementById('domain-input') as HTMLInputElement | null)?.value?.trim();
-      if (skillRequest || domain) {
-        fetch(`${apiBase}/api/skills-signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: capturedEmail, skillRequest, domain }),
-        }).catch(() => {});
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'skill_request', { method: 'text' });
-        }
-      }
-      showSuccess();
-    });
-
-    document.getElementById('skip-btn')?.addEventListener('click', showSuccess);
-
-    // Spell-UI inspired: Blur-reveal on scroll
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
-      revealObserver.observe(el);
-    });
   </script>
 
 </Base>
 
 <style>
-  
+  .gh-top {
+    position: absolute;
+    top: 24px;
+    right: 40px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--color-dark);
+    text-decoration: none;
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    transition: all 0.15s;
+    background: var(--color-card);
+  }
+
+  .gh-top:hover {
+    background: var(--color-dark);
+    color: var(--color-text-light);
+  }
+
+  @media (max-width: 768px) {
+    .gh-top { position: absolute; top: 16px; right: 16px; margin-bottom: 0; padding: 10px; border-radius: 8px; display: inline-flex; justify-content: center; align-items: center; background: var(--color-bg); border-color: var(--color-card-border); z-index: 100; }
+    .gh-text { display: none; }
+    .gh-top svg { width: 18px; height: 18px; margin: 0; }
+  }
 
   /* HERO */
   .hero {
@@ -685,7 +435,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     align-items: center;
     padding: 0;
     overflow: hidden;
-    position: relative;
   }
 
   .hero-split {
@@ -725,8 +474,8 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     opacity: 0;
   }
 
-  .typewriter.tw-go {
-    animation: typeReveal 1s steps(14, end) forwards;
+  .typewriter.reveal {
+    animation: typeReveal 0.8s steps(12, end) forwards;
   }
 
   @keyframes typeReveal {
@@ -756,6 +505,15 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     margin-top: 4px;
   }
 
+  #rotating-link {
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #rotating-link:hover #rotating-text {
+    background: linear-gradient(to top, rgba(232, 168, 56, 0.45) 40%, transparent 40%);
+  }
+
   #rotating-text {
     color: var(--color-dark);
     font-weight: 600;
@@ -763,7 +521,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     transition: opacity 0.3s, background 0.2s;
     border-right: 2px solid var(--color-accent);
     padding-right: 3px;
-    animation: blink 1s step-end infinite;
+    animation: blink 0.8s step-end infinite;
     background: linear-gradient(to top, rgba(232, 168, 56, 0.2) 40%, transparent 40%);
     padding-bottom: 2px;
   }
@@ -776,12 +534,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .install-tabs {
     display: inline-flex;
-    gap: 2px;
-    margin-bottom: 14px;
-    padding: 3px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 9px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    gap: 4px;
+    margin-bottom: 12px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
   }
 
   .tab {
@@ -795,7 +552,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     border: none;
     background: transparent;
     color: var(--color-muted);
-    border-radius: 6px;
+    border-radius: 7px;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -817,9 +574,9 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .tab:hover { color: var(--color-dark); }
   .tab.active {
-    background: white;
+    background: var(--color-card);
     color: var(--color-dark);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
 
   .install-panel-wrap {
@@ -893,9 +650,8 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .cmd-prompt code {
     font-family: var(--font-body);
-    font-style: normal;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-style: italic;
+    opacity: 0.9;
   }
 
   .prompt-wrap {
@@ -934,6 +690,69 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     pointer-events: none;
   }
 
+  .prompt-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 2px;
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .prompt-expand-btn:hover { color: var(--color-dark); }
+
+  .expand-chevron {
+    transition: transform 0.2s;
+  }
+
+  .prompt-expand-btn[aria-expanded="true"] .expand-chevron {
+    transform: rotate(180deg);
+  }
+
+  .expand-label-open { display: none; }
+  .prompt-expand-btn[aria-expanded="true"] .expand-label-closed { display: none; }
+  .prompt-expand-btn[aria-expanded="true"] .expand-label-open { display: inline; }
+
+  .prompt-full {
+    width: 100%;
+    max-width: 560px;
+    max-height: 280px;
+    background: var(--color-card);
+    border: 1px solid var(--color-card-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--color-text);
+    white-space: pre-wrap;
+    overflow-y: auto;
+    overflow-x: auto;
+    margin: 0;
+    animation: panelIn 0.2s ease forwards;
+    overscroll-behavior: contain;
+  }
+
+  .prompt-full::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .prompt-full::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .prompt-full::-webkit-scrollbar-thumb {
+    background: var(--color-card-border);
+    border-radius: 4px;
+  }
+  .prompt-full::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+  }
+
   @media (hover: none) {
     .cmd-prompt[data-tooltip]:hover::before { display: none; }
   }
@@ -969,133 +788,65 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
   .built-by:hover .built-by-logo { opacity: 0.85; }
 
-  .signup-teaser {
-    position: absolute;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 22px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    color: var(--color-text-light);
-    background: var(--color-dark);
-    border: 2px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 4px solid var(--color-accent);
-    border-radius: 999px;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom;
-    user-select: none;
-  }
-
-  .signup-teaser:hover {
-    transform: translateX(-50%) translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.1);
-    border-bottom-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
-  .signup-teaser:active {
-    transform: translateX(-50%) scaleY(0.97);
-    border-bottom-width: 2px;
-    transition: all 0.06s ease;
-  }
-
-  .teaser-arrow {
-    color: var(--color-accent);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .signup-teaser:hover .teaser-arrow {
-    transform: translateY(3px);
-  }
-
-  /* ─── Pop-button base: 3D raised with thick bottom border ─── */
   .cmd {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     background: var(--color-dark);
     color: var(--color-text-light);
-    padding: 13px 18px;
-    border-radius: 12px;
+    padding: 18px 28px;
+    border-radius: var(--radius);
     font-family: var(--font-mono);
-    font-size: 0.85rem;
-    border: 2px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 4px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.9rem;
+    border: 2px solid var(--color-dark);
     cursor: pointer;
-    transition: all 0.15s ease;
-    transform-origin: bottom;
-    user-select: none;
+    transition: all 0.2s;
     position: relative;
   }
 
   .cmd:hover {
-    background: #1a1a1a;
-    border-color: rgba(255, 255, 255, 0.14);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .cmd:active {
-    border-bottom-width: 2px;
-    transform: scaleY(0.97);
-    transition: all 0.06s ease;
-  }
-
-  /* ─── Claude Code prompt: light pop card with accent bottom edge ─── */
-  .cmd.cmd-prompt {
-    background: white;
+    background: transparent;
     color: var(--color-dark);
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-bottom: 4px solid var(--color-accent);
-  }
-
-  .cmd.cmd-prompt:hover {
-    background: #fcfcfc;
-    border-color: rgba(0, 0, 0, 0.12);
-    border-bottom-color: var(--color-accent);
-    color: var(--color-dark);
-  }
-
-  .cmd.cmd-prompt:active {
-    border-bottom-width: 2px;
-    transform: scaleY(0.97);
-    transition: all 0.06s ease;
   }
 
   .cmd-dollar { color: var(--color-accent); font-weight: 700; }
-  .cmd-copy { opacity: 0.35; transition: opacity 0.15s; flex-shrink: 0; }
-  .cmd:hover .cmd-copy { opacity: 0.8; }
-
-  .cmd.cmd-prompt .cmd-copy {
-    opacity: 0.18;
-    color: var(--color-muted);
-  }
-  .cmd.cmd-prompt:hover .cmd-copy {
-    opacity: 0.45;
-  }
+  .cmd-copy { opacity: 0.4; transition: opacity 0.15s; }
+  .cmd:hover .cmd-copy { opacity: 1; }
 
   .cmd-toast {
     position: absolute;
-    top: -32px;
+    top: -30px;
     right: 0;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-family: var(--font-body);
     font-weight: 600;
     color: var(--color-accent);
     opacity: 0;
     transform: translateY(4px);
     transition: all 0.2s;
-    pointer-events: none;
   }
 
   .cmd.copied .cmd-toast { opacity: 1; transform: translateY(0); }
+
+  .gh-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    padding: 8px 14px;
+    border: 1px solid var(--color-card-border);
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .gh-cta:hover {
+    color: var(--color-dark);
+    border-color: var(--color-dark);
+    background: rgba(0, 0, 0, 0.03);
+  }
 
   .cmd-platforms {
     margin-top: 14px;
@@ -1166,43 +917,18 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     font-family: var(--font-mono);
     font-size: 0.58rem;
     font-weight: 600;
-    
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     padding: 2px 7px;
     border-radius: 4px;
     margin-bottom: 6px;
   }
   
   .s-name {
-    font-family: var(--font-heading);
-    font-size: 0.92rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--color-dark);
     display: block;
-    line-height: 1.3;
-  }
-
-  /* Routine chips: visually distinct from skills */
-  .s-chip-routine {
-    background: linear-gradient(135deg, rgba(232, 168, 56, 0.06), rgba(232, 168, 56, 0.02));
-    border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-card-border));
-  }
-
-  .s-chip-routine:hover {
-    border-color: var(--color-accent);
-    background: linear-gradient(135deg, rgba(232, 168, 56, 0.12), rgba(232, 168, 56, 0.04));
-  }
-
-  .s-cat-routine {
-    display: inline-flex !important;
-    align-items: center;
-    gap: 5px;
-    color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  }
-
-  .s-routine-icon {
-    flex-shrink: 0;
   }
   
   .browse-row {
@@ -1239,7 +965,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .hero {
       height: auto;
       min-height: 100dvh;
-      
     }
     .hero-split {
       display: flex;
@@ -1259,9 +984,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     #rotating-text { font-size: 1.15rem; }
     .hero-cta { margin-top: 16px; }
     .hero-cta-row { gap: 10px; display: block; width: 100%; }
-    .cmd { padding: 12px 14px; gap: 8px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; max-width: 100%; width: 100%; box-sizing: border-box; overflow: hidden; border-bottom-width: 4px; }
-    .cmd:active { border-bottom-width: 2px; }
-    .cmd.cmd-prompt { border-bottom: 4px solid var(--color-accent); }
+    .cmd { padding: 12px 14px; gap: 6px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; max-width: 100%; width: 100%; box-sizing: border-box; overflow: hidden; }
     .cmd code { white-space: nowrap; font-size: clamp(0.48rem, 3.2vw, 0.85rem); text-align: left; overflow: hidden; text-overflow: ellipsis; flex: 1; }
     .gh-cta { padding: 12px 16px; font-size: 0.78rem; }
     .cmd-platforms { font-size: 0.72rem; margin-top: 8px; }
@@ -1270,7 +993,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     
     .hero-right {
       flex: 0 0 auto;
-      margin-top: 48px; width: 100%; box-sizing: border-box; overflow: hidden;
+      margin-top: 20px; width: 100%; box-sizing: border-box; overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -1310,385 +1033,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-chip { padding: 16px 20px; border-radius: 12px; }
     .s-name { font-size: 1rem; white-space: nowrap; }
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
-    .browse-link { display: inline-flex; order: -1; margin-top: 10px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; padding: 10px 16px; border: 1.5px solid var(--color-dark); border-radius: 8px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
+    .browse-link { display: inline-flex; order: -1; margin-top: 0px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600; padding: 12px 20px; border: 2px solid var(--color-dark); border-radius: 10px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
   }
-
-  /* ROUTINES PREVIEW */
-  .routines-preview {
-    padding: 100px 40px 60px;
-  }
-
-  .routines-preview-inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 64px;
-    align-items: center;
-  }
-
-  .routines-intro {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .routines-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-  }
-
-  .routines-heading {
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin: 0;
-    font-weight: 800;
-  }
-
-  .routines-accent {
-    color: var(--color-muted);
-  }
-
-  .routines-lede {
-    font-size: 1.02rem;
-    line-height: 1.6;
-    color: var(--color-muted);
-    margin: 0;
-    max-width: 460px;
-  }
-
-  .routines-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    width: fit-content;
-    margin-top: 8px;
-    padding: 12px 22px;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--color-text-light);
-    background: var(--color-dark);
-    border: 2px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 4px solid var(--color-accent);
-    border-radius: 100px;
-    text-decoration: none;
-    transition: all 0.15s ease;
-    transform-origin: bottom;
-    user-select: none;
-  }
-
-  .routines-cta:hover {
-    background: #1a1a1a;
-    border-color: rgba(255, 255, 255, 0.1);
-    border-bottom-color: var(--color-accent);
-    color: var(--color-accent);
-    transform: translateY(-2px);
-  }
-
-  .routines-cta:active {
-    border-bottom-width: 2px;
-    transform: scaleY(0.97);
-    transition: all 0.06s ease;
-  }
-
-  .routines-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--color-card-border);
-    border: 1px solid var(--color-card-border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .routine-preview-card {
-    background: var(--color-card);
-    padding: 26px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: background 0.2s, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .routine-preview-card:hover {
-    background: color-mix(in srgb, var(--color-accent) 4%, var(--color-card));
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  }
-
-  .routine-preview-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    color: var(--color-muted);
-  }
-
-  .routine-preview-num {
-    font-weight: 700;
-    color: var(--color-accent);
-    letter-spacing: 0.05em;
-  }
-
-  .routine-preview-when {
-    text-align: right;
-    font-weight: 500;
-  }
-
-  .routine-preview-title {
-    font-size: 1.1rem;
-    letter-spacing: -0.02em;
-    margin: 0;
-    line-height: 1.25;
-    font-weight: 700;
-  }
-
-  .routine-preview-tagline {
-    font-size: 0.86rem;
-    line-height: 1.5;
-    color: var(--color-muted);
-    margin: 0;
-  }
-
-  @media (max-width: 900px) {
-    .routines-preview { padding: 64px 20px 40px; }
-    .routines-preview-inner { grid-template-columns: 1fr; gap: 36px; }
-    .routines-grid { grid-template-columns: 1fr; }
-    .routine-preview-card { padding: 22px 20px; }
-  }
-
-  /* SIGNUP SECTION */
-  .signup {
-    padding: 100px 40px 120px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .signup-card {
-    background: var(--color-dark);
-    border-radius: 24px;
-    padding: 60px 64px;
-    max-width: 680px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .signup-eyebrow {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-accent);
-    background: rgba(232, 168, 56, 0.12);
-    border: 1px solid rgba(232, 168, 56, 0.25);
-    padding: 4px 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-  }
-
-  .signup-heading {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    color: var(--color-text-light);
-    margin-bottom: 14px;
-  }
-
-  .signup-desc {
-    font-size: 1rem;
-    color: rgba(250, 250, 250, 0.55);
-    line-height: 1.6;
-    max-width: 420px;
-    margin: 0 auto 32px;
-  }
-
-  .signup-row {
-    display: flex;
-    gap: 10px;
-    max-width: 460px;
-    margin: 0 auto;
-  }
-
-  .signup-input {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 16px 20px;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-    outline: none;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    min-width: 0;
-  }
-
-  .signup-input::placeholder { color: rgba(250, 250, 250, 0.4); }
-
-  .signup-input:focus {
-    border-color: var(--color-accent);
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 0 0 2px rgba(232, 168, 56, 0.2);
-  }
-
-  .signup-btn {
-    background: var(--color-accent);
-    color: var(--color-dark);
-    border: 2px solid rgba(0, 0, 0, 0.05);
-    border-bottom: 4px solid rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    padding: 14px 28px;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s ease;
-    transform-origin: bottom;
-    user-select: none;
-  }
-
-  .signup-btn:hover {
-    background: #dea030;
-    border-bottom-color: rgba(0, 0, 0, 0.2);
-  }
-  .signup-btn:active { border-bottom-width: 2px; transform: scaleY(0.97); transition: all 0.06s ease; }
-  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; border-bottom-width: 4px; }
-
-  .signup-fine {
-    margin-top: 14px;
-    font-size: 0.78rem;
-    color: rgba(250, 250, 250, 0.3);
-  }
-
-  .signup-success {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: var(--color-accent);
-    font-family: var(--font-heading);
-    font-size: 1.05rem;
-    font-weight: 600;
-    padding: 12px 0 4px;
-    opacity: 0;
-    transition: opacity 0.4s;
-  }
-
-  .signup-success.visible {
-    display: flex;
-    opacity: 1;
-  }
-
-  /* Step transitions */
-  #signup-step1 {
-    transition: opacity 0.25s, transform 0.25s;
-  }
-  #signup-step1.done {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  #signup-step1.hidden {
-    display: none;
-  }
-
-  .signup-step2 {
-    display: none;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.3s, transform 0.3s;
-  }
-  .signup-step2.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .step2-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    color: var(--color-accent);
-    font-weight: 600;
-    margin-bottom: 20px;
-  }
-
-  .step2-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 460px;
-    margin: 0 auto;
-  }
-
-  .step2-submit {
-    width: 100%;
-    padding: 14px;
-  }
-
-  .skip-link {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-top: 14px;
-    font-size: 0.78rem;
-    color: rgba(250, 250, 250, 0.3);
-    transition: color 0.15s;
-  }
-  .skip-link:hover { color: rgba(250, 250, 250, 0.6); }
-
-  @media (max-width: 768px) {
-    .signup { padding: 60px 24px 80px; }
-    .signup-card { padding: 40px 28px; }
-    .signup-row { flex-direction: column; }
-    .signup-btn { width: 100%; padding: 16px; }
-  }
-
-
-  .mobile-teaser {
-    display: none;
-  }
-  @media (max-width: 768px) {
-    .signup-teaser:not(.mobile-teaser) {
-      display: none !important;
-    }
-    .mobile-teaser {
-      display: inline-flex;
-      position: relative;
-      bottom: auto;
-      left: auto;
-      transform: none;
-      align-self: center;
-      margin-top: 40px;
-      margin-bottom: 20px;
-      z-index: 10;
-    }
-  }
-
-  .signup-eyebrow-flex {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .signup-eyebrow-logo {
-    filter: brightness(0) saturate(100%) invert(77%) sepia(35%) saturate(3015%) hue-rotate(345deg) brightness(96%) contrast(88%);
-    height: 14px;
-    width: auto;
-    opacity: 0.85;
-    transform: translateY(-1px);
-  }
-
 </style>
