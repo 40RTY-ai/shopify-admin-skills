@@ -6,49 +6,59 @@ Cross-reference table mapping every Shopify Admin GraphQL operation used across 
 
 | Operation | Type | API Version | Skills Using It |
 |-----------|------|-------------|-----------------|
-| abandonedCheckouts | query | 2025-01 | marketing/abandoned-cart-recovery, conversion-optimization/checkout-abandonment-report |
-| articles | query | 2025-01 | store-management/page-content-audit |
-| collection | query | 2025-01 | merchandising/collection-reorganization |
-| collectionReorderProducts | mutation | 2025-01 | merchandising/collection-reorganization |
-| collections | query | 2025-01 | merchandising/seo-metadata-audit, merchandising/collection-membership-audit |
-| companies | query | 2025-01 | customer-ops/b2b-company-overview |
-| companyLocations | query | 2025-01 | customer-ops/b2b-company-overview |
-| customer | query | 2025-01 | conversion-optimization/gift-card-issuance |
-| customerUpdate | mutation | 2025-01 | customer-ops/customer-note-bulk-annotator |
-| customers | query | 2025-01 | marketing/customer-win-back, marketing/loyalty-segment-export, finance/average-order-value-trends, customer-ops/duplicate-customer-finder, customer-ops/customer-note-bulk-annotator, customer-ops/marketing-consent-report, customer-ops/customer-spend-tier-tagger, customer-ops/customer-cohort-analysis, order-intelligence/repeat-purchase-rate |
-| discountCodeBulkCreate | mutation | 2025-01 | marketing/abandoned-cart-recovery |
-| discountCodeDelete | mutation | 2025-01 | store-management/discount-hygiene-cleanup |
-| discountNodes | query | 2025-01 | conversion-optimization/discount-ab-analysis, store-management/discount-hygiene-cleanup |
-| draftOrderCreate | mutation | 2025-01 | customer-support/refund-and-reorder |
-| draftOrderDelete | mutation | 2025-01 | store-management/draft-order-cleanup |
-| draftOrders | query | 2025-01 | store-management/draft-order-cleanup |
-| fulfillmentCreate | mutation | 2025-01 | fulfillment-ops/bulk-fulfillment-creation |
-| fulfillmentOrderHold | mutation | 2025-01 | fulfillment-ops/order-hold-and-release, order-intelligence/high-risk-order-tagger |
-| fulfillmentOrderMove | mutation | 2025-01 | fulfillment-ops/fulfillment-location-routing |
-| fulfillmentOrderReleaseHold | mutation | 2025-01 | fulfillment-ops/order-hold-and-release |
-| fulfillmentOrders | query | 2025-01 | fulfillment-ops/fulfillment-status-digest, fulfillment-ops/bulk-fulfillment-creation, fulfillment-ops/fulfillment-location-routing, fulfillment-ops/delivery-time-analysis, fulfillment-ops/split-shipment-planner, finance/revenue-by-location-report |
-| fulfillmentOrderSplit | mutation | 2025-01 | fulfillment-ops/split-shipment-planner |
-| fulfillmentUpdate | mutation | 2025-01 | fulfillment-ops/tracking-update-bulk |
-| giftCardCreate | mutation | 2025-01 | conversion-optimization/gift-card-issuance |
-| giftCards | query | 2025-01 | finance/gift-card-balance-report |
-| inventoryAdjustQuantities | mutation | 2025-01 | merchandising/inventory-adjustment, merchandising/inventory-transfer-between-locations |
-| inventoryItems | query | 2025-01 | merchandising/multi-location-inventory-audit, merchandising/dead-stock-identifier, merchandising/inventory-transfer-between-locations, merchandising/stock-velocity-report, merchandising/inventory-valuation-report |
-| locations | query | 2025-01 | merchandising/multi-location-inventory-audit, merchandising/inventory-transfer-between-locations, merchandising/inventory-valuation-report, finance/revenue-by-location-report |
-| metafieldsDelete | mutation | 2025-01 | merchandising/metafield-bulk-update |
-| metafieldsSet | mutation | 2025-01 | merchandising/metafield-bulk-update |
-| order | query | 2025-01 | customer-support/refund-and-reorder, customer-support/address-correction, fulfillment-ops/cancel-and-restock, customer-support/return-initiation, fulfillment-ops/tracking-update-bulk |
-| orderCancel | mutation | 2025-01 | fulfillment-ops/cancel-and-restock |
-| orders | query | 2025-01 | customer-support/order-lookup-and-summary, conversion-optimization/discount-ab-analysis, conversion-optimization/top-product-performance, fulfillment-ops/fulfillment-status-digest, fulfillment-ops/order-hold-and-release, customer-support/wismo-bulk-status-report, fulfillment-ops/delivery-time-analysis, returns/return-reason-analysis, returns/exchange-vs-refund-ratio, returns/return-processing-sla, finance/refund-rate-analysis, finance/revenue-by-location-report, finance/average-order-value-trends, finance/tax-liability-summary, finance/sales-by-channel-report, finance/shipping-cost-analysis, merchandising/dead-stock-identifier, merchandising/stock-velocity-report, customer-ops/customer-spend-tier-tagger, customer-ops/customer-cohort-analysis, order-intelligence/order-risk-report, order-intelligence/high-risk-order-tagger, order-intelligence/repeat-purchase-rate, order-intelligence/order-notes-and-attributes-report |
-| orderUpdate | mutation | 2025-01 | customer-support/address-correction |
-| pages | query | 2025-01 | merchandising/seo-metadata-audit, store-management/page-content-audit |
-| productUpdate | mutation | 2025-01 | merchandising/product-lifecycle-manager |
-| productVariants | query | 2025-01 | merchandising/low-inventory-restock, merchandising/inventory-adjustment, merchandising/duplicate-sku-barcode-detector, merchandising/dead-stock-identifier, merchandising/stock-velocity-report, merchandising/inventory-valuation-report |
-| productVariantsBulkUpdate | mutation | 2025-01 | merchandising/bulk-price-adjustment, merchandising/variant-option-normalizer |
-| products | query | 2025-01 | merchandising/bulk-price-adjustment, merchandising/product-tag-bulk-update, merchandising/product-lifecycle-manager, merchandising/seo-metadata-audit, merchandising/product-image-audit, merchandising/metafield-bulk-update, merchandising/collection-membership-audit, merchandising/variant-option-normalizer, merchandising/product-data-completeness-score, store-management/publication-channel-audit |
-| publications | query | 2025-01 | store-management/publication-channel-audit |
-| refundCreate | mutation | 2025-01 | customer-support/refund-and-reorder |
-| returnCreate | mutation | 2025-01 | customer-support/return-initiation |
-| returns | query | 2025-01 | returns/return-reason-analysis, returns/exchange-vs-refund-ratio, returns/return-processing-sla |
-| tagsAdd | mutation | 2025-01 | marketing/abandoned-cart-recovery, marketing/customer-win-back, marketing/loyalty-segment-export, merchandising/product-tag-bulk-update, customer-ops/customer-spend-tier-tagger, order-intelligence/high-risk-order-tagger |
-| tagsRemove | mutation | 2025-01 | merchandising/product-tag-bulk-update |
-| urlRedirects | query | 2025-01 | store-management/url-redirect-audit |
+| abandonedCheckouts | query | 2025-01 | conversion-optimization/shopify-admin-checkout-abandonment-report, marketing/shopify-admin-abandoned-cart-recovery |
+| articles | query | 2025-01 | store-management/shopify-admin-file-storage-audit, store-management/shopify-admin-page-content-audit |
+| collection | query | 2025-01 | merchandising/shopify-admin-collection-reorganization |
+| collectionReorderProducts | mutation | 2025-01 | merchandising/shopify-admin-collection-reorganization |
+| collections | query | 2025-01 | merchandising/shopify-admin-collection-membership-audit, merchandising/shopify-admin-seo-metadata-audit |
+| companies | query | 2025-01 | customer-ops/shopify-admin-b2b-company-overview |
+| companyLocations | query | 2025-01 | customer-ops/shopify-admin-b2b-company-overview |
+| customer | query | 2025-01 | conversion-optimization/shopify-admin-gift-card-issuance, customer-support/shopify-admin-customer-merge, customer-support/shopify-admin-customer-timeline-export |
+| customerMerge | mutation | 2025-01 | customer-support/shopify-admin-customer-merge |
+| customers | query | 2025-01 | customer-ops/shopify-admin-churn-risk-scorer, customer-ops/shopify-admin-customer-cohort-analysis, customer-ops/shopify-admin-customer-note-bulk-annotator, customer-ops/shopify-admin-customer-spend-tier-tagger, customer-ops/shopify-admin-duplicate-customer-finder, customer-ops/shopify-admin-email-deliverability-audit, customer-ops/shopify-admin-marketing-consent-report, customer-ops/shopify-admin-rfm-customer-segmentation, customer-support/shopify-admin-bulk-customer-tag-update, finance/shopify-admin-average-order-value-trends, marketing/shopify-admin-customer-win-back, marketing/shopify-admin-loyalty-segment-export, marketing/shopify-admin-vip-customer-identifier, order-intelligence/shopify-admin-repeat-purchase-rate, returns/shopify-admin-return-fraud-detector |
+| customerUpdate | mutation | 2025-01 | customer-ops/shopify-admin-chargeback-watchlist-tagger, customer-ops/shopify-admin-customer-note-bulk-annotator, customer-support/shopify-admin-bulk-customer-tag-update, customer-support/shopify-admin-customer-merge, marketing/shopify-admin-vip-customer-identifier |
+| deliveryProfiles | query | 2025-01 | fulfillment-ops/shopify-admin-shipping-rate-audit |
+| discountCodeBasicCreate | mutation | 2025-01 | marketing/shopify-admin-promo-code-bulk-generator |
+| discountCodeBulkCreate | mutation | 2025-01 | marketing/shopify-admin-abandoned-cart-recovery |
+| discountCodeDelete | mutation | 2025-01 | store-management/shopify-admin-discount-hygiene-cleanup |
+| discountNodes | query | 2025-01 | conversion-optimization/shopify-admin-discount-ab-analysis, conversion-optimization/shopify-admin-discount-roi-calculator, store-management/shopify-admin-discount-hygiene-cleanup |
+| draftOrderCreate | mutation | 2025-01 | customer-support/shopify-admin-refund-and-reorder |
+| draftOrderDelete | mutation | 2025-01 | store-management/shopify-admin-draft-order-cleanup |
+| draftOrders | query | 2025-01 | store-management/shopify-admin-draft-order-cleanup |
+| files | query | 2025-01 | store-management/shopify-admin-file-storage-audit |
+| fulfillmentCreate | mutation | 2025-01 | fulfillment-ops/shopify-admin-bulk-fulfillment-creation |
+| fulfillmentOrderHold | mutation | 2025-01 | fulfillment-ops/shopify-admin-order-hold-and-release, order-intelligence/shopify-admin-high-risk-order-tagger |
+| fulfillmentOrderMove | mutation | 2025-01 | fulfillment-ops/shopify-admin-fulfillment-location-routing |
+| fulfillmentOrderReleaseHold | mutation | 2025-01 | fulfillment-ops/shopify-admin-order-hold-and-release |
+| fulfillmentOrders | query | 2025-01 | finance/shopify-admin-revenue-by-location-report, fulfillment-ops/shopify-admin-bulk-fulfillment-creation, fulfillment-ops/shopify-admin-delivery-time-analysis, fulfillment-ops/shopify-admin-fulfillment-location-routing, fulfillment-ops/shopify-admin-fulfillment-status-digest, fulfillment-ops/shopify-admin-split-shipment-planner |
+| fulfillmentOrderSplit | mutation | 2025-01 | fulfillment-ops/shopify-admin-split-shipment-planner |
+| fulfillments | query | 2025-01 | fulfillment-ops/shopify-admin-carrier-performance-comparison |
+| fulfillmentUpdate | mutation | 2025-01 | fulfillment-ops/shopify-admin-tracking-update-bulk |
+| giftCardCreate | mutation | 2025-01 | conversion-optimization/shopify-admin-gift-card-issuance |
+| giftCards | query | 2025-01 | finance/shopify-admin-gift-card-balance-report, finance/shopify-admin-gift-card-liability-report |
+| inventoryAdjustQuantities | mutation | 2025-01 | merchandising/shopify-admin-inventory-adjustment, merchandising/shopify-admin-inventory-transfer-between-locations, returns/shopify-admin-restock-on-return |
+| inventoryItems | query | 2025-01 | finance/shopify-admin-profit-margin-calculator, fulfillment-ops/shopify-admin-bundle-availability-check, merchandising/shopify-admin-cogs-completeness-audit, merchandising/shopify-admin-dead-stock-identifier, merchandising/shopify-admin-demand-forecast-reorder, merchandising/shopify-admin-inventory-aging-report, merchandising/shopify-admin-inventory-transfer-between-locations, merchandising/shopify-admin-inventory-valuation-report, merchandising/shopify-admin-multi-location-inventory-audit, merchandising/shopify-admin-stock-velocity-report, returns/shopify-admin-return-cost-attribution |
+| inventoryLevels | query | 2025-01 | merchandising/shopify-admin-demand-forecast-reorder |
+| locations | query | 2025-01 | finance/shopify-admin-revenue-by-location-report, merchandising/shopify-admin-inventory-transfer-between-locations, merchandising/shopify-admin-inventory-valuation-report, merchandising/shopify-admin-multi-location-inventory-audit |
+| metafieldDefinitions | query | 2025-01 | store-management/shopify-admin-metafield-definition-audit |
+| metafieldsDelete | mutation | 2025-01 | merchandising/shopify-admin-metafield-bulk-update |
+| metafieldsSet | mutation | 2025-01 | merchandising/shopify-admin-metafield-bulk-update |
+| order | query | 2025-01 | customer-support/shopify-admin-address-correction, customer-support/shopify-admin-refund-and-reorder, customer-support/shopify-admin-return-initiation, fulfillment-ops/shopify-admin-cancel-and-restock, fulfillment-ops/shopify-admin-tracking-update-bulk |
+| orderCancel | mutation | 2025-01 | fulfillment-ops/shopify-admin-cancel-and-restock |
+| orders | query | 2025-01 | conversion-optimization/shopify-admin-cross-sell-opportunity-finder, conversion-optimization/shopify-admin-discount-ab-analysis, conversion-optimization/shopify-admin-discount-roi-calculator, conversion-optimization/shopify-admin-frequently-bought-together, conversion-optimization/shopify-admin-gift-message-extraction, conversion-optimization/shopify-admin-post-purchase-survey-trigger, conversion-optimization/shopify-admin-top-product-performance, customer-ops/shopify-admin-chargeback-watchlist-tagger, customer-ops/shopify-admin-churn-risk-scorer, customer-ops/shopify-admin-customer-acquisition-cost-by-source, customer-ops/shopify-admin-customer-cohort-analysis, customer-ops/shopify-admin-customer-spend-tier-tagger, customer-ops/shopify-admin-rfm-customer-segmentation, customer-support/shopify-admin-customer-timeline-export, customer-support/shopify-admin-order-lookup-and-summary, customer-support/shopify-admin-wismo-bulk-status-report, finance/shopify-admin-average-order-value-trends, finance/shopify-admin-discount-cost-trend, finance/shopify-admin-payout-reconciliation, finance/shopify-admin-profit-margin-calculator, finance/shopify-admin-refund-rate-analysis, finance/shopify-admin-revenue-by-location-report, finance/shopify-admin-sales-by-channel-report, finance/shopify-admin-shipping-cost-analysis, finance/shopify-admin-tax-liability-summary, fulfillment-ops/shopify-admin-carrier-performance-comparison, fulfillment-ops/shopify-admin-delivery-time-analysis, fulfillment-ops/shopify-admin-fulfillment-status-digest, fulfillment-ops/shopify-admin-order-hold-and-release, marketing/shopify-admin-referral-source-attribution, marketing/shopify-admin-vip-customer-identifier, merchandising/shopify-admin-dead-stock-identifier, merchandising/shopify-admin-demand-forecast-reorder, merchandising/shopify-admin-inventory-aging-report, merchandising/shopify-admin-price-elasticity-analyzer, merchandising/shopify-admin-stock-velocity-report, order-intelligence/shopify-admin-automated-order-tagger, order-intelligence/shopify-admin-high-risk-order-tagger, order-intelligence/shopify-admin-order-attribution-report, order-intelligence/shopify-admin-order-cancellation-analysis, order-intelligence/shopify-admin-order-notes-and-attributes-report, order-intelligence/shopify-admin-order-risk-report, order-intelligence/shopify-admin-partial-refund-pattern-detector, order-intelligence/shopify-admin-repeat-purchase-rate, returns/shopify-admin-exchange-vs-refund-ratio, returns/shopify-admin-return-cost-attribution, returns/shopify-admin-return-fraud-detector, returns/shopify-admin-return-processing-sla, returns/shopify-admin-return-reason-analysis |
+| orderUpdate | mutation | 2025-01 | customer-support/shopify-admin-address-correction, order-intelligence/shopify-admin-automated-order-tagger |
+| pages | query | 2025-01 | merchandising/shopify-admin-seo-metadata-audit, store-management/shopify-admin-file-storage-audit, store-management/shopify-admin-page-content-audit |
+| products | query | 2025-01 | conversion-optimization/shopify-admin-cross-sell-opportunity-finder, conversion-optimization/shopify-admin-frequently-bought-together, fulfillment-ops/shopify-admin-bundle-availability-check, merchandising/shopify-admin-bulk-price-adjustment, merchandising/shopify-admin-collection-membership-audit, merchandising/shopify-admin-metafield-bulk-update, merchandising/shopify-admin-price-elasticity-analyzer, merchandising/shopify-admin-product-data-completeness-score, merchandising/shopify-admin-product-image-audit, merchandising/shopify-admin-product-lifecycle-manager, merchandising/shopify-admin-product-tag-bulk-update, merchandising/shopify-admin-seo-metadata-audit, merchandising/shopify-admin-variant-option-normalizer, merchandising/shopify-admin-vendor-consolidation, store-management/shopify-admin-file-storage-audit, store-management/shopify-admin-publication-channel-audit |
+| productUpdate | mutation | 2025-01 | merchandising/shopify-admin-product-lifecycle-manager |
+| productVariants | query | 2025-01 | finance/shopify-admin-profit-margin-calculator, fulfillment-ops/shopify-admin-bundle-availability-check, merchandising/shopify-admin-cogs-completeness-audit, merchandising/shopify-admin-compare-at-price-cleanup, merchandising/shopify-admin-dead-stock-identifier, merchandising/shopify-admin-demand-forecast-reorder, merchandising/shopify-admin-duplicate-sku-barcode-detector, merchandising/shopify-admin-inventory-adjustment, merchandising/shopify-admin-inventory-aging-report, merchandising/shopify-admin-inventory-valuation-report, merchandising/shopify-admin-low-inventory-restock, merchandising/shopify-admin-price-elasticity-analyzer, merchandising/shopify-admin-stock-velocity-report |
+| productVariantsBulkUpdate | mutation | 2025-01 | merchandising/shopify-admin-bulk-price-adjustment, merchandising/shopify-admin-compare-at-price-cleanup, merchandising/shopify-admin-variant-option-normalizer |
+| publications | query | 2025-01 | store-management/shopify-admin-publication-channel-audit |
+| refundCreate | mutation | 2025-01 | customer-support/shopify-admin-refund-and-reorder |
+| returnCreate | mutation | 2025-01 | customer-support/shopify-admin-return-initiation |
+| returns | query | 2025-01 | returns/shopify-admin-exchange-vs-refund-ratio, returns/shopify-admin-restock-on-return, returns/shopify-admin-return-cost-attribution, returns/shopify-admin-return-fraud-detector, returns/shopify-admin-return-processing-sla, returns/shopify-admin-return-reason-analysis |
+| shopifyPaymentsAccount | query | 2025-01 | finance/shopify-admin-payout-reconciliation |
+| staffMembers | query | 2025-01 | store-management/shopify-admin-staff-account-audit |
+| subscriptionContracts | query | 2025-01 | finance/shopify-admin-subscription-mrr-tracker |
+| tagsAdd | mutation | 2025-01 | customer-ops/shopify-admin-customer-spend-tier-tagger, marketing/shopify-admin-abandoned-cart-recovery, marketing/shopify-admin-customer-win-back, marketing/shopify-admin-loyalty-segment-export, merchandising/shopify-admin-product-tag-bulk-update, order-intelligence/shopify-admin-high-risk-order-tagger |
+| tagsRemove | mutation | 2025-01 | merchandising/shopify-admin-product-tag-bulk-update |
+| urlRedirects | query | 2025-01 | store-management/shopify-admin-url-redirect-audit |
