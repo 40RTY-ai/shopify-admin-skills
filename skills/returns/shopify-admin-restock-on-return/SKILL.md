@@ -59,10 +59,7 @@ query ReturnsForRestock($query: String!, $after: String) {
         name
         status
         closedAt
-        order {
-          id
-          name
-        }
+        order { id name }
         returnLineItems(first: 50) {
           edges {
             node {
@@ -77,10 +74,7 @@ query ReturnsForRestock($query: String!, $after: String) {
                   variant {
                     id
                     sku
-                    inventoryItem {
-                      id
-                      tracked
-                    }
+                    inventoryItem { id tracked }
                   }
                 }
               }
@@ -91,22 +85,13 @@ query ReturnsForRestock($query: String!, $after: String) {
           edges {
             node {
               id
-              reverseDeliveries(first: 5) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
+              reverseDeliveries(first: 5) { edges { node { id } } }
             }
           }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -123,20 +108,11 @@ mutation RestockOnReturn($input: InventoryAdjustQuantitiesInput!) {
         name
         delta
         quantityAfterChange
-        item {
-          id
-          sku
-        }
-        location {
-          id
-          name
-        }
+        item { id sku }
+        location { id name }
       }
     }
-    userErrors {
-      field
-      message
-    }
+    userErrors { field message }
   }
 }
 ```

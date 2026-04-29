@@ -13,7 +13,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Surfaces customers whose return behavior deviates statistically from the store baseline so support and operations can review them before approving the next return. Three abuse patterns are detected: (1) high return rate (≥40% of orders returned), (2) wardrobing — full-order returns within a short window after delivery, and (3) serial returners — many returns relative to peers, including across separated orders. Read-only — no mutations. Output is a candidate list, not an automatic block list.
+Surfaces customers whose return behavior deviates statistically from the store baseline so support and ops can review them before approving the next return. Three patterns are detected: (1) high return rate (≥40% of orders returned), (2) wardrobing — full-order returns shortly after delivery, (3) serial returners — many returns over time. Read-only. Output is a candidate list, not an automatic block list.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_returns,read_customers`
@@ -33,31 +33,23 @@ Surfaces customers whose return behavior deviates statistically from the store b
 
 ## Safety
 
-> ℹ️ Read-only skill — no mutations are executed. Safe to run at any time. Output flags candidates for human review only — never block or restrict customers automatically based on this report. False positives are common (genuine size issues, address-correction returns, etc.); investigate before action.
+> ℹ️ Read-only skill — no mutations are executed. Output flags candidates for human review only — never block or restrict customers automatically. False positives are common (genuine size issues, address-correction returns, etc.); investigate before action.
 
 ## Workflow Steps
 
 1. **OPERATION:** `orders` — query
-   **Inputs:** `query: "created_at:>='<NOW - days_back days>'"`, `first: 250`, select `id`, `customer { id }`, `displayFulfillmentStatus`, `processedAt`, `fulfillments { deliveredAt, deliveryStatus }`, `totalPriceSet`, `lineItems(first: 50) { quantity }`, pagination cursor
-   **Expected output:** All orders in window grouped by `customer.id`; paginate until done
+   **Inputs:** `query: "created_at:>='<NOW - days_back days>'"`, `first: 250`, select `id`, `customer { id }`, `processedAt`, `fulfillments { deliveredAt }`, `totalPriceSet`, `lineItems { quantity }`, paginate
+   **Expected output:** All orders in window grouped by `customer.id`
 
 2. **OPERATION:** `returns` — query
-   **Inputs:** `query: "created_at:>='<NOW - days_back days>'"`, `first: 250`, select `id`, `status`, `createdAt`, `order { id customer { id } }`, `returnLineItems(first: 50) { node { quantity } }`, `totalQuantity`, pagination cursor
-   **Expected output:** All returns in window joined to their order and customer
+   **Inputs:** Same date filter, `first: 250`, select `id`, `createdAt`, `order { customer { id } }`, `returnLineItems { quantity }`, `totalQuantity`
+   **Expected output:** All returns in window joined to customer
 
 3. **OPERATION:** `customers` — query
-   **Inputs:** For flagged candidate IDs from step 4, batch via `query: "id:<ids>"`, select `displayName`, `defaultEmailAddress { emailAddress }`, `numberOfOrders`, `amountSpent`, `tags`
-   **Expected output:** Identifiable contact data for the candidates list
+   **Inputs:** For flagged candidates only: `query: "id:<ids>"`, select identity fields and `tags`
+   **Expected output:** Contact data for the candidates list
 
-4. Compute per-customer metrics over the window:
-   - `total_orders` = count of orders with `customer.id`
-   - `total_returns` = count of distinct returns linked to that customer
-   - `return_rate` = `total_returns` / `total_orders`
-   - `wardrobing_count` = number of returns initiated within `wardrobing_window_days` of delivery where `Σ returnLineItems.quantity ≥ Σ lineItems.quantity` (full-order return)
-   - Flag rules:
-     - `high_return_rate` if `total_orders >= min_orders` AND `return_rate >= return_rate_threshold`
-     - `wardrobing` if `wardrobing_count >= 2`
-     - `serial_returner` if `total_returns >= serial_threshold`
+4. Per customer compute `total_orders`, `total_returns`, `return_rate`, `wardrobing_count` (returns within `wardrobing_window_days` of delivery where Σ return qty ≥ Σ order qty). Flag rules: `high_return_rate` (orders ≥ `min_orders` AND rate ≥ `return_rate_threshold`), `wardrobing` (count ≥ 2), `serial_returner` (returns ≥ `serial_threshold`).
 
 ## GraphQL Operations
 
@@ -71,19 +63,10 @@ query OrdersForReturnFraud($query: String!, $after: String) {
         name
         processedAt
         displayFulfillmentStatus
-        totalPriceSet {
-          shopMoney { amount currencyCode }
-        }
-        customer {
-          id
-        }
+        totalPriceSet { shopMoney { amount currencyCode } }
+        customer { id }
         lineItems(first: 50) {
-          edges {
-            node {
-              id
-              quantity
-            }
-          }
+          edges { node { id quantity } }
         }
         fulfillments {
           deliveredAt
@@ -92,10 +75,7 @@ query OrdersForReturnFraud($query: String!, $after: String) {
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -110,28 +90,13 @@ query ReturnsForFraud($query: String!, $after: String) {
         status
         createdAt
         totalQuantity
-        order {
-          id
-          name
-          customer {
-            id
-          }
-        }
+        order { id name customer { id } }
         returnLineItems(first: 50) {
-          edges {
-            node {
-              id
-              quantity
-              returnReason
-            }
-          }
+          edges { node { id quantity returnReason } }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -146,15 +111,10 @@ query CustomerContactBatch($query: String!) {
         displayName
         firstName
         lastName
-        defaultEmailAddress {
-          emailAddress
-        }
+        defaultEmailAddress { emailAddress }
         phone
         numberOfOrders
-        amountSpent {
-          amount
-          currencyCode
-        }
+        amountSpent { amount currencyCode }
         tags
       }
     }
@@ -227,13 +187,13 @@ CSV file `return_fraud_candidates_<YYYY-MM-DD>.csv` with columns:
 | Error | Cause | Recovery |
 |-------|-------|----------|
 | `THROTTLED` | API rate limit exceeded | Wait 2 seconds, retry up to 3 times |
-| Customer is null on order | Guest checkout | Skip for fraud analysis (cannot link multiple orders to a guest reliably) |
-| Return missing `order.customer` | Order was anonymized or deleted | Skip return |
-| `deliveredAt` missing | Order has not delivered yet | Cannot evaluate wardrobing — skip that flag for the order |
+| Customer null on order | Guest checkout | Skip — cannot link multiple orders to a guest |
+| Return missing `order.customer` | Anonymized or deleted | Skip return |
+| `deliveredAt` missing | Order not yet delivered | Skip wardrobing flag for the order |
 
 ## Best Practices
 - Treat output as a review queue, never an automatic action — manually validate before tagging or restricting any account.
-- Tune `return_rate_threshold` to your category baseline. Apparel stores typically run 20–30% return rates; flagging at 40% picks out outliers. For electronics or homewares, lower the threshold to 15–20%.
-- Cross-reference with `return-reason-analysis` — if a customer's returns are concentrated on one product, the issue may be product quality, not customer abuse.
+- Tune `return_rate_threshold` to your category baseline. Apparel stores run 20–30% return rates; flagging at 40% picks outliers. For electronics or homewares, drop to 15–20%.
+- Cross-reference with `return-reason-analysis` — if returns concentrate on one product, the issue may be product quality, not abuse.
 - Pair with `customer-merge` candidates from `duplicate-customer-finder` — fraudsters often create duplicate accounts to dodge return-rate flags.
-- Run quarterly with a 12-month window for stable signal; running monthly produces noisy flags from new customers with one return.
+- Run quarterly with a 12-month window for stable signal; monthly runs produce noisy flags from new customers with one return.
