@@ -1,0 +1,368 @@
+---
+const navItems = [
+  { name: "Home", href: "https://40rty.ai?utm_source=skills.40rty.ai&utm_medium=nav&utm_campaign=skills-site", external: true },
+  { name: "The backlog", href: "https://40rty.ai/blog?utm_source=skills.40rty.ai&utm_medium=nav&utm_campaign=skills-site", external: true },
+  { name: "Find your products", href: "https://audit.40rty.ai/catalog/search?utm_source=skills.40rty.ai&utm_medium=nav&utm_campaign=skills-site", external: true },
+  { name: "Shopify skills", href: "/", active: true },
+  { name: "Login", href: "https://apps.shopify.com/fourty-ai", external: true, isButton: true },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Logo --><!-- force deploy -->
+    <a href="https://40rty.ai" class="header-logo" target="_blank" rel="noopener noreferrer">
+      <img src="/40rty-logo-black.png" alt="40rty" height="32" />
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="header-nav" aria-label="Main navigation">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`nav-link${item.active ? ' nav-link--active' : ''}${item.isButton ? ' btn-demo' : ''}`}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Mobile toggle -->
+    <div class="header-right">
+      <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
+    <div class="gh-icon-wrapper">
+      <svg class="gh-icon-gh" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      <svg class="gh-icon-star" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <span class="gh-text">Star to support us</span>
+    <span id="gh-count-container" style="display: none; align-items: center; gap: 6px; margin-left: 4px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,0.2);">
+      <span id="gh-stars"></span>
+    </span>
+  </a>
+      <button class="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="mobile-nav">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav drawer -->
+  <div id="mobile-nav" class="mobile-nav" aria-hidden="true">
+    <button class="mobile-menu-close" aria-label="Close navigation"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <nav>
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`mobile-nav-link${item.active ? ' nav-link--active' : ''}`}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+  }
+
+  .site-header.scrolled {
+    background: rgba(250, 250, 250, 0.85);
+    border-bottom-color: var(--color-card-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .header-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .header-logo img {
+    height: 32px;
+    width: auto;
+  }
+
+  .header-nav {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .nav-link {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(10, 10, 10, 0.7);
+    text-decoration: none;
+    transition: color 0.15s;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover,
+  .nav-link--active {
+    color: var(--color-dark);
+  }
+
+  .header-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-demo {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--color-dark);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-demo:hover {
+    background: #222;
+    color: #fff;
+  }
+
+  .mobile-menu-toggle:hover {
+    opacity: 0.7;
+  }
+
+  .mobile-menu-close {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--color-dark);
+    line-height: 0;
+  }
+
+  .mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--color-dark);
+    line-height: 0;
+  }
+
+  .mobile-nav {
+    display: none;
+    border-top: 1px solid var(--color-card-border);
+    background: #fff;
+    padding: 16px 24px 24px;
+  }
+
+  .mobile-nav nav {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobile-nav-link {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(10, 10, 10, 0.7);
+    text-decoration: none;
+    padding: 8px 0;
+    transition: color 0.15s;
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link.nav-link--active {
+    color: var(--color-dark);
+  }
+
+  .btn-demo--mobile {
+    display: inline-flex;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  /* Mobile breakpoint */
+  @media (max-width: 768px) {
+    .header-nav { display: none; }
+    .btn-demo:not(.btn-demo--mobile) { display: none; }
+    .mobile-menu-toggle { display: flex; }
+
+    .mobile-nav.is-open {
+      display: block;
+    }
+  }
+.gh-top {
+    /* Spell UI "Rich Button" Base */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.875rem; /* text-sm */
+    color: #fff;
+    text-decoration: none;
+    
+    /* Rich Button Gradients, Borders & Shadows */
+    background: linear-gradient(to bottom, rgba(24, 24, 27, 0.85), rgb(24, 24, 27));
+    border: 1px solid rgba(9, 9, 11, 0.35);
+    border-radius: 0.375rem;
+    box-shadow: 
+      0 4px 6px -1px rgba(9, 9, 11, 0.2), 
+      0 2px 4px -2px rgba(9, 9, 11, 0.2), 
+      inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    
+    height: 36px;
+    padding: 0.5rem 1rem;
+    transition: filter 200ms;
+  }
+
+  .gh-top:hover {
+    filter: brightness(1.1);
+  }
+
+  .gh-top:active {
+    filter: brightness(0.95);
+  }
+
+  .gh-top span {
+    position: relative;
+    text-shadow: 0 1px 0 rgb(0, 0, 0);
+  }
+
+  .gh-icon-wrapper {
+    position: relative;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gh-icon-gh, .gh-icon-star {
+    position: absolute;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .gh-icon-star {
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+    color: var(--color-accent);
+  }
+  .gh-top:hover .gh-icon-gh {
+    opacity: 0;
+    transform: scale(0.5) rotate(45deg);
+  }
+  .gh-top:hover .gh-icon-star {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  @media (max-width: 768px) {
+    .gh-top { font-size: 0.78rem; height: 32px; padding: 0.35rem 0.8rem; }
+    .gh-text { display: none; }
+  }
+</style>
+
+<script>
+  
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  const closeBtn = document.querySelector('.mobile-menu-close');
+  const mobileNav = document.getElementById('mobile-nav');
+  const header = document.querySelector('.site-header');
+
+  let focusableElements = [];
+  
+  function openMenu() {
+    mobileNav.classList.add('is-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    mobileNav.setAttribute('aria-hidden', 'false');
+    
+    focusableElements = Array.from(mobileNav.querySelectorAll('a, button'));
+    focusableElements[0]?.focus();
+    
+    document.addEventListener('keydown', trapFocus);
+  }
+  
+  function closeMenu() {
+    mobileNav.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    mobileNav.setAttribute('aria-hidden', 'true');
+    toggle.focus();
+    document.removeEventListener('keydown', trapFocus);
+  }
+
+  function trapFocus(e) {
+    const isTabPressed = e.key === 'Tab' || e.keyCode === 9;
+    if (!isTabPressed) return;
+
+    const firstEl = focusableElements[0];
+    const lastEl = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) { // shift + tab
+      if (document.activeElement === firstEl) {
+        lastEl.focus();
+        e.preventDefault();
+      }
+    } else { // tab
+      if (document.activeElement === lastEl) {
+        firstEl.focus();
+        e.preventDefault();
+      }
+    }
+  }
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = mobileNav.classList.contains('is-open');
+    isOpen ? closeMenu() : openMenu();
+  });
+  
+  closeBtn?.addEventListener('click', closeMenu);
+
+  function onScroll() {
+    if (window.scrollY > 10) {
+      header?.classList.add('scrolled');
+    } else {
+      header?.classList.remove('scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+</script>
