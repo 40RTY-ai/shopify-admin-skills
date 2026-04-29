@@ -7,6 +7,7 @@ import matter from 'gray-matter';
 const base = import.meta.env.BASE_URL;
 
 const skillsRoot = path.resolve(process.cwd(), '../skills');
+const routinesRoot = path.resolve(process.cwd(), '../routines');
 const categories = fs.readdirSync(skillsRoot).filter((d: string) =>
   fs.statSync(path.join(skillsRoot, d)).isDirectory()
 );
@@ -17,6 +18,12 @@ interface Skill {
   category: string;
   categorySlug: string;
   slug: string;
+}
+
+interface Routine {
+  id: string;
+  description: string;
+  cron: string;
 }
 
 const skills: Skill[] = [];
@@ -36,6 +43,23 @@ for (const cat of categories) {
         category: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         categorySlug: cat,
         slug: skill,
+      });
+    }
+  }
+}
+
+const routines: Routine[] = [];
+if (fs.existsSync(routinesRoot)) {
+  const routineFiles = fs.readdirSync(routinesRoot)
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
+  for (const file of routineFiles) {
+    const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
+    const { data } = matter(content);
+    if (data.routine_id && data.cron) {
+      routines.push({
+        id: data.routine_id,
+        description: data.description || '',
+        cron: data.cron,
       });
     }
   }
@@ -145,7 +169,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         <p class="hero-sub">
           <a id="rotating-link" href="#"><span id="rotating-text"></span></a>
         </p>
-        <p class="hero-sub-static">through your AI agent.</p>
+        <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <div class="hero-cta">
           <div class="install-tabs">
             <button class="tab active" data-tab="claude-code">
@@ -218,7 +242,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
             ))}
           </div>
         </div>
-        <a href={`${base}skills/`} class="browse-link">Browse all {skills.length} skills &rarr;</a>
+        <div class="browse-row">
+          <a href={`${base}skills/`} class="browse-link">{skills.length} skills &rarr;</a>
+          <span class="browse-sep">·</span>
+          <a href={`${base}routines/`} class="browse-link">{routines.length} routines &rarr;</a>
+        </div>
       </div>
     </div>
   </section>
@@ -897,9 +925,21 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     display: block;
   }
   
-  .browse-link {
-    display: block;
+  .browse-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-top: 16px;
+  }
+
+  .browse-sep {
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .browse-link {
+    display: inline-block;
     font-family: var(--font-mono);
     font-size: 0.82rem;
     font-weight: 500;
@@ -909,7 +949,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     transition: all 0.15s;
     width: fit-content;
   }
-  
+
   .browse-link:hover {
     color: var(--color-dark);
     border-color: var(--color-dark);
