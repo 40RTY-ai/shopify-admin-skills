@@ -8,60 +8,111 @@ const base = import.meta.env.BASE_URL;
 
 interface Routine {
   id: string;
+  title: string;
   description: string;
+  schedule: string;
   cron: string;
-  scheduleHuman: string;
-  skillsUsed: string[];
-  notify: string;
-  file: string;
 }
 
 const routinesRoot = path.resolve(process.cwd(), '../routines');
-const routines: Routine[] = [];
 
+function humanizeId(id: string): string {
+  return id
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function cronToHuman(cron: string): string {
+  const map: Record<string, string> = {
+    '0 8 * * *': 'Every morning at 8 AM',
+    '0 7 * * *': 'Every morning at 7 AM',
+    '0 6 * * *': 'Every morning at 6 AM',
+    '0 9 * * *': 'Every morning at 9 AM',
+    '0 10 * * *': 'Every weekday at 10 AM',
+    '0 */4 * * *': 'Every four hours',
+    '0 */2 * * *': 'Every two hours',
+    '0 10,15 * * 1-5': 'Weekdays at 10 AM and 3 PM',
+    '0 8 * * 1': 'Every Monday morning',
+    '0 9 * * 1': 'Every Monday morning',
+    '0 8 * * 3': 'Every Wednesday morning',
+    '0 7 * * 3': 'Every Wednesday morning',
+    '0 9 * * 2': 'Every Tuesday morning',
+    '0 7 * * 4': 'Every Thursday morning',
+    '0 9 * * 0': 'Every Sunday morning',
+    '0 8 1 * *': 'First of every month',
+    '0 10 1 * *': 'First of every month',
+    '0 7 15 * *': 'Mid-month, fifteenth',
+    '0 9 1 1,4,7,10 *': 'Start of every quarter',
+  };
+  return map[cron] || cron;
+}
+
+const allRoutines: Routine[] = [];
 if (fs.existsSync(routinesRoot)) {
   const files = fs.readdirSync(routinesRoot)
-    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md' && f !== 'INSTALL.md');
   for (const file of files) {
     const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
     const { data } = matter(content);
     if (data.routine_id && data.cron) {
-      routines.push({
+      allRoutines.push({
         id: data.routine_id,
+        title: humanizeId(data.routine_id),
         description: data.description || '',
+        schedule: cronToHuman(data.cron),
         cron: data.cron,
-        scheduleHuman: cronToHuman(data.cron),
-        skillsUsed: data.skills_used || [],
-        notify: data.notify || '',
-        file: file.replace('.md', ''),
       });
     }
   }
 }
 
-function cronToHuman(cron: string): string {
-  const map: Record<string, string> = {
-    '0 8 * * *': 'Daily at 8 AM',
-    '0 7 * * *': 'Daily at 7 AM',
-    '0 6 * * *': 'Daily at 6 AM',
-    '0 */4 * * *': 'Every 4 hours',
-    '0 */2 * * *': 'Every 2 hours',
-    '0 10,15 * * 1-5': 'Weekdays at 10 AM & 3 PM',
-    '0 8 * * 1': 'Mondays at 8 AM',
-    '0 8 * * 3': 'Wednesdays at 8 AM',
-  };
-  return map[cron] || cron;
-}
+const featuredIds = [
+  'morning-store-briefing',
+  'low-stock-watchdog',
+  'fraud-sentinel',
+  'weekly-business-review',
+  'monthly-financial-close',
+  'customer-churn-watch',
+];
+const featured = featuredIds
+  .map(id => allRoutines.find(r => r.id === id))
+  .filter((r): r is Routine => r !== undefined);
+
+const featuredCopy: Record<string, { title: string; tagline: string }> = {
+  'morning-store-briefing': {
+    title: 'Morning Store Briefing',
+    tagline: 'Open your day with a single message: yesterday\'s revenue, what shipped, what didn\'t, and what needs your attention.',
+  },
+  'low-stock-watchdog': {
+    title: 'Low Stock Watchdog',
+    tagline: 'Catches inventory falling below safe levels before it costs a sale. Suggests how much to reorder, by when.',
+  },
+  'fraud-sentinel': {
+    title: 'Fraud Sentinel',
+    tagline: 'Watches for high-risk orders and flags them for manual review the moment they appear.',
+  },
+  'weekly-business-review': {
+    title: 'Weekly Business Review',
+    tagline: 'A clean Monday-morning rollup of revenue, top products, customer health, and conversion — all in one place.',
+  },
+  'monthly-financial-close': {
+    title: 'Monthly Financial Close',
+    tagline: 'On the first of every month: profit and loss, payouts, taxes, refunds, and a reconciliation against Shopify Payments.',
+  },
+  'customer-churn-watch': {
+    title: 'Customer Churn Watch',
+    tagline: 'Identifies customers about to slip away — before they\'re gone — with personalized win-back recommendations.',
+  },
+};
 
 const smartInstallPrompt = `You are the routine onboarding concierge for this Shopify store. Your job is to install ONLY the routines that fit this specific store — not all of them. Be conversational, terse, and never dump options without context.
 
 PHASE 1 — STORE PROFILING (silent)
 Run these read-only Shopify queries silently. Build a profile internally:
-  shop, recent orders volume, catalog size, location count, subscriptionContracts,
-  shopifyPaymentsAccount, publications count, active discounts.
+  shop, recent orders volume, catalog size, location count, subscriptionContracts, shopifyPaymentsAccount, publications count, active discounts.
 
-Profile axes: volume (low/mid/high), catalog (small/mid/large), locations (single/multi),
-subscriptions (yes/no), payments (Shopify Payments / external), channels, country.
+Profile axes: volume (low/mid/high), catalog (small/mid/large), locations (single/multi), subscriptions (yes/no), payments (Shopify Payments / external), channels, country.
 
 PHASE 2 — INTERVIEW (3 questions, one at a time)
 Greet by store name, state profile in one sentence.
@@ -76,73 +127,90 @@ Skip payout-recon-daily if not Shopify Payments. Cap by Q3 aggressiveness.
 Adjust cron based on volume (low-volume: less frequent).
 
 PHASE 4 — CONFIRM
-Show recommended list with reasoning, plus skipped routines with one-line why.
-Show estimated daily session cost. Wait for "yes / edit / cancel".
+Show recommended list with reasoning, plus skipped routines with one-line why. Show estimated daily session cost. Wait for "yes / edit / cancel".
 
 PHASE 5 — INSTALL (only after merchant confirms)
-For each approved routine: read routines/<id>.md, parse frontmatter (cron + description),
-extract prompt from "### Prompt" code block, apply tailoring (channel, store domain, cron),
-then call mcp__scheduled-tasks__create_scheduled_task with the tailored values.
-Confirm install with mcp__scheduled-tasks__list_scheduled_tasks. Show next-fire times.
+For each approved routine: read routines/<id>.md, parse frontmatter (cron + description), extract prompt from "### Prompt" code block, apply tailoring (channel, store domain, cron), then call mcp__scheduled-tasks__create_scheduled_task with the tailored values. Confirm install with mcp__scheduled-tasks__list_scheduled_tasks.
 
 RULES
 - Never install a routine the merchant didn't approve.
 - Never exceed Q3 cap.
-- If "edit" — ask which to add/remove.
-- Plain-language errors, no stack traces.
 - File-only output if Q2.c chosen.
 
 Begin Phase 1 now.`;
 ---
 
-<Base title="Routines — Shopify Admin Skills">
+<Base
+  title="Routines — Shopify Admin Skills"
+  description={`Always-on agents that watch your Shopify store on a schedule. Daily briefings, weekly reviews, monthly close — ${allRoutines.length} routines you can install in minutes.`}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Routines — Shopify Admin Skills',
+    description: 'Pre-built scheduled agents that monitor your Shopify store automatically.',
+    url: 'https://skills.40rty.ai/routines/',
+    isPartOf: { '@type': 'WebSite', name: 'Shopify Admin Skills', url: 'https://skills.40rty.ai' },
+    numberOfItems: allRoutines.length,
+  }}
+>
 
   <section class="page-header">
     <div class="header-inner">
       <a href={base} class="back">&larr; Back</a>
-      <h1>Routines<span class="dot">.</span></h1>
-      <p class="header-sub">Always-on scheduled agents that run skills on your store automatically.</p>
+      <span class="eyebrow">Always on. Always watching.</span>
+      <h1>Your store, on autopilot<span class="dot">.</span></h1>
+      <p class="page-sub">
+        Routines are scheduled agents that run while you sleep. They watch inventory, flag fraud, reconcile payouts, write the weekly review — and ping you when something needs attention. Install in minutes. {allRoutines.length} ready to use.
+      </p>
+    </div>
+  </section>
+
+  <section class="featured">
+    <div class="featured-inner">
+      {featured.map((r, i) => {
+        const copy = featuredCopy[r.id] || { title: r.title, tagline: r.description };
+        return (
+          <article class="feature-card">
+            <div class="feature-head">
+              <span class="feature-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="feature-when">{r.schedule}</span>
+            </div>
+            <h2 class="feature-title">{copy.title}</h2>
+            <p class="feature-tagline">{copy.tagline}</p>
+          </article>
+        );
+      })}
+    </div>
+    <div class="featured-foot">
+      <a href="https://github.com/40RTY-ai/shopify-admin-skills/tree/main/routines" target="_blank" rel="noopener" class="see-all">
+        See all {allRoutines.length} routines on GitHub <span aria-hidden="true">&rarr;</span>
+      </a>
     </div>
   </section>
 
   <section class="install-section">
     <div class="install-inner">
-      <h2>Smart install — tailored to your store</h2>
-      <p class="install-hint">Don't dump all {routines.length} routines on a store that doesn't need them. Paste this into Claude Code — Claude profiles your store, asks 3 questions, and installs only the routines that fit.</p>
-      <button class="cmd cmd-prompt" data-cmd={smartInstallPrompt}>
-        <span class="cmd-dollar">✨</span>
-        <code>Install routines tailored to my Shopify store…</code>
-        <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
-        <span class="cmd-toast">Copied!</span>
-      </button>
-      <details class="alt-install">
-        <summary>Other install paths</summary>
-        <ul>
-          <li><strong>Per-routine:</strong> use the built-in <code>/schedule</code> command in Claude Code with any routine markdown file</li>
-          <li><strong>Programmatic:</strong> <code>node scripts/install-routines.mjs</code> (prints config + raw install prompt)</li>
-          <li><strong>Bulk install (advanced):</strong> see <a href="https://github.com/40RTY-ai/shopify-admin-skills/blob/main/routines/README.md" target="_blank" rel="noopener">routines/README.md → Option C</a> — installs all {routines.length} routines blindly. Not recommended for new stores.</li>
-          <li><strong>Web UI:</strong> paste any routine prompt at <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> Routines panel</li>
-        </ul>
-      </details>
-    </div>
-  </section>
-
-  <section class="routines-grid-section">
-    <div class="routines-grid">
-      {routines.map(r => (
-        <a href={`https://github.com/40RTY-ai/shopify-admin-skills/blob/main/routines/${r.file}.md`} target="_blank" rel="noopener" class="routine-card">
-          <div class="routine-head">
-            <code class="routine-id">{r.id}</code>
-            <span class="routine-schedule">⏱ {r.scheduleHuman}</span>
-          </div>
-          <p class="routine-desc">{r.description}</p>
-          <div class="routine-meta">
-            <span class="meta-chip">📦 {r.skillsUsed.length} skill{r.skillsUsed.length !== 1 ? 's' : ''}</span>
-            {r.notify && <span class="meta-chip">📢 {r.notify}</span>}
-            <code class="cron-chip">{r.cron}</code>
-          </div>
-        </a>
-      ))}
+      <div class="install-card">
+        <span class="install-eyebrow">Smart install</span>
+        <h2 class="install-title">Tailored to your store, not a blanket setup<span class="dot">.</span></h2>
+        <p class="install-hint">
+          Paste this into Claude Code. It looks at your store, asks three short questions, and installs only the routines that fit your business — never a one-size-fits-all dump.
+        </p>
+        <button class="cmd cmd-prompt" data-cmd={smartInstallPrompt}>
+          <span class="cmd-spark">✦</span>
+          <code>Install routines tailored to my Shopify store…</code>
+          <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+          <span class="cmd-toast">Copied</span>
+        </button>
+        <details class="alt-install">
+          <summary>Other ways to install</summary>
+          <ul>
+            <li>Use the built-in <code>/schedule</code> command to add one routine at a time.</li>
+            <li>Run <code>node scripts/install-routines.mjs</code> for a programmatic plan.</li>
+            <li>Bulk install everything: see the <a href="https://github.com/40RTY-ai/shopify-admin-skills/blob/main/routines/README.md" target="_blank" rel="noopener">routines README</a>. Not recommended for new stores.</li>
+          </ul>
+        </details>
+      </div>
     </div>
   </section>
 
@@ -161,236 +229,307 @@ Begin Phase 1 now.`;
 
 <style>
   .page-header {
-    padding: 80px 40px 40px;
-    max-width: var(--max-width);
-    margin: 0 auto;
+    padding: 64px 40px 0;
   }
 
   .header-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .back {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    text-decoration: none;
-    width: fit-content;
-  }
-
-  .back:hover {
-    color: var(--color-dark);
-  }
-
-  h1 {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: -0.04em;
-  }
-
-  .dot {
-    color: var(--color-accent, #E85D75);
-  }
-
-  .header-sub {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    margin: 0;
-    max-width: 680px;
-  }
-
-  .install-section {
-    padding: 0 40px 40px;
     max-width: var(--max-width);
     margin: 0 auto;
   }
 
-  .install-inner {
-    background: var(--color-card);
-    border: 1px solid var(--color-card-border);
-    border-radius: 12px;
-    padding: 24px;
-  }
-
-  .install-inner h2 {
-    margin: 0 0 8px;
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-
-  .install-hint {
-    font-size: 0.9rem;
+  .back {
+    font-size: 0.85rem;
     color: var(--color-muted);
-    margin: 0 0 16px;
+    display: inline-block;
+    margin-bottom: 28px;
+    transition: color 0.15s;
   }
 
-  .cmd-prompt {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 14px 18px;
-    background: var(--color-bg);
+  .back:hover { color: var(--color-dark); }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 16px;
+  }
+
+  .page-header h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin: 0 0 20px;
+    max-width: 720px;
+  }
+
+  .dot { color: var(--color-accent); }
+
+  .page-sub {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    margin: 0;
+    max-width: 640px;
+  }
+
+  /* Featured grid */
+  .featured {
+    padding: 72px 40px 0;
+  }
+
+  .featured-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--color-card-border);
     border: 1px solid var(--color-card-border);
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: left;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--color-card);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: background 0.2s;
+  }
+
+  .feature-card:hover {
+    background: color-mix(in srgb, var(--color-accent) 4%, var(--color-card));
+  }
+
+  .feature-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+
+  .feature-num {
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .feature-when {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .feature-title {
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .feature-tagline {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .featured-foot {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 28px 0 0;
+    text-align: center;
+  }
+
+  .see-all {
+    display: inline-block;
     font-family: var(--font-mono);
     font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--color-card-border);
     transition: all 0.15s;
-    position: relative;
   }
 
-  .cmd-prompt:hover {
+  .see-all:hover {
+    color: var(--color-dark);
     border-color: var(--color-dark);
   }
 
-  .cmd-prompt code {
+  /* Install card */
+  .install-section {
+    padding: 64px 40px 80px;
+  }
+
+  .install-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .install-card {
+    background: var(--color-dark);
+    color: var(--color-text-light);
+    border-radius: 20px;
+    padding: 44px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .install-card::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--color-accent) 25%, transparent), transparent 60%);
+    pointer-events: none;
+  }
+
+  .install-eyebrow {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 16px;
+  }
+
+  .install-title {
+    position: relative;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    line-height: 1.2;
+    max-width: 580px;
+  }
+
+  .install-title .dot { color: var(--color-accent); }
+
+  .install-hint {
+    position: relative;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: rgba(250, 250, 250, 0.72);
+    margin: 0 0 28px;
+    max-width: 640px;
+  }
+
+  .cmd {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 18px 22px;
+    background: rgba(250, 250, 250, 0.06);
+    border: 1px solid rgba(250, 250, 250, 0.14);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    transition: all 0.15s;
+  }
+
+  .cmd:hover {
+    border-color: var(--color-accent);
+    background: rgba(250, 250, 250, 0.1);
+  }
+
+  .cmd code {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--color-text-light);
+    background: transparent;
   }
 
-  .cmd-dollar { font-size: 1.1rem; }
+  .cmd-spark {
+    color: var(--color-accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
 
   .cmd-copy {
-    color: var(--color-muted);
+    color: rgba(250, 250, 250, 0.5);
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
 
   .cmd-toast {
     position: absolute;
-    right: 18px;
-    background: var(--color-dark);
-    color: var(--color-text-light);
+    right: 22px;
+    background: var(--color-accent);
+    color: var(--color-dark);
     padding: 4px 10px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
   }
 
-  .cmd-prompt.copied .cmd-toast {
-    opacity: 1;
-  }
+  .cmd.copied .cmd-toast { opacity: 1; }
 
   .alt-install {
-    margin-top: 16px;
+    position: relative;
+    margin-top: 24px;
     font-size: 0.85rem;
   }
 
   .alt-install summary {
     cursor: pointer;
-    color: var(--color-muted);
+    color: rgba(250, 250, 250, 0.6);
     font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
   }
+
+  .alt-install summary:hover { color: var(--color-text-light); }
 
   .alt-install ul {
-    margin: 12px 0 0;
+    margin: 14px 0 0;
     padding-left: 20px;
-    color: var(--color-muted);
-  }
-
-  .alt-install li {
-    margin-bottom: 6px;
+    color: rgba(250, 250, 250, 0.68);
+    line-height: 1.7;
   }
 
   .alt-install code {
-    background: var(--color-bg);
-    padding: 1px 6px;
+    background: rgba(250, 250, 250, 0.08);
+    padding: 2px 7px;
     border-radius: 3px;
     font-size: 0.85em;
+    font-family: var(--font-mono);
+    color: var(--color-text-light);
   }
 
-  .routines-grid-section {
-    padding: 0 40px 80px;
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
-
-  .routines-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 16px;
-  }
-
-  .routine-card {
-    background: var(--color-card);
-    border: 1px solid var(--color-card-border);
-    border-radius: 10px;
-    padding: 20px;
+  .alt-install a {
+    color: var(--color-accent);
     text-decoration: none;
-    color: var(--color-dark);
-    transition: all 0.15s;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
-  .routine-card:hover {
-    border-color: var(--color-dark);
-    transform: translateY(-2px);
-  }
-
-  .routine-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .routine-id {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-weight: 700;
-  }
-
-  .routine-schedule {
-    font-size: 0.78rem;
-    color: var(--color-muted);
-    white-space: nowrap;
-  }
-
-  .routine-desc {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    line-height: 1.5;
-  }
-
-  .routine-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: auto;
-  }
-
-  .meta-chip {
-    font-size: 0.72rem;
-    padding: 3px 8px;
-    background: var(--color-bg);
-    border-radius: 4px;
-    color: var(--color-muted);
-  }
-
-  .cron-chip {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    background: var(--color-bg);
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    color: var(--color-muted);
-  }
+  .alt-install a:hover { border-color: var(--color-accent); }
 
   @media (max-width: 768px) {
-    .page-header { padding: 60px 20px 24px; }
-    .install-section, .routines-grid-section { padding-left: 20px; padding-right: 20px; }
-    .routines-grid { grid-template-columns: 1fr; }
+    .page-header { padding: 32px 20px 0; }
+    .featured { padding: 48px 20px 0; }
+    .featured-inner { grid-template-columns: 1fr; }
+    .feature-card { padding: 24px 22px; }
+    .install-section { padding: 48px 20px 64px; }
+    .install-card { padding: 28px 24px; }
   }
 </style>

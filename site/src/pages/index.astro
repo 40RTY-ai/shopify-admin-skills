@@ -51,7 +51,7 @@ for (const cat of categories) {
 const routines: Routine[] = [];
 if (fs.existsSync(routinesRoot)) {
   const routineFiles = fs.readdirSync(routinesRoot)
-    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md' && f !== 'INSTALL.md');
   for (const file of routineFiles) {
     const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
     const { data } = matter(content);
@@ -64,6 +64,30 @@ if (fs.existsSync(routinesRoot)) {
     }
   }
 }
+
+// Featured routines for home — human-readable, no jargon
+const homeRoutines: { title: string; when: string; tagline: string }[] = [
+  {
+    title: 'Morning Store Briefing',
+    when: 'Every morning at 8 AM',
+    tagline: 'Yesterday\'s revenue, what shipped, what stalled, and what needs your attention — in one Slack message.',
+  },
+  {
+    title: 'Low Stock Watchdog',
+    when: 'Every morning at 7 AM',
+    tagline: 'Catches inventory falling below safe levels and tells you exactly what to reorder, by when.',
+  },
+  {
+    title: 'Fraud Sentinel',
+    when: 'Every two hours',
+    tagline: 'High-risk orders flagged for review the moment they appear — before they ship.',
+  },
+  {
+    title: 'Monthly Financial Close',
+    when: 'First of every month',
+    tagline: 'Profit and loss, payouts, taxes, refunds — reconciled and ready, no spreadsheet wrestling.',
+  },
+];
 
 const categoryColors: Record<string, string> = {
   'Marketing': '#E8A838',
@@ -276,6 +300,38 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       Tell me more cool stuff
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
     </a>
+  </section>
+
+  <!-- ROUTINES PREVIEW -->
+  <section class="routines-preview">
+    <div class="routines-preview-inner">
+      <div class="routines-intro">
+        <span class="routines-eyebrow">Always on. Always watching.</span>
+        <h2 class="routines-heading">
+          Skills run on demand.<br/>
+          <span class="routines-accent">Routines run while you sleep<span class="dot">.</span></span>
+        </h2>
+        <p class="routines-lede">
+          {routines.length} pre-built scheduled agents that watch your store on a cron — daily briefings, fraud sentinels, monthly close — and ping you only when something needs attention.
+        </p>
+        <a href={`${base}routines/`} class="routines-cta">
+          See routines <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="routines-grid">
+        {homeRoutines.map((r, i) => (
+          <article class="routine-preview-card">
+            <div class="routine-preview-head">
+              <span class="routine-preview-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="routine-preview-when">{r.when}</span>
+            </div>
+            <h3 class="routine-preview-title">{r.title}</h3>
+            <p class="routine-preview-tagline">{r.tagline}</p>
+          </article>
+        ))}
+      </div>
+    </div>
   </section>
 
   <!-- SIGNUP SECTION -->
@@ -1110,6 +1166,143 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
     .browse-link { display: inline-flex; order: -1; margin-top: 10px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; padding: 10px 16px; border: 1.5px solid var(--color-dark); border-radius: 8px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
+  }
+
+  /* ROUTINES PREVIEW */
+  .routines-preview {
+    padding: 100px 40px 60px;
+  }
+
+  .routines-preview-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .routines-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .routines-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .routines-heading {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .routines-accent {
+    color: var(--color-muted);
+  }
+
+  .routines-lede {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    margin: 0;
+    max-width: 460px;
+  }
+
+  .routines-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    margin-top: 8px;
+    padding: 12px 22px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    background: var(--color-dark);
+    border-radius: 100px;
+    text-decoration: none;
+    transition: transform 0.15s, background 0.15s;
+  }
+
+  .routines-cta:hover {
+    background: var(--color-accent);
+    color: var(--color-dark);
+    transform: translateY(-2px);
+  }
+
+  .routines-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--color-card-border);
+    border: 1px solid var(--color-card-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .routine-preview-card {
+    background: var(--color-card);
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: background 0.2s;
+  }
+
+  .routine-preview-card:hover {
+    background: color-mix(in srgb, var(--color-accent) 4%, var(--color-card));
+  }
+
+  .routine-preview-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-muted);
+  }
+
+  .routine-preview-num {
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .routine-preview-when {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .routine-preview-title {
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .routine-preview-tagline {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .routines-preview { padding: 64px 20px 40px; }
+    .routines-preview-inner { grid-template-columns: 1fr; gap: 36px; }
+    .routines-grid { grid-template-columns: 1fr; }
+    .routine-preview-card { padding: 22px 20px; }
   }
 
   /* SIGNUP SECTION */
