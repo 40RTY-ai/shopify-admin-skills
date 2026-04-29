@@ -53,16 +53,46 @@ function cronToHuman(cron: string): string {
   return map[cron] || cron;
 }
 
-const installPrompt = `Install all routines from routines/ in this repo. For each .md file in routines/ (skip README.md), parse the YAML frontmatter to get routine_id, description, and cron, then extract the prompt from the "### Prompt" code block.
+const smartInstallPrompt = `You are the routine onboarding concierge for this Shopify store. Your job is to install ONLY the routines that fit this specific store — not all of them. Be conversational, terse, and never dump options without context.
 
-For each routine, call mcp__scheduled-tasks__create_scheduled_task with:
-  taskId: <routine_id>
-  cronExpression: <cron>
-  description: <description>
-  prompt: <extracted prompt>
-  notifyOnCompletion: true
+PHASE 1 — STORE PROFILING (silent)
+Run these read-only Shopify queries silently. Build a profile internally:
+  shop, recent orders volume, catalog size, location count, subscriptionContracts,
+  shopifyPaymentsAccount, publications count, active discounts.
 
-After all routines are created, run mcp__scheduled-tasks__list_scheduled_tasks and confirm each routine is enabled and shows next run time.`;
+Profile axes: volume (low/mid/high), catalog (small/mid/large), locations (single/multi),
+subscriptions (yes/no), payments (Shopify Payments / external), channels, country.
+
+PHASE 2 — INTERVIEW (3 questions, one at a time)
+Greet by store name, state profile in one sentence.
+Q1: "Top 2 priorities? a) inventory b) fraud c) churn d) fulfillment e) discounts f) daily summary"
+Q2: "Where should alerts go? a) Slack channel b) email c) Claude Code only"
+Q3: "How aggressive? a) minimal (3-4) b) standard (6-8) c) comprehensive (10+)"
+
+PHASE 3 — RECOMMEND (scored against profile)
+Score each candidate routine in routines/ against the answers and store profile.
+Always recommend morning-store-briefing. Skip subscription-mrr-tracker if no subs.
+Skip payout-recon-daily if not Shopify Payments. Cap by Q3 aggressiveness.
+Adjust cron based on volume (low-volume: less frequent).
+
+PHASE 4 — CONFIRM
+Show recommended list with reasoning, plus skipped routines with one-line why.
+Show estimated daily session cost. Wait for "yes / edit / cancel".
+
+PHASE 5 — INSTALL (only after merchant confirms)
+For each approved routine: read routines/<id>.md, parse frontmatter (cron + description),
+extract prompt from "### Prompt" code block, apply tailoring (channel, store domain, cron),
+then call mcp__scheduled-tasks__create_scheduled_task with the tailored values.
+Confirm install with mcp__scheduled-tasks__list_scheduled_tasks. Show next-fire times.
+
+RULES
+- Never install a routine the merchant didn't approve.
+- Never exceed Q3 cap.
+- If "edit" — ask which to add/remove.
+- Plain-language errors, no stack traces.
+- File-only output if Q2.c chosen.
+
+Begin Phase 1 now.`;
 ---
 
 <Base title="Routines — Shopify Admin Skills">
@@ -77,19 +107,20 @@ After all routines are created, run mcp__scheduled-tasks__list_scheduled_tasks a
 
   <section class="install-section">
     <div class="install-inner">
-      <h2>Install all routines</h2>
-      <p class="install-hint">Paste this into Claude Code — Claude will read each routine file and create the scheduled task via MCP.</p>
-      <button class="cmd cmd-prompt" data-cmd={installPrompt}>
+      <h2>Smart install — tailored to your store</h2>
+      <p class="install-hint">Don't dump all {routines.length} routines on a store that doesn't need them. Paste this into Claude Code — Claude profiles your store, asks 3 questions, and installs only the routines that fit.</p>
+      <button class="cmd cmd-prompt" data-cmd={smartInstallPrompt}>
         <span class="cmd-dollar">✨</span>
-        <code>Install all routines from routines/ in this repo…</code>
+        <code>Install routines tailored to my Shopify store…</code>
         <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
         <span class="cmd-toast">Copied!</span>
       </button>
       <details class="alt-install">
         <summary>Other install paths</summary>
         <ul>
-          <li><strong>Per-routine:</strong> use the built-in <code>/schedule</code> command in Claude Code</li>
-          <li><strong>Programmatic:</strong> <code>node scripts/install-routines.mjs</code> (prints config + install prompt)</li>
+          <li><strong>Per-routine:</strong> use the built-in <code>/schedule</code> command in Claude Code with any routine markdown file</li>
+          <li><strong>Programmatic:</strong> <code>node scripts/install-routines.mjs</code> (prints config + raw install prompt)</li>
+          <li><strong>Bulk install (advanced):</strong> see <a href="https://github.com/40RTY-ai/shopify-admin-skills/blob/main/routines/README.md" target="_blank" rel="noopener">routines/README.md → Option C</a> — installs all {routines.length} routines blindly. Not recommended for new stores.</li>
           <li><strong>Web UI:</strong> paste any routine prompt at <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> Routines panel</li>
         </ul>
       </details>

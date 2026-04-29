@@ -3,7 +3,7 @@
 <p align="center">
   <strong>AI agent skills + scheduled routines to operate your Shopify store.</strong>
   <br />
-  73 skills across 10 categories, plus 8 always-on routines that monitor inventory, fraud, fulfillment, and customer health on a schedule.
+  100+ skills across 10 categories, plus 20 always-on routines that monitor inventory, fraud, fulfillment, finance, and customer health on a schedule.
 </p>
 
 <p align="center">
@@ -30,37 +30,36 @@ npx skills add 40RTY-ai/shopify-admin-skills
 
 ## Skills
 
-73 skills across 10 categories:
+100+ skills across 10 categories:
 
 | Category | Skills | Examples |
 |---|---|---|
-| [Marketing](skills/marketing/) | 3 | Abandoned cart recovery, win-back, loyalty exports |
-| [Merchandising](skills/merchandising/) | 21 | Pricing, stock, demand forecast, aging, SEO, dead stock |
-| [Customer Support](skills/customer-support/) | 5 | Order lookup, refunds, returns, address correction, WISMO |
-| [Customer Ops](skills/customer-ops/) | 8 | RFM, churn risk, duplicates, spend tiers, cohort, B2B |
-| [Conversion](skills/conversion-optimization/) | 7 | FBT, cross-sell, discount ROI, A/B, gift cards |
-| [Fulfillment Ops](skills/fulfillment-ops/) | 8 | Digest, holds, routing, tracking, delivery SLA |
-| [Finance](skills/finance/) | 8 | Profit/margin, revenue, refund rates, AOV, tax |
-| [Order Intelligence](skills/order-intelligence/) | 5 | Fraud risk, auto-tagging, high-risk, repeat purchase |
-| [Returns](skills/returns/) | 3 | Reason analysis, exchange ratios, SLA |
-| [Store Management](skills/store-management/) | 5 | Redirects, drafts, discounts, pages, channels |
+| [Marketing](skills/marketing/) | 6 | Cart recovery, win-back, loyalty, VIP, promo codes, attribution |
+| [Merchandising](skills/merchandising/) | 24 | Pricing, stock, demand forecast, aging, SEO, dead stock, COGS, vendor consolidation |
+| [Customer Support](skills/customer-support/) | 8 | Order lookup, refunds, returns, address correction, customer merge, timeline export |
+| [Customer Ops](skills/customer-ops/) | 11 | RFM, churn risk, CAC, deliverability, chargeback watch, cohort, B2B |
+| [Conversion](skills/conversion-optimization/) | 9 | FBT, cross-sell, discount ROI, A/B, post-purchase survey, gift messages |
+| [Fulfillment Ops](skills/fulfillment-ops/) | 11 | Digest, routing, tracking, SLA, shipping rates, carrier comparison, bundles |
+| [Finance](skills/finance/) | 12 | Profit, payout recon, gift card liability, MRR, discount trend, tax, AOV |
+| [Order Intelligence](skills/order-intelligence/) | 8 | Fraud, auto-tagging, attribution, cancellation, partial-refund patterns |
+| [Returns](skills/returns/) | 6 | Reason analysis, fraud detection, restock, cost attribution, SLA |
+| [Store Management](skills/store-management/) | 8 | Redirects, drafts, discounts, pages, staff audit, file storage, metafield definitions |
 
 ## Routines
 
-8 ready-to-use **scheduled routines** that run autonomously on Claude Code's infrastructure. Each routine fires on a cron schedule, invokes one or more skills, and reports back via Slack or file output.
+20 ready-to-use **scheduled routines** that run autonomously on Claude Code's infrastructure. Each routine fires on a cron schedule, invokes one or more skills, and reports back via Slack or file output.
 
-| Routine | Schedule | What it does |
-|---|---|---|
-| [morning-store-briefing](routines/morning-store-briefing.md) | Daily 8 AM | Orders, revenue, fulfillment digest |
-| [low-stock-watchdog](routines/low-stock-watchdog.md) | Daily 7 AM | Inventory + demand forecast alerts |
-| [abandoned-cart-patrol](routines/abandoned-cart-patrol.md) | Every 4h | Cart recovery opportunities |
-| [fraud-sentinel](routines/fraud-sentinel.md) | Every 2h | High-risk order alerting |
-| [fulfillment-sla-watchdog](routines/fulfillment-sla-watchdog.md) | Weekdays 10 AM + 3 PM | Overdue fulfillments |
-| [weekly-business-review](routines/weekly-business-review.md) | Monday 8 AM | Comprehensive weekly report |
-| [price-anomaly-scanner](routines/price-anomaly-scanner.md) | Daily 6 AM | Pricing error detection |
-| [customer-churn-watch](routines/customer-churn-watch.md) | Wednesday 8 AM | At-risk customer identification |
+**Daily / High-frequency:** `morning-store-briefing`, `low-stock-watchdog`, `abandoned-cart-patrol`, `fraud-sentinel`, `fulfillment-sla-watchdog`, `price-anomaly-scanner`, `vip-customer-watcher`, `payout-recon-daily`, `new-product-launch-tracker`
 
-See [routines/README.md](routines/README.md) for install instructions.
+**Weekly:** `weekly-business-review`, `return-fraud-watch`, `discount-roi-weekly`, `catalog-health-weekly`, `customer-churn-watch`, `seo-coverage-weekly`, `dead-stock-weekly`
+
+**Monthly / Quarterly:** `monthly-financial-close`, `staff-activity-monthly`, `inventory-aging-monthly`, `quarterly-business-review`
+
+### Smart install (recommended)
+
+Don't dump all 20 routines on a store that doesn't need them. The smart installer profiles your store, asks 3 questions, and installs only the routines that fit.
+
+See [routines/INSTALL.md](routines/INSTALL.md) for the smart install prompt, or [routines/README.md](routines/README.md) for all install paths and per-routine details.
 
 ## How it works
 
