@@ -2,63 +2,49 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import './TerminalDemo.css';
 
-type LineKind = 'log' | 'success';
-type Line = { kind: LineKind; text: string };
-
 type Demo = {
   command: string;
   skill: string;
-  lines: Line[];
+  thought: string;
   result: string;
+  resultMeta: string;
 };
 
 const demos: Demo[] = [
   {
-    command: 'find variants below reorder threshold',
+    command: 'find variants below reorder threshold and export a restock list',
     skill: 'low-inventory-restock',
-    lines: [
-      { kind: 'log', text: 'Connecting to my-store.myshopify.com' },
-      { kind: 'log', text: 'Scanning 1,247 active variants' },
-      { kind: 'success', text: '23 SKUs below reorder point' },
-    ],
-    result: 'Saved restock_2026-04-29.csv',
+    thought: 'I\'ll scan all active variants and flag ones below their reorder threshold.',
+    result: 'Found 23 SKUs that need reordering.',
+    resultMeta: 'restock_2026-04-29.csv · 23 rows',
   },
   {
-    command: 'audit products missing SEO titles',
+    command: 'audit products missing SEO titles or descriptions',
     skill: 'seo-metadata-audit',
-    lines: [
-      { kind: 'log', text: 'Reviewing 1,247 products' },
-      { kind: 'log', text: 'Checking title + description coverage' },
-      { kind: 'success', text: '240 products need attention' },
-    ],
-    result: 'Saved seo_audit_2026-04-29.csv',
+    thought: 'Reviewing every product for title and description coverage.',
+    result: '240 products need attention.',
+    resultMeta: 'seo_audit_2026-04-29.csv · 240 rows',
   },
   {
-    command: 'recover abandoned checkouts last 24h',
+    command: 'recover abandoned checkouts from the last 24 hours',
     skill: 'abandoned-cart-recovery',
-    lines: [
-      { kind: 'log', text: 'Found 47 abandoned checkouts' },
-      { kind: 'log', text: 'Generating unique recovery codes' },
-      { kind: 'success', text: 'Sent 47 recovery emails' },
-    ],
-    result: '$8,420 in pending recovery',
+    thought: 'Pulling abandoned checkouts and generating personalized recovery codes.',
+    result: 'Sent 47 recovery emails.',
+    resultMeta: '$8,420 in pending recovery',
   },
   {
-    command: 'flag high-risk orders this morning',
+    command: 'flag any high-risk orders from this morning',
     skill: 'high-risk-order-tagger',
-    lines: [
-      { kind: 'log', text: 'Reviewing 184 new orders' },
-      { kind: 'log', text: 'Risk-scoring with Shopify Fraud signals' },
-      { kind: 'success', text: '3 orders flagged for review' },
-    ],
-    result: 'Tagged 3 orders · risk:review',
+    thought: 'Risk-scoring new orders against Shopify Fraud signals.',
+    result: '3 orders flagged for manual review.',
+    resultMeta: 'Tagged · risk:review',
   },
 ];
 
-type Phase = 'typing' | 'thinking' | 'streaming' | 'result' | 'pause';
+type Phase = 'typing' | 'thinking' | 'responding' | 'tool' | 'done' | 'pause';
 
 const ClaudeMark = ({ size = 14 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
     <path
       d="M16 4.5c2 5 4 8 7 9.5-3 1.5-5 4.5-7 9.5-2-5-4-8-7-9.5 3-1.5 5-4.5 7-9.5z"
       fill="#DA7756"
@@ -66,169 +52,178 @@ const ClaudeMark = ({ size = 14 }: { size?: number }) => (
   </svg>
 );
 
-export default function TerminalDemo() {
+export default function ClaudeChatDemo() {
   const [demoIdx, setDemoIdx] = useState(0);
   const [phase, setPhase] = useState<Phase>('typing');
   const [typed, setTyped] = useState('');
-  const [streamIdx, setStreamIdx] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const demo = demos[demoIdx];
 
-  // typing: 50–85ms per character — natural human cadence
+  // typing
   useEffect(() => {
     if (phase !== 'typing') return;
     if (typed.length === demo.command.length) {
-      timerRef.current = setTimeout(() => setPhase('thinking'), 700);
+      timerRef.current = setTimeout(() => setPhase('thinking'), 900);
       return () => clearTimeout(timerRef.current!);
     }
     timerRef.current = setTimeout(() => {
       setTyped(demo.command.slice(0, typed.length + 1));
-    }, 55 + Math.random() * 40);
+    }, 28 + Math.random() * 22);
     return () => clearTimeout(timerRef.current!);
   }, [phase, typed, demo.command]);
 
-  // thinking: pause for "Claude is responding..." dots
   useEffect(() => {
     if (phase !== 'thinking') return;
-    timerRef.current = setTimeout(() => setPhase('streaming'), 1400);
+    timerRef.current = setTimeout(() => setPhase('responding'), 1500);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
-  // streaming: reveal lines one-by-one
   useEffect(() => {
-    if (phase !== 'streaming') return;
-    if (streamIdx >= demo.lines.length) {
-      timerRef.current = setTimeout(() => setPhase('result'), 700);
-      return () => clearTimeout(timerRef.current!);
-    }
-    timerRef.current = setTimeout(() => setStreamIdx(i => i + 1), 850);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase, streamIdx, demo.lines.length]);
-
-  // result: hold for read
-  useEffect(() => {
-    if (phase !== 'result') return;
-    timerRef.current = setTimeout(() => setPhase('pause'), 2600);
+    if (phase !== 'responding') return;
+    timerRef.current = setTimeout(() => setPhase('tool'), 1700);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
-  // pause then advance
+  useEffect(() => {
+    if (phase !== 'tool') return;
+    timerRef.current = setTimeout(() => setPhase('done'), 1900);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'done') return;
+    timerRef.current = setTimeout(() => setPhase('pause'), 3200);
+    return () => clearTimeout(timerRef.current!);
+  }, [phase]);
+
   useEffect(() => {
     if (phase !== 'pause') return;
     timerRef.current = setTimeout(() => {
       setTyped('');
-      setStreamIdx(0);
       setDemoIdx(i => (i + 1) % demos.length);
       setPhase('typing');
-    }, 800);
+    }, 700);
     return () => clearTimeout(timerRef.current!);
   }, [phase]);
 
-  const showSkillCard = phase === 'streaming' || phase === 'result' || phase === 'pause';
-  const showResult = phase === 'result' || phase === 'pause';
+  const showAssistant = phase !== 'typing';
+  const showThought = phase === 'responding' || phase === 'tool' || phase === 'done' || phase === 'pause';
+  const showTool = phase === 'tool' || phase === 'done' || phase === 'pause';
+  const showResult = phase === 'done' || phase === 'pause';
 
   return (
-    <div className="claude-chat">
-      <div className="claude-chat-header">
-        <div className="claude-chat-brand">
-          <ClaudeMark size={16} />
-          <span className="claude-chat-name">Claude</span>
-          <span className="claude-chat-model">Sonnet 4.5</span>
+    <div className="claude-app">
+      <div className="claude-app-sidebar">
+        <div className="sidebar-brand">
+          <ClaudeMark size={14} />
+          <span>Claude</span>
         </div>
-        <div className="claude-chat-status">
-          <span className="status-pulse" />
-          <span>connected to my-store</span>
+        <div className="sidebar-section">
+          <div className="sidebar-label">Recents</div>
+          <div className="sidebar-item sidebar-item-active">Shopify store</div>
+          <div className="sidebar-item">Inventory questions</div>
+          <div className="sidebar-item">Customer outreach</div>
         </div>
       </div>
 
-      <div className="claude-chat-body">
-        {/* User message */}
-        <div className="claude-msg claude-msg-user">
-          <div className="msg-avatar msg-avatar-user">you</div>
-          <div className="msg-content">
-            <div className="msg-text">
-              {typed || ' '}
-              {phase === 'typing' && <span className="msg-caret">▍</span>}
+      <div className="claude-app-main">
+        <div className="claude-app-titlebar">
+          <div className="titlebar-title">Shopify store</div>
+          <div className="titlebar-model">Sonnet 4.5</div>
+        </div>
+
+        <div className="claude-app-thread">
+          {/* User turn */}
+          <div className="claude-turn claude-turn-user">
+            <div className="turn-bubble">
+              {typed || ' '}
+              {phase === 'typing' && <span className="turn-caret" />}
+            </div>
+          </div>
+
+          {/* Assistant turn */}
+          <AnimatePresence>
+            {showAssistant && (
+              <motion.div
+                key={`a-${demoIdx}`}
+                className="claude-turn claude-turn-assistant"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+              >
+                <div className="turn-avatar">
+                  <ClaudeMark size={14} />
+                </div>
+                <div className="turn-content">
+                  {phase === 'thinking' ? (
+                    <div className="turn-thinking">
+                      <span className="thinking-dot" />
+                      <span className="thinking-dot" />
+                      <span className="thinking-dot" />
+                    </div>
+                  ) : (
+                    <>
+                      {showThought && (
+                        <motion.p
+                          className="turn-text"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          {demo.thought}
+                        </motion.p>
+                      )}
+                      {showTool && (
+                        <motion.div
+                          className="turn-tool"
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="turn-tool-head">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                            </svg>
+                            <span className="turn-tool-label">Used skill</span>
+                            <code className="turn-tool-name">{demo.skill}</code>
+                          </div>
+                        </motion.div>
+                      )}
+                      {showResult && (
+                        <motion.div
+                          className="turn-result"
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          <p className="turn-text turn-text-strong">{demo.result}</p>
+                          <div className="turn-result-meta">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                              <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <span>{demo.resultMeta}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="claude-app-composer">
+          <div className="composer-pill">
+            <span className="composer-placeholder">Ask anything about your store…</span>
+            <div className="composer-actions">
+              <span className="composer-skill-chip">/skill</span>
             </div>
           </div>
         </div>
-
-        {/* Assistant message — streamed once typing done */}
-        <AnimatePresence>
-          {phase !== 'typing' && (
-            <motion.div
-              key={`msg-${demoIdx}`}
-              className="claude-msg claude-msg-assistant"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-            >
-              <div className="msg-avatar msg-avatar-claude">
-                <ClaudeMark size={14} />
-              </div>
-              <div className="msg-content">
-                {phase === 'thinking' ? (
-                  <div className="msg-thinking">
-                    <span className="thinking-dot" />
-                    <span className="thinking-dot" />
-                    <span className="thinking-dot" />
-                  </div>
-                ) : (
-                  <>
-                    {showSkillCard && (
-                      <motion.div
-                        className="msg-skill-card"
-                        initial={{ opacity: 0, scale: 0.97 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <div className="skill-card-row">
-                          <span className="skill-card-label">Running skill</span>
-                          <code className="skill-card-name">{demo.skill}</code>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    <div className="msg-stream">
-                      {demo.lines.slice(0, streamIdx).map((line, i) => (
-                        <motion.div
-                          key={`${demoIdx}-line-${i}`}
-                          className={`stream-line stream-${line.kind}`}
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, ease: 'easeOut' }}
-                        >
-                          <span className="stream-bullet">
-                            {line.kind === 'success' ? '✓' : '·'}
-                          </span>
-                          <span className="stream-text">{line.text}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    {showResult && (
-                      <motion.div
-                        className="msg-result"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                      >
-                        <span className="result-tick">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </span>
-                        <span>{demo.result}</span>
-                      </motion.div>
-                    )}
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
