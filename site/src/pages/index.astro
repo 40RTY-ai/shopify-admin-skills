@@ -169,7 +169,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
-          <span class="line stroke typewriter" id="t2">Admin</span>
+          <span class="line typewriter" id="t2">Admin</span>
           <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
         </h1>
         <p class="hero-sub">
@@ -649,9 +649,12 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .cmd-prompt code {
-    font-family: var(--font-body);
-    font-style: italic;
-    opacity: 0.9;
+    font-family: var(--font-heading);
+    font-style: normal;
+    font-weight: 600;
+    color: var(--color-dark);
+    background: transparent;
+    letter-spacing: -0.01em;
   }
 
   .prompt-wrap {
@@ -812,6 +815,31 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   .cmd-dollar { color: var(--color-accent); font-weight: 700; }
   .cmd-copy { opacity: 0.4; transition: opacity 0.15s; }
   .cmd:hover .cmd-copy { opacity: 1; }
+
+  /* Prompt button — softer, less terminal-like */
+  .cmd-prompt {
+    background: var(--color-card);
+    color: var(--color-dark);
+    padding: 16px 22px;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1.5px solid var(--color-card-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .cmd-prompt:hover {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-card));
+    color: var(--color-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(232, 168, 56, 0.14);
+  }
+
+  .cmd-prompt .cmd-dollar { color: var(--color-accent); font-weight: 700; font-size: 1.05rem; }
+  .cmd-prompt .cmd-copy { color: var(--color-muted); opacity: 0.6; }
+  .cmd-prompt:hover .cmd-copy { opacity: 1; color: var(--color-accent); }
 
   .cmd-toast {
     position: absolute;
