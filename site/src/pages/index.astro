@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import TerminalDemo from '../components/illustrations/TerminalDemo';
+import RoutineFeed from '../components/illustrations/RoutineFeed';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
@@ -228,24 +230,24 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </div>
       </div>
 
-      <!-- Right side: skills grid scrolling vertically -->
+      <!-- Right side: live demo (terminal + routine feed) -->
       <div class="hero-right">
-        <div class="skills-scroll-mask">
-          <div class="skills-scroll-col col-up">
-            {row1.map(s => (
-              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
-                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
-                <code class="s-name">{s.name}</code>
-              </a>
-            ))}
-          </div>
-          <div class="skills-scroll-col col-down">
-            {row2.map(s => (
-              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
-                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
-                <code class="s-name">{s.name}</code>
-              </a>
-            ))}
+        <div class="hero-illustration">
+          <div class="illustration-stack">
+            <div class="illustration-block illustration-terminal">
+              <div class="block-eyebrow">
+                <span class="block-eyebrow-dot" style="background: #5B8DEF;"></span>
+                <span>On demand · skills</span>
+              </div>
+              <TerminalDemo client:visible />
+            </div>
+            <div class="illustration-block illustration-feed">
+              <div class="block-eyebrow">
+                <span class="block-eyebrow-dot" style="background: #28c840;"></span>
+                <span>Always on · routines</span>
+              </div>
+              <RoutineFeed client:visible />
+            </div>
           </div>
         </div>
         <div class="browse-row">
@@ -882,13 +884,58 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     color: var(--color-muted);
   }
 
-  /* RIGHT SIDE — vertical scroll columns */
+  /* RIGHT SIDE — live illustration */
   .hero-right {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
+  }
+
+  .hero-illustration {
+    width: 100%;
+    height: 70vh;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .illustration-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .illustration-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .block-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(10, 10, 10, 0.55);
+  }
+
+  .block-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   .skills-scroll-mask {
