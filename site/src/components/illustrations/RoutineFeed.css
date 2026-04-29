@@ -1,159 +1,179 @@
-.routine-feed {
+.rb-shell {
   width: 100%;
-  max-width: 560px;
+  max-width: 580px;
+  height: 410px; /* fixed — never reflows */
+  background: #FAF9F5;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 24px 60px -12px rgba(31, 30, 27, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+  font-family: -apple-system, 'Inter', system-ui, sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  overflow: hidden;
 }
 
-.routine-feed-header {
+.rb-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 4px;
+  padding: 12px 18px;
+  background: #F1ECE2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(10, 10, 10, 0.5);
+  letter-spacing: 0.04em;
+  color: rgba(31, 30, 27, 0.55);
 }
 
-.feed-pulse {
-  width: 8px;
-  height: 8px;
+.rb-pulse {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #28c840;
-  box-shadow: 0 0 0 4px rgba(40, 200, 64, 0.18);
-  animation: feed-pulse 1.6s ease-in-out infinite;
+  background: #6CD49A;
+  box-shadow: 0 0 0 3px rgba(108, 212, 154, 0.18);
+  animation: rb-pulse 1.6s ease-in-out infinite;
 }
 
-@keyframes feed-pulse {
+@keyframes rb-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.92); }
+  50% { opacity: 0.55; transform: scale(0.92); }
 }
 
-.feed-label {
+.rb-label {
   flex: 1;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.feed-count {
+.rb-stat {
   font-size: 0.62rem;
-  color: rgba(10, 10, 10, 0.4);
+  color: rgba(31, 30, 27, 0.4);
+  text-transform: lowercase;
+  letter-spacing: 0;
 }
 
-.routine-feed-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-}
-
-.routine-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px 18px;
-  background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.02),
-    0 12px 28px -12px rgba(0, 0, 0, 0.10),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+.rb-canvas {
+  flex: 1;
   position: relative;
   overflow: hidden;
 }
 
-.routine-card::before {
-  content: '';
+.rb-svg {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--accent);
-  opacity: 0.85;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.routine-card-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+/* Center store node */
+.rb-store {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.rb-store-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #1f1e1b 0%, #0f0e0c 100%);
+  color: #F5F0E8;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px -2px var(--accent);
+  box-shadow:
+    0 8px 24px -4px rgba(31, 30, 27, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.routine-card-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.routine-card-head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.routine-card-name {
+.rb-store-label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #0a0a0a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(31, 30, 27, 0.75);
 }
 
-.routine-card-time {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.66rem;
-  color: rgba(10, 10, 10, 0.4);
-  flex-shrink: 0;
-  letter-spacing: 0.02em;
-}
-
-.routine-card-msg {
-  font-size: 0.86rem;
-  font-weight: 500;
-  color: #0a0a0a;
-  line-height: 1.4;
-}
-
-.routine-card-foot {
+/* Routine nodes */
+.rb-node {
+  position: absolute;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.68rem;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow:
+    0 6px 16px -4px rgba(31, 30, 27, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 2;
 }
 
-.routine-card-metric {
-  flex: 1;
-  color: rgba(10, 10, 10, 0.55);
+.rb-node.is-active {
+  border-color: var(--node-color);
+  box-shadow:
+    0 8px 24px -4px color-mix(in srgb, var(--node-color) 35%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: scale(1.025);
+}
+
+.rb-node-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--node-color) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rb-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rb-node-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1f1e1b;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.routine-card-channel {
-  color: var(--accent);
-  font-weight: 600;
-  flex-shrink: 0;
+.rb-node-meta {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.66rem;
+  color: rgba(31, 30, 27, 0.5);
+  white-space: nowrap;
+}
+
+.rb-node-spark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--node-color) 18%, transparent);
 }
 
 @media (max-width: 768px) {
-  .routine-feed { max-width: 100%; }
-  .routine-card { padding: 14px 14px; }
-  .routine-card-name { font-size: 0.74rem; }
-  .routine-card-msg { font-size: 0.82rem; }
+  .rb-shell { height: 360px; max-width: 100%; }
+  .rb-svg { transform: scale(0.85); transform-origin: center; }
+  .rb-stat { display: none; }
 }
