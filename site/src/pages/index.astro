@@ -147,27 +147,50 @@ For each, give a one-sentence description. Ask me to pick one (or describe my ow
 Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text, no logs, no "here's what I ran" unless I ask.`;
 ---
 
-<Base title="Shopify Admin Skills — AI agent skills for your store">
+<Base
+  title="Shopify Admin Skills — AI agent skills for your store"
+  description={`${skills.length}+ pre-built AI agent skills for Shopify store operators. Recover carts, adjust prices, audit inventory, process refunds and more — directly through Claude Code, Cursor, Cline, Copilot, or Gemini CLI.`}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Shopify Admin Skills',
+      url: 'https://skills.40rty.ai',
+      description: `${skills.length}+ pre-built AI agent skills for Shopify store operators.`,
+      publisher: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Shopify Admin Skills',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Claude Code, Cursor, Cline, Copilot, Gemini CLI',
+      url: 'https://skills.40rty.ai',
+      downloadUrl: 'https://github.com/40RTY-ai/shopify-admin-skills',
+      license: 'https://opensource.org/licenses/MIT',
+      description: `${skills.length}+ pre-built AI agent skills for Shopify: cart recovery, bulk pricing, inventory audits, refunds, fulfillment routing, SEO, and more.`,
+      author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+  ]}
+>
 
 
   <!-- HERO — split layout: left title, right skills grid -->
   
 
-  <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="gh-top">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-    <span class="gh-text">Star on GitHub</span>
-  </a>
+  
   <section class="hero">
     <div class="hero-split">
       <div class="hero-left">
         
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
-          <span class="line stroke typewriter" id="t2">Admin</span>
-          <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
+          <span class="line typewriter" id="t2">Admin</span>
+          <span class="line typewriter" id="t3">Skills</span>
         </h1>
         <p class="hero-sub">
-          <a id="rotating-link" href="#"><span id="rotating-text"></span></a>
+          <span id="rotating-text"></span>
         </p>
         <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <div class="hero-cta">
@@ -197,12 +220,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
                 <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
                 <span class="cmd-toast">Copied!</span>
               </button>
-              <button class="prompt-expand-btn" type="button" aria-expanded="false" aria-controls="prompt-full">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="expand-chevron"><polyline points="6 9 12 15 18 9"/></svg>
-                <span class="expand-label-closed">View full prompt</span>
-                <span class="expand-label-open">Hide prompt</span>
-              </button>
-              <pre class="prompt-full" id="prompt-full" hidden>{installPrompt}</pre>
             </div>
           </div>
 
@@ -223,6 +240,11 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       </div>
 
       <!-- Right side: skills grid scrolling vertically -->
+      <a href="#signup" class="signup-teaser mobile-teaser">
+        Tell me more cool stuff
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </a>
+
       <div class="hero-right">
         <div class="skills-scroll-mask">
           <div class="skills-scroll-col col-up">
@@ -249,9 +271,76 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </div>
       </div>
     </div>
+
+    <a href="#signup" class="signup-teaser">
+      Tell me more cool stuff
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    </a>
+  </section>
+
+  <!-- SIGNUP SECTION -->
+  <section class="signup" id="signup">
+    <div class="signup-card">
+      <span class="signup-eyebrow signup-eyebrow-flex">From <img src="/40rty-logo.png" alt="40rty" class="signup-eyebrow-logo" /></span>
+      <h2 class="signup-heading">Get new skills first.</h2>
+      <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
+      <!-- Step 1: email -->
+      <div id="signup-step1">
+        <form class="signup-form" id="signup-form" novalidate>
+          <div class="signup-row">
+            <input
+              type="email"
+              name="email"
+              id="signup-email"
+              placeholder="your@email.com"
+              required
+              class="signup-input"
+              autocomplete="email"
+            />
+            <button type="submit" class="signup-btn">Get updates</button>
+          </div>
+          <p class="signup-fine">No spam. Unsubscribe any time.</p>
+        </form>
+      </div>
+
+      <!-- Step 2: skill request (shown after email captured) -->
+      <div id="signup-step2" class="signup-step2">
+        <p class="step2-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          You're in! Tell us a bit more.
+        </p>
+        <form class="signup-form" id="skill-request-form" novalidate>
+          <div class="step2-fields">
+            <input
+              type="text"
+              id="domain-input"
+              placeholder="Your store domain (e.g. my-store.myshopify.com)"
+              class="signup-input"
+            />
+            <input
+              type="text"
+              id="skill-request-input"
+              placeholder="Any skill you'd love to see?"
+              class="signup-input"
+            />
+            <button type="submit" class="signup-btn step2-submit">Send</button>
+          </div>
+        </form>
+        <button type="button" id="skip-btn" class="skip-link">Skip &rarr;</button>
+      </div>
+
+      <!-- Final success -->
+      <div class="signup-success" id="signup-success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>You're in — we'll be in touch.</span>
+      </div>
+    </div>
   </section>
 
   <script>
+    // Fetch GitHub stars
+    
+
     // Copy buttons — handle both .cmd and .prompt-box
     document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -323,7 +412,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     ];
 
     const rotEl = document.getElementById('rotating-text');
-    const rotLink = document.getElementById('rotating-link') as HTMLAnchorElement | null;
     let currentIdx = 0;
     let typeInterval: number | null = null;
     let eraseTimeout: number | null = null;
@@ -348,10 +436,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       }, 35);
     }
 
-    function updateLink(idx: number) {
-      if (rotLink) rotLink.href = base + abilities[idx][1];
-    }
-
     function eraseAndType() {
       if (!rotEl || document.hidden) return;
       clearTimers();
@@ -359,7 +443,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       eraseTimeout = window.setTimeout(() => {
         currentIdx = (currentIdx + 1) % abilities.length;
         rotEl.style.opacity = '1';
-        updateLink(currentIdx);
         typeText(abilities[currentIdx][0], rotEl);
       }, 300);
     }
@@ -370,7 +453,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     }
 
     if (rotEl) {
-      updateLink(0);
       typeText(abilities[0][0], rotEl);
       startRotation();
     }
@@ -385,42 +467,74 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         startRotation();
       }
     });
+
+    const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : 'https://audit.40rty.ai';
+    let capturedEmail = '';
+
+    function showSuccess() {
+      document.getElementById('signup-step2')?.classList.remove('visible');
+      document.getElementById('signup-success')?.classList.add('visible');
+    }
+
+    // Step 1 — email
+    const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
+    const signupBtn = signupForm?.querySelector('.signup-btn') as HTMLButtonElement | null;
+
+    signupForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+      const email = emailInput?.value?.trim();
+      if (!email) return;
+
+      capturedEmail = email;
+      if (signupBtn) { signupBtn.textContent = 'Sending…'; signupBtn.disabled = true; }
+
+      fetch(`${apiBase}/api/skills-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }).catch(() => {});
+
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'skills_signup', { method: 'email' });
+      }
+
+      // Move to step 2
+      document.getElementById('signup-step1')?.classList.add('done');
+      setTimeout(() => {
+        document.getElementById('signup-step1')?.classList.add('hidden');
+        document.getElementById('signup-step2')?.classList.add('visible');
+        document.getElementById('skill-request-input')?.focus();
+      }, 300);
+    });
+
+    // Step 2 — skill request
+    const skillRequestForm = document.getElementById('skill-request-form') as HTMLFormElement | null;
+
+    skillRequestForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const skillRequest = (document.getElementById('skill-request-input') as HTMLInputElement | null)?.value?.trim();
+      const domain = (document.getElementById('domain-input') as HTMLInputElement | null)?.value?.trim();
+      if (skillRequest || domain) {
+        fetch(`${apiBase}/api/skills-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: capturedEmail, skillRequest, domain }),
+        }).catch(() => {});
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'skill_request', { method: 'text' });
+        }
+      }
+      showSuccess();
+    });
+
+    document.getElementById('skip-btn')?.addEventListener('click', showSuccess);
   </script>
 
 </Base>
 
 <style>
-  .gh-top {
-    position: absolute;
-    top: 24px;
-    right: 40px;
-    z-index: 100;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 16px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--color-dark);
-    text-decoration: none;
-    border: 1px solid var(--color-card-border);
-    border-radius: 6px;
-    transition: all 0.15s;
-    background: var(--color-card);
-  }
-
-  .gh-top:hover {
-    background: var(--color-dark);
-    color: var(--color-text-light);
-  }
-
-  @media (max-width: 768px) {
-    .gh-top { position: absolute; top: 16px; right: 16px; margin-bottom: 0; padding: 10px; border-radius: 8px; display: inline-flex; justify-content: center; align-items: center; background: var(--color-bg); border-color: var(--color-card-border); z-index: 100; }
-    .gh-text { display: none; }
-    .gh-top svg { width: 18px; height: 18px; margin: 0; }
-  }
+  
 
   /* HERO */
   .hero {
@@ -429,6 +543,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     align-items: center;
     padding: 0;
     overflow: hidden;
+    position: relative;
   }
 
   .hero-split {
@@ -497,15 +612,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     font-size: 1.1rem;
     color: var(--color-muted);
     margin-top: 4px;
-  }
-
-  #rotating-link {
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  #rotating-link:hover #rotating-text {
-    background: linear-gradient(to top, rgba(232, 168, 56, 0.45) 40%, transparent 40%);
   }
 
   #rotating-text {
@@ -684,69 +790,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     pointer-events: none;
   }
 
-  .prompt-expand-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 2px;
-    background: none;
-    border: none;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-
-  .prompt-expand-btn:hover { color: var(--color-dark); }
-
-  .expand-chevron {
-    transition: transform 0.2s;
-  }
-
-  .prompt-expand-btn[aria-expanded="true"] .expand-chevron {
-    transform: rotate(180deg);
-  }
-
-  .expand-label-open { display: none; }
-  .prompt-expand-btn[aria-expanded="true"] .expand-label-closed { display: none; }
-  .prompt-expand-btn[aria-expanded="true"] .expand-label-open { display: inline; }
-
-  .prompt-full {
-    width: 100%;
-    max-width: 560px;
-    max-height: 280px;
-    background: var(--color-card);
-    border: 1px solid var(--color-card-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.55;
-    color: var(--color-text);
-    white-space: pre-wrap;
-    overflow-y: auto;
-    overflow-x: auto;
-    margin: 0;
-    animation: panelIn 0.2s ease forwards;
-    overscroll-behavior: contain;
-  }
-
-  .prompt-full::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  .prompt-full::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .prompt-full::-webkit-scrollbar-thumb {
-    background: var(--color-card-border);
-    border-radius: 4px;
-  }
-  .prompt-full::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted);
-  }
-
   @media (hover: none) {
     .cmd-prompt[data-tooltip]:hover::before { display: none; }
   }
@@ -781,6 +824,44 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .built-by:hover .built-by-logo { opacity: 0.85; }
+
+  .signup-teaser {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    
+    color: var(--color-text-light);
+    background: var(--color-dark);
+    border: 1px solid var(--color-dark);
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .signup-teaser:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    color: var(--color-accent);
+  }
+
+  .teaser-arrow {
+    color: var(--color-accent);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .signup-teaser:hover .teaser-arrow {
+    transform: translateY(3px);
+  }
 
   .cmd {
     display: inline-flex;
@@ -911,8 +992,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     font-family: var(--font-mono);
     font-size: 0.58rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    
     padding: 2px 7px;
     border-radius: 4px;
     margin-bottom: 6px;
@@ -959,6 +1039,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .hero {
       height: auto;
       min-height: 100dvh;
+      
     }
     .hero-split {
       display: flex;
@@ -987,7 +1068,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     
     .hero-right {
       flex: 0 0 auto;
-      margin-top: 20px; width: 100%; box-sizing: border-box; overflow: hidden;
+      margin-top: 48px; width: 100%; box-sizing: border-box; overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -1027,7 +1108,237 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-chip { padding: 16px 20px; border-radius: 12px; }
     .s-name { font-size: 1rem; white-space: nowrap; }
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
-    .browse-link { display: inline-flex; order: -1; margin-top: 0px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600; padding: 12px 20px; border: 2px solid var(--color-dark); border-radius: 10px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+    .browse-link { display: inline-flex; order: -1; margin-top: 10px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; padding: 10px 16px; border: 1.5px solid var(--color-dark); border-radius: 8px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
   }
+
+  /* SIGNUP SECTION */
+  .signup {
+    padding: 100px 40px 120px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .signup-card {
+    background: var(--color-dark);
+    border-radius: 24px;
+    padding: 60px 64px;
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .signup-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    background: rgba(232, 168, 56, 0.12);
+    border: 1px solid rgba(232, 168, 56, 0.25);
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .signup-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--color-text-light);
+    margin-bottom: 14px;
+  }
+
+  .signup-desc {
+    font-size: 1rem;
+    color: rgba(250, 250, 250, 0.55);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+
+  .signup-row {
+    display: flex;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .signup-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 0;
+  }
+
+  .signup-input::placeholder { color: rgba(250, 250, 250, 0.4); }
+
+  .signup-input:focus {
+    border-color: var(--color-accent);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 2px rgba(232, 168, 56, 0.2);
+  }
+
+  .signup-btn {
+    background: var(--color-accent);
+    color: var(--color-dark);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .signup-btn:hover { 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232, 168, 56, 0.3);
+  }
+  .signup-btn:active { transform: translateY(1px); }
+  .signup-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .signup-fine {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 250, 0.3);
+  }
+
+  .signup-success {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 12px 0 4px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .signup-success.visible {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* Step transitions */
+  #signup-step1 {
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  #signup-step1.done {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  #signup-step1.hidden {
+    display: none;
+  }
+
+  .signup-step2 {
+    display: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .signup-step2.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .step2-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .step2-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .step2-submit {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .skip-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: rgba(250, 250, 250, 0.3);
+    transition: color 0.15s;
+  }
+  .skip-link:hover { color: rgba(250, 250, 250, 0.6); }
+
+  @media (max-width: 768px) {
+    .signup { padding: 60px 24px 80px; }
+    .signup-card { padding: 40px 28px; }
+    .signup-row { flex-direction: column; }
+    .signup-btn { width: 100%; padding: 16px; }
+  }
+
+
+  @media (max-width: 768px) {
+    .signup-teaser {
+    }
+  }
+
+  .mobile-teaser {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .signup-teaser:not(.mobile-teaser) {
+      display: none !important;
+    }
+    .mobile-teaser {
+      display: inline-flex;
+      position: relative;
+      bottom: auto;
+      left: auto;
+      transform: none;
+      align-self: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+  }
+
+  .signup-eyebrow-flex {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .signup-eyebrow-logo {
+    filter: brightness(0) saturate(100%) invert(77%) sepia(35%) saturate(3015%) hue-rotate(345deg) brightness(96%) contrast(88%);
+    height: 14px;
+    width: auto;
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
 </style>
