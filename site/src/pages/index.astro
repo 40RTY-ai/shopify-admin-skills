@@ -208,14 +208,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     <div class="hero-split">
       <div class="hero-left">
         
-        <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="os-badge">
-          <span class="os-dot"></span>
-          <span class="os-label">Open source</span>
-          <span class="os-sep">·</span>
-          <span class="os-mit">MIT</span>
-          <span class="os-sep">·</span>
-          <span class="os-free">Free forever</span>
-        </a>
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
           <span class="line typewriter" id="t2">Admin</span>
@@ -265,14 +257,9 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
             <p class="cmd-hint">Works with Cursor, Cline, Copilot, Gemini CLI.</p>
           </div>
 
-          <div class="hero-meta">
-            <a href="https://github.com/40RTY-ai/shopify-admin-skills" target="_blank" rel="noopener" class="hero-meta-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              Star on GitHub
-            </a>
-            <span class="hero-meta-sep">·</span>
-            <span class="hero-meta-item hero-meta-static">Community-built. Maintained by <a href="https://40rty.ai" target="_blank" rel="noopener">40rty</a>.</span>
-          </div>
+          <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
+            Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
+          </a>
         </div>
       </div>
 
@@ -315,36 +302,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     </a>
   </section>
 
-  <!-- STATS STRIP -->
-  <section class="stats-strip">
-    <div class="stats-inner">
-      <div class="stat">
-        <span class="stat-num">{skills.length}</span>
-        <span class="stat-label">Skills</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-num">{routines.length}</span>
-        <span class="stat-label">Routines</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-num">10</span>
-        <span class="stat-label">Categories</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-num stat-num-text">MIT</span>
-        <span class="stat-label">License</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-num stat-num-text">$0</span>
-        <span class="stat-label">Forever</span>
-      </div>
-    </div>
-  </section>
-
   <!-- ROUTINES PREVIEW -->
   <section class="routines-preview">
     <div class="routines-preview-inner">
@@ -380,7 +337,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   <!-- SIGNUP SECTION -->
   <section class="signup" id="signup">
     <div class="signup-card">
-      <span class="signup-eyebrow">Open source · Stay in the loop</span>
+      <span class="signup-eyebrow signup-eyebrow-flex">From <img src="/40rty-logo.png" alt="40rty" class="signup-eyebrow-logo" /></span>
       <h2 class="signup-heading">Get new skills first.</h2>
       <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
       <!-- Step 1: email -->
@@ -1209,175 +1166,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     .s-cat { font-size: 0.75rem; margin-bottom: 8px; padding: 4px 10px; }
     .browse-link { display: inline-flex; order: -1; margin-top: 10px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; padding: 10px 16px; border: 1.5px solid var(--color-dark); border-radius: 8px; align-self: flex-start; background: var(--color-card); color: var(--color-dark); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
     .gh-link { top: 16px; right: 16px; }
-  }
-
-  /* OPEN SOURCE BADGE */
-  .os-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 18px;
-    padding: 7px 14px;
-    background: var(--color-card);
-    border: 1px solid var(--color-card-border);
-    border-radius: 100px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--color-dark);
-    text-decoration: none;
-    transition: all 0.15s;
-    width: fit-content;
-  }
-
-  .os-badge:hover {
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-card));
-  }
-
-  .os-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #3DBB8F;
-    box-shadow: 0 0 0 3px color-mix(in srgb, #3DBB8F 25%, transparent);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  .os-label { color: #3DBB8F; }
-  .os-mit { color: var(--color-accent); font-weight: 700; }
-  .os-free { color: var(--color-muted); }
-  .os-sep { color: var(--color-card-border); }
-
-  /* HERO META — replaces "Built by 40rty agents" */
-  .hero-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--color-muted);
-  }
-
-  .hero-meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    color: var(--color-dark);
-    text-decoration: none;
-    padding: 6px 12px;
-    border: 1px solid var(--color-card-border);
-    border-radius: 6px;
-    background: var(--color-card);
-    transition: all 0.15s;
-    font-weight: 500;
-  }
-
-  .hero-meta-item:hover {
-    background: var(--color-dark);
-    color: var(--color-text-light);
-    border-color: var(--color-dark);
-  }
-
-  .hero-meta-static {
-    background: transparent;
-    border: none;
-    padding: 0;
-    font-size: 0.74rem;
-  }
-
-  .hero-meta-static:hover {
-    background: transparent;
-    color: var(--color-muted);
-  }
-
-  .hero-meta-static a {
-    color: var(--color-dark);
-    text-decoration: none;
-    border-bottom: 1px solid var(--color-card-border);
-  }
-
-  .hero-meta-static a:hover {
-    border-color: var(--color-dark);
-  }
-
-  .hero-meta-sep { color: var(--color-card-border); }
-
-  /* STATS STRIP */
-  .stats-strip {
-    background: var(--color-dark);
-    color: var(--color-text-light);
-    padding: 36px 40px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stats-strip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 50%);
-    pointer-events: none;
-  }
-
-  .stats-inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    position: relative;
-  }
-
-  .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .stat-num {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--color-text-light) 0%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-  }
-
-  .stat-num-text { font-family: var(--font-mono); font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 700; }
-
-  .stat-label {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(250, 250, 250, 0.55);
-  }
-
-  .stat-divider {
-    width: 1px;
-    height: 36px;
-    background: rgba(250, 250, 250, 0.1);
-  }
-
-  @media (max-width: 768px) {
-    .stats-strip { padding: 24px 20px; }
-    .stats-inner { gap: 14px; flex-wrap: wrap; justify-content: center; }
-    .stat { align-items: center; }
-    .stat-divider { display: none; }
   }
 
   /* ROUTINES PREVIEW */
