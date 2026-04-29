@@ -13,22 +13,22 @@ type Node = {
 };
 
 const nodes: Node[] = [
-  { id: 'morning-briefing', label: 'Morning Briefing', schedule: 'Daily 8 AM', side: 'left', row: 0, color: '#5B8DEF', icon: 'sun' },
-  { id: 'low-stock-watchdog', label: 'Low Stock Watchdog', schedule: 'Daily 7 AM', side: 'left', row: 1, color: '#E87838', icon: 'box' },
-  { id: 'fraud-sentinel', label: 'Fraud Sentinel', schedule: 'Every 2h', side: 'left', row: 2, color: '#E85D75', icon: 'shield' },
-  { id: 'fulfillment-sla', label: 'Fulfillment SLA', schedule: 'Wkdys 10/3', side: 'right', row: 0, color: '#3DBB8F', icon: 'truck' },
-  { id: 'weekly-review', label: 'Weekly Review', schedule: 'Mon 8 AM', side: 'right', row: 1, color: '#9B6EE3', icon: 'chart' },
-  { id: 'churn-watch', label: 'Churn Watch', schedule: 'Wed 8 AM', side: 'right', row: 2, color: '#5BB8A8', icon: 'heart' },
+  { id: 'morning-briefing', label: 'Morning Briefing', schedule: 'Every morning', side: 'left', row: 0, color: '#5B8DEF', icon: 'sun' },
+  { id: 'low-stock-watchdog', label: 'Low Stock Alerts', schedule: 'Every morning', side: 'left', row: 1, color: '#E87838', icon: 'box' },
+  { id: 'fraud-sentinel', label: 'Fraud Watch', schedule: 'Every 2 hours', side: 'left', row: 2, color: '#E85D75', icon: 'shield' },
+  { id: 'fulfillment-sla', label: 'Shipping On Time', schedule: 'Twice a day', side: 'right', row: 0, color: '#3DBB8F', icon: 'truck' },
+  { id: 'weekly-review', label: 'Weekly Review', schedule: 'Mondays', side: 'right', row: 1, color: '#9B6EE3', icon: 'chart' },
+  { id: 'churn-watch', label: 'At-Risk Customers', schedule: 'Wednesdays', side: 'right', row: 2, color: '#5BB8A8', icon: 'heart' },
 ];
 
-const W = 580;
-const H = 360;
+const W = 540;
+const H = 340;
 const CENTER_X = W / 2;
 const CENTER_Y = H / 2;
 const NODE_W = 168;
-const NODE_H = 70;
-const ROW_Y = [54, 145, 236];
-const SIDE_X = { left: 22, right: W - NODE_W - 22 };
+const NODE_H = 64;
+const ROW_Y = [40, 138, 236];
+const SIDE_X = { left: 18, right: W - NODE_W - 18 };
 
 function nodeAnchor(n: Node): { x: number; y: number } {
   const x = n.side === 'left' ? SIDE_X.left + NODE_W : SIDE_X.right;
@@ -99,12 +99,6 @@ export default function RoutineBeams() {
 
   return (
     <div className="rb-shell">
-      <div className="rb-header">
-        <span className="rb-pulse" />
-        <span className="rb-label">Routines · live</span>
-        <span className="rb-stat">{nodes.length} active · {Math.floor(Math.random() * 100) + 200} fires today</span>
-      </div>
-
       <div className="rb-canvas">
         <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="rb-svg">
           <defs>
