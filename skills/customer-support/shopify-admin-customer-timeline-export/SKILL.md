@@ -55,42 +55,18 @@ query CustomerHeaderForTimeline($id: ID!) {
     displayName
     firstName
     lastName
-    defaultEmailAddress {
-      emailAddress
-    }
+    defaultEmailAddress { emailAddress }
     phone
     note
     tags
     numberOfOrders
-    amountSpent {
-      amount
-      currencyCode
-    }
-    emailMarketingConsent {
-      marketingState
-      marketingOptInLevel
-      consentUpdatedAt
-    }
-    smsMarketingConsent {
-      marketingState
-      marketingOptInLevel
-      consentUpdatedAt
-    }
+    amountSpent { amount currencyCode }
+    emailMarketingConsent { marketingState marketingOptInLevel consentUpdatedAt }
+    smsMarketingConsent { marketingState marketingOptInLevel consentUpdatedAt }
     addresses(first: 25) {
-      id
-      firstName
-      lastName
-      address1
-      address2
-      city
-      provinceCode
-      countryCodeV2
-      zip
-      phone
+      id firstName lastName address1 address2 city provinceCode countryCodeV2 zip phone
     }
-    defaultAddress {
-      id
-    }
+    defaultAddress { id }
     createdAt
     updatedAt
   }
@@ -111,69 +87,35 @@ query CustomerOrdersForTimeline($query: String!, $after: String) {
         displayFulfillmentStatus
         cancelledAt
         cancelReason
-        totalPriceSet {
-          shopMoney { amount currencyCode }
-        }
-        totalShippingPriceSet {
-          shopMoney { amount currencyCode }
-        }
-        totalDiscountsSet {
-          shopMoney { amount currencyCode }
-        }
+        totalPriceSet { shopMoney { amount currencyCode } }
+        totalShippingPriceSet { shopMoney { amount currencyCode } }
+        totalDiscountsSet { shopMoney { amount currencyCode } }
         lineItems(first: 50) {
-          edges {
-            node {
-              id
-              title
-              quantity
-              sku
-              discountedTotalSet {
-                shopMoney { amount currencyCode }
-              }
-              variant {
-                id
-                sku
-              }
-            }
-          }
+          edges { node {
+            id title quantity sku
+            discountedTotalSet { shopMoney { amount currencyCode } }
+            variant { id sku }
+          } }
         }
         fulfillments {
-          id
-          status
-          deliveredAt
-          trackingInfo {
-            number
-            url
-            company
-          }
+          id status deliveredAt
+          trackingInfo { number url company }
         }
         refunds {
           id
           createdAt
-          totalRefundedSet {
-            shopMoney { amount currencyCode }
-          }
+          totalRefundedSet { shopMoney { amount currencyCode } }
           refundLineItems(first: 50) {
-            edges {
-              node {
-                quantity
-                lineItem {
-                  id
-                  title
-                }
-                subtotalSet {
-                  shopMoney { amount currencyCode }
-                }
-              }
-            }
+            edges { node {
+              quantity
+              lineItem { id title }
+              subtotalSet { shopMoney { amount currencyCode } }
+            } }
           }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -204,22 +146,17 @@ For `format: human` (default):
 ```
 ══════════════════════════════════════════════
 CUSTOMER TIMELINE
-  Customer:        <name> (<email>)
-  ID:              <customer_id>
+  Customer:        <name> (<email>)  ID: <customer_id>
   Joined:          <createdAt>
-  Lifetime spend:  $<amount> <currency>
-  Total orders:    <n>
-  Refunds total:   $<amount>
+  Lifetime spend:  $<amount> <currency>   Total orders: <n>   Refunds total: $<amount>
   Tags:            <list>
-  Email consent:   <state> (since <date>)
-  SMS consent:     <state> (since <date>)
+  Email consent:   <state> (since <date>)   SMS consent: <state> (since <date>)
 
   Recent timeline (most recent first):
-    <date>  ORDER       <name>  $<amount>  <financial> / <fulfillment>
-    <date>  REFUND      <id>    $<amount>  reason: <text>
-    <date>  RETURN      <id>    items: <n>
+    <date>  ORDER   <name>  $<amount>  <financial> / <fulfillment>
+    <date>  REFUND  <id>    $<amount>
+    <date>  RETURN  <id>    items: <n>
     ...
-
   Output: customer_timeline_<customer_id>_<date>.csv
 ══════════════════════════════════════════════
 ```
@@ -231,22 +168,12 @@ For `format: json`, emit:
   "store": "<domain>",
   "customer_id": "<gid>",
   "header": {
-    "name": "<string>",
-    "email": "<string>",
-    "phone": "<string>",
-    "joined": "<ISO8601>",
-    "lifetime_spend": 0,
-    "currency": "USD",
-    "total_orders": 0,
-    "tags": [],
-    "email_consent": "<state>",
-    "sms_consent": "<state>"
+    "name": "<string>", "email": "<string>", "phone": "<string>",
+    "joined": "<ISO8601>", "lifetime_spend": 0, "currency": "USD",
+    "total_orders": 0, "tags": [],
+    "email_consent": "<state>", "sms_consent": "<state>"
   },
-  "totals": {
-    "orders": 0,
-    "refunds_count": 0,
-    "refunds_amount": 0
-  },
+  "totals": { "orders": 0, "refunds_count": 0, "refunds_amount": 0 },
   "output_file": "customer_timeline_<customer_id>_<date>.csv"
 }
 ```
@@ -261,15 +188,13 @@ Event types include: `customer_created`, `order_placed`, `order_fulfilled`, `ord
 | Error | Cause | Recovery |
 |-------|-------|----------|
 | `THROTTLED` | API rate limit exceeded | Wait 2 seconds, retry up to 3 times |
-| Customer not found | Wrong GID | Use `order-lookup-and-summary` to find a recent order, then read `customer.id` from it |
-| Customer has 0 orders | New account or guest-only | Emit header-only timeline; no order rows |
-| Order has been anonymized | GDPR data wipe | Skip line items; emit a placeholder event row |
-| Pagination beyond `max_orders` | Cap reached | Stop and report `truncated: true` in JSON output |
+| Customer not found | Wrong GID | Use `order-lookup-and-summary` to find a recent order, then read `customer.id` |
+| 0 orders | New account or guest-only | Emit header-only timeline |
+| Order anonymized | GDPR data wipe | Skip line items; emit placeholder row |
+| Pagination beyond `max_orders` | Cap reached | Stop, set `truncated: true` |
 
 ## Best Practices
-- Use this skill before any merge, deletion, or escalation as the source-of-truth dump — once a merge is committed, the pre-merge state is no longer reconstructable from the API.
-- For high-volume customers, set `max_orders: 50` to cap export size; their full lifetime is rarely needed for a single support case.
-- Cross-reference the timeline with internal support tickets — gaps between orders often correspond to unresolved support cases that suppress repeat purchase.
-- The CSV is intentionally event-sorted (one row per timeline event) so downstream pivoting in a spreadsheet works without reshaping.
-- Pair with `customer-merge` — run this skill on both the winner and loser before merging so you have a permanent record of each record's pre-merge state.
-- When responding to data subject access requests, this CSV plus the human-format summary together cover the typical "everything you have on me" scope.
+- Run before any merge, deletion, or escalation — pre-state is unreconstructable once a merge commits.
+- For high-volume customers set `max_orders: 50`; full lifetime is rarely needed for one support case.
+- CSV is event-sorted so downstream pivoting works without reshaping.
+- Pair with `customer-merge`: run on both winner and loser before merging for a permanent pre-merge record.

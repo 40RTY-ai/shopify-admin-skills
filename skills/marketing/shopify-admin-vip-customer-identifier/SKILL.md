@@ -166,8 +166,6 @@ For `format: json`, emit:
 {
   "skill": "vip-customer-identifier",
   "store": "<domain>",
-  "started_at": "<ISO8601>",
-  "completed_at": "<ISO8601>",
   "dry_run": true,
   "rank_by": "spend",
   "outcome": {
@@ -175,7 +173,6 @@ For `format: json`, emit:
     "eligible": 0,
     "vips_identified": 0,
     "threshold_spend": 0,
-    "threshold_orders": 0,
     "customers_tagged": 0,
     "errors": 0,
     "output_file": "vip_customers_<date>.csv"

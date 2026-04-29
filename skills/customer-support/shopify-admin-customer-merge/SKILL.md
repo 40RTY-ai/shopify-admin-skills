@@ -65,35 +65,15 @@ query CustomerForMerge($id: ID!) {
     displayName
     firstName
     lastName
-    defaultEmailAddress {
-      emailAddress
-    }
+    defaultEmailAddress { emailAddress }
     phone
     tags
     note
     numberOfOrders
-    amountSpent {
-      amount
-      currencyCode
-    }
-    emailMarketingConsent {
-      marketingState
-      marketingOptInLevel
-      consentUpdatedAt
-    }
-    smsMarketingConsent {
-      marketingState
-      marketingOptInLevel
-      consentUpdatedAt
-    }
-    addresses(first: 25) {
-      id
-      address1
-      city
-      provinceCode
-      countryCodeV2
-      zip
-    }
+    amountSpent { amount currencyCode }
+    emailMarketingConsent { marketingState marketingOptInLevel consentUpdatedAt }
+    smsMarketingConsent { marketingState marketingOptInLevel consentUpdatedAt }
+    addresses(first: 25) { id address1 city provinceCode countryCodeV2 zip }
     createdAt
   }
 }
@@ -111,16 +91,9 @@ mutation CustomerMerge(
     customerTwoId: $customerTwoId
     overrideFields: $overrideFields
   ) {
-    job {
-      id
-      done
-    }
+    job { id done }
     resultingCustomerId
-    userErrors {
-      field
-      message
-      code
-    }
+    userErrors { field message code }
   }
 }
 ```
@@ -129,16 +102,8 @@ mutation CustomerMerge(
 # customerUpdate:mutation — validated against api_version 2025-01
 mutation CustomerConsolidate($input: CustomerInput!) {
   customerUpdate(input: $input) {
-    customer {
-      id
-      displayName
-      tags
-      note
-    }
-    userErrors {
-      field
-      message
-    }
+    customer { id displayName tags note }
+    userErrors { field message }
   }
 }
 ```

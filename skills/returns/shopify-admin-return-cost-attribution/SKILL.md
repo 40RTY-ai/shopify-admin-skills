@@ -13,10 +13,10 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Quantifies the full cost of returns over a window — not just the refunded amount. Combines refund totals, lost shipping revenue, COGS for non-restockable items (e.g., `DEFECTIVE` returns), and restocking workload to produce a per-reason and per-product return P&L. Read-only — no mutations. Use to prioritize which return reasons or product lines deserve operational fixes (e.g., better packaging, better size guides, more accurate listings).
+Quantifies the full cost of returns over a window — not just the refunded amount. Combines refund totals, lost shipping revenue, COGS for non-restockable items (e.g., `DEFECTIVE`), and restocking labor into a per-reason and per-product return P&L. Read-only. Use to prioritize which reasons or product lines deserve operational fixes — better packaging, size guides, listing accuracy.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_returns,read_inventory`
+- `shopify store auth --store <domain> --scopes read_orders,read_returns,read_inventory`
 - API scopes: `read_orders`, `read_returns`, `read_inventory`
 
 ## Parameters
@@ -33,29 +33,21 @@ Quantifies the full cost of returns over a window — not just the refunded amou
 
 ## Safety
 
-> ℹ️ Read-only skill — no mutations are executed. Safe to run at any time. Cost figures are estimates derived from `unitCost`, refund totals, and the `flat_restocking_cost` parameter — calibrate the flat-cost figure to your operation before treating outputs as accounting truth.
+> ℹ️ Read-only skill — no mutations are executed. Cost figures are estimates derived from `unitCost`, refund totals, and `flat_restocking_cost` — calibrate the flat-cost figure to your operation before treating outputs as accounting truth.
 
 ## Workflow Steps
 
 1. **OPERATION:** `returns` — query
-   **Inputs:** `query: "created_at:>='<NOW - days_back days>'"`, `first: 250`, select `id`, `status`, `createdAt`, `order { id name totalShippingPriceSet }`, `returnLineItems(first: 50) { node { quantity returnReason fulfillmentLineItem { lineItem { id title variant { id sku inventoryItem { id } } discountedTotalSet originalUnitPriceSet } } } }`, pagination cursor
-   **Expected output:** All returns in window joined to their order shipping cost and per-line-item pricing
+   **Inputs:** `query: "created_at:>='<NOW - days_back days>'"`, `first: 250`, select returns with line item pricing, product/variant, `inventoryItem.id`
+   **Expected output:** All returns in window with per-line-item pricing
 
 2. **OPERATION:** `orders` — query
-   **Inputs:** For each return's `order.id`, fetch `refunds { totalRefundedSet, refundLineItems { lineItem { id }, quantity, subtotalSet, totalTaxSet } }` to attribute the refunded amount to specific line items
-   **Expected output:** Refund-side data per return order; sum refunded $ per `lineItem.id`
+   **Inputs:** For each return's `order.id`, fetch `refunds { totalRefundedSet refundLineItems { quantity subtotalSet totalTaxSet lineItem { id } } }`
+   **Expected output:** Refund amounts mappable to line items
 
-3. **OPERATION:** `inventoryItems` — query
-   **Inputs:** Batch unique `inventoryItem.id` values gathered in step 1, `nodes(ids: $ids)`
-   **Expected output:** `unitCost` per inventory item for COGS impact calculation
+3. **OPERATION:** `inventoryItems` — query — batch unique `inventoryItem.id` from step 1; returns `unitCost` per item
 
-4. For each return line item, compute:
-   - `refund_amount` = matched refundLineItem.subtotalSet for this lineItem × proportion of returned quantity
-   - `shipping_loss` = order.totalShippingPriceSet allocated by line-item value share for full-order returns; 0 for partial returns
-   - `cogs_writeoff` = `unitCost × quantity` if `returnReason in writeoff_reasons`; 0 otherwise (assumed restockable)
-   - `restocking_labor` = `flat_restocking_cost × quantity`
-   - `total_return_cost` = `refund_amount + shipping_loss + cogs_writeoff + restocking_labor`
-   Then aggregate by the chosen `group_by` dimension.
+4. Per line item compute: `refund_amount` (matched refundLineItem proportional to returned qty), `shipping_loss` (order shipping × line-item value share for full-order returns; else 0), `cogs_writeoff` (`unitCost × qty` only if `returnReason in writeoff_reasons`), `restocking_labor` (`flat_restocking_cost × qty`). Sum and aggregate by `group_by`.
 
 ## GraphQL Operations
 
@@ -72,54 +64,28 @@ query ReturnsForCostAttribution($query: String!, $after: String) {
         order {
           id
           name
-          totalShippingPriceSet {
-            shopMoney { amount currencyCode }
-          }
-          totalPriceSet {
-            shopMoney { amount currencyCode }
-          }
+          totalShippingPriceSet { shopMoney { amount currencyCode } }
+          totalPriceSet { shopMoney { amount currencyCode } }
         }
         returnLineItems(first: 50) {
-          edges {
-            node {
+          edges { node {
+            id
+            quantity
+            returnReason
+            fulfillmentLineItem { lineItem {
               id
+              title
               quantity
-              returnReason
-              returnReasonNote
-              fulfillmentLineItem {
-                lineItem {
-                  id
-                  title
-                  quantity
-                  discountedTotalSet {
-                    shopMoney { amount currencyCode }
-                  }
-                  originalUnitPriceSet {
-                    shopMoney { amount currencyCode }
-                  }
-                  variant {
-                    id
-                    sku
-                    inventoryItem {
-                      id
-                    }
-                  }
-                  product {
-                    id
-                    title
-                    vendor
-                  }
-                }
-              }
-            }
-          }
+              discountedTotalSet { shopMoney { amount currencyCode } }
+              originalUnitPriceSet { shopMoney { amount currencyCode } }
+              variant { id sku inventoryItem { id } }
+              product { id title vendor }
+            } }
+          } }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -135,32 +101,19 @@ query OrderRefundsForReturns($query: String!, $after: String) {
         refunds {
           id
           createdAt
-          totalRefundedSet {
-            shopMoney { amount currencyCode }
-          }
+          totalRefundedSet { shopMoney { amount currencyCode } }
           refundLineItems(first: 50) {
-            edges {
-              node {
-                quantity
-                subtotalSet {
-                  shopMoney { amount currencyCode }
-                }
-                totalTaxSet {
-                  shopMoney { amount currencyCode }
-                }
-                lineItem {
-                  id
-                }
-              }
-            }
+            edges { node {
+              quantity
+              subtotalSet { shopMoney { amount currencyCode } }
+              totalTaxSet { shopMoney { amount currencyCode } }
+              lineItem { id }
+            } }
           }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
   }
 }
 ```
@@ -171,10 +124,7 @@ query InventoryUnitCosts($ids: [ID!]!) {
   nodes(ids: $ids) {
     ... on InventoryItem {
       id
-      unitCost {
-        amount
-        currencyCode
-      }
+      unitCost { amount currencyCode }
       tracked
     }
   }
@@ -208,14 +158,10 @@ For `format: human` (default):
 ══════════════════════════════════════════════
 RETURN COST ATTRIBUTION  (<days_back> days, group: <group_by>)
   Returns analyzed:    <n>
-  Total return cost:   $<amount>
-    Refund $:          $<amount>  (<pct>%)
-    Shipping loss:     $<amount>  (<pct>%)
-    COGS write-off:    $<amount>  (<pct>%)
-    Restocking labor:  $<amount>  (<pct>%)
+  Total return cost:   $<amount>  (refund <pct>%, shipping <pct>%, COGS <pct>%, labor <pct>%)
 
   Top cost drivers:
-    <group>   Returns: <n>  Total cost: $<n>  Avg/return: $<n>  Top reason: <reason>
+    <group>   Returns: <n>  Total: $<n>  Avg: $<n>  Top reason: <reason>
   Output: return_cost_<date>.csv
 ══════════════════════════════════════════════
 ```
@@ -229,12 +175,8 @@ For `format: json`, emit:
   "group_by": "reason",
   "returns_analyzed": 0,
   "totals": {
-    "total_cost": 0,
-    "refund": 0,
-    "shipping_loss": 0,
-    "cogs_writeoff": 0,
-    "restocking_labor": 0,
-    "currency": "USD"
+    "total_cost": 0, "refund": 0, "shipping_loss": 0,
+    "cogs_writeoff": 0, "restocking_labor": 0, "currency": "USD"
   },
   "groups": [],
   "output_file": "return_cost_<date>.csv"
@@ -249,14 +191,12 @@ CSV file `return_cost_<YYYY-MM-DD>.csv` with columns:
 | Error | Cause | Recovery |
 |-------|-------|----------|
 | `THROTTLED` | API rate limit exceeded | Wait 2 seconds, retry up to 3 times |
-| Missing `unitCost` on inventory item | Cost not recorded | Treat COGS as 0 and flag the row in output |
-| Refund not yet processed for return | Customer hasn't been refunded | Use line item discounted total as the refund estimate |
-| Return spans multiple refunds | Partial refund history | Sum refunds tied to the line items in the return |
-| Order has no shipping cost | Free shipping | Shipping loss = 0 |
+| Missing `unitCost` | Cost not recorded | Treat COGS as 0 and flag the row |
+| Refund not yet processed | Customer not yet refunded | Use line item discounted total as estimate |
+| Multiple refunds per return | Partial refund history | Sum refunds tied to the return's line items |
+| No shipping cost | Free shipping | Shipping loss = 0 |
 
 ## Best Practices
-- Use `group_by: reason_x_product` to find lethal combos like `DEFECTIVE × <vendor X's hero SKU>` — they reveal supplier quality issues that can be addressed at the source.
-- Re-run after `unitCost` is updated for any product line — accurate cost is the input most likely to be stale.
-- Pair with `return-reason-analysis` (which reports volume) to compare "what returns most" with "what costs most"; they often diverge.
-- Calibrate `flat_restocking_cost` annually based on warehouse staff hourly cost × average minutes-per-return.
-- For DEFECTIVE returns showing high COGS write-off, escalate to vendor for credit; the cost-per-return metric makes the business case.
+- Use `group_by: reason_x_product` to surface lethal combos like `DEFECTIVE × <hero SKU>` — supplier-quality issues addressable at the source.
+- Re-run after `unitCost` updates; stale cost most often skews COGS write-off.
+- Pair with `return-reason-analysis` to compare "what returns most" with "what costs most" — they often diverge.

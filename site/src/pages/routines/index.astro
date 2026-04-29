@@ -429,9 +429,10 @@ Begin Phase 1 now.`;
     align-items: center;
     gap: 14px;
     width: 100%;
-    padding: 18px 22px;
+    padding: 14px 20px;
     background: rgba(250, 250, 250, 0.06);
-    border: 1px solid rgba(250, 250, 250, 0.14);
+    border: 2px solid rgba(250, 250, 250, 0.1);
+    border-bottom: 4px solid var(--color-accent);
     border-radius: 12px;
     cursor: pointer;
     text-align: left;
@@ -439,11 +440,20 @@ Begin Phase 1 now.`;
     font-size: 0.88rem;
     color: var(--color-text-light);
     transition: all 0.15s;
+    transform-origin: bottom;
+    user-select: none;
   }
 
   .cmd:hover {
-    border-color: var(--color-accent);
+    border-color: rgba(250, 250, 250, 0.16);
+    border-bottom-color: var(--color-accent);
     background: rgba(250, 250, 250, 0.1);
+  }
+
+  .cmd:active {
+    border-bottom-width: 2px;
+    transform: scaleY(0.97);
+    transition: all 0.06s ease;
   }
 
   .cmd code {
