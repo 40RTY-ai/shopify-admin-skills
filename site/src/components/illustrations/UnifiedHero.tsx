@@ -58,20 +58,44 @@ function nodeAnchor(n: AgentNode): { x: number; y: number } {
   return { x: p.x + (dx / len) * r, y: p.y + (dy / len) * r };
 }
 
-function pathFor(n: AgentNode): string {
+/* Compute the quadratic bezier control point for a node's connection.
+   Same math drives pathFor() and the comet-head waypoint sampling so the
+   dot stays glued to the visible curve. */
+function controlPoint(n: AgentNode): { mx: number; my: number } {
   const a = nodeAnchor(n);
-  // Build a real curve: control point perpendicular to the line, biased outward
   const dx = CENTER_X - a.x;
   const dy = CENTER_Y - a.y;
   const len = Math.hypot(dx, dy);
   const px = -dy / len; // perpendicular unit vector
   const py = dx / len;
-  // Curve direction alternates clockwise based on quadrant for visual variety
   const sign = a.x < CENTER_X ? -1 : 1;
   const curvature = 24;
-  const mx = (a.x + CENTER_X) / 2 + px * curvature * sign;
-  const my = (a.y + CENTER_Y) / 2 + py * curvature * sign;
+  return {
+    mx: (a.x + CENTER_X) / 2 + px * curvature * sign,
+    my: (a.y + CENTER_Y) / 2 + py * curvature * sign,
+  };
+}
+
+function pathFor(n: AgentNode): string {
+  const a = nodeAnchor(n);
+  const { mx, my } = controlPoint(n);
   return `M ${a.x} ${a.y} Q ${mx} ${my}, ${CENTER_X} ${CENTER_Y}`;
+}
+
+/* Sample positions along the quadratic bezier. Returns N+1 [cx, cy] pairs
+   from t=0 (start anchor) to t=1 (store center) inclusive. */
+function bezierWaypoints(n: AgentNode, samples: number = 24): { cx: number[]; cy: number[] } {
+  const a = nodeAnchor(n);
+  const { mx, my } = controlPoint(n);
+  const cx: number[] = [];
+  const cy: number[] = [];
+  for (let i = 0; i <= samples; i++) {
+    const t = i / samples;
+    const u = 1 - t;
+    cx.push(u * u * a.x + 2 * u * t * mx + t * t * CENTER_X);
+    cy.push(u * u * a.y + 2 * u * t * my + t * t * CENTER_Y);
+  }
+  return { cx, cy };
 }
 
 /* Single fixed chip position above the store — never collides with nodes */
@@ -303,7 +327,7 @@ export default function UnifiedHero() {
         {/* Beams — three layers: wide blurred halo, mid solid, bright moving comet */}
         {beams.map(beam => {
           const node = nodes.find(n => n.id === beam.nodeId)!;
-          const a = nodeAnchor(node);
+          const wp = bezierWaypoints(node, 30);
           return (
             <g key={beam.id}>
               {/* Outer halo */}
@@ -338,14 +362,15 @@ export default function UnifiedHero() {
                 }}
                 style={{ filter: `drop-shadow(0 0 4px ${node.color})` }}
               />
-              {/* Bright comet head with triple glow */}
+              {/* Bright comet head — sampled bezier waypoints so it
+                  follows the visible curve, not a straight line. */}
               <motion.circle
                 r="5"
                 fill="#FFFFFF"
                 initial={{ opacity: 0 }}
                 animate={{
-                  cx: [a.x, CENTER_X],
-                  cy: [a.y, CENTER_Y],
+                  cx: wp.cx,
+                  cy: wp.cy,
                   opacity: [0, 1, 1, 0],
                 }}
                 transition={{
