@@ -58,19 +58,23 @@ function nodeAnchor(n: AgentNode): { x: number; y: number } {
 
 function pathFor(n: AgentNode): string {
   const a = nodeAnchor(n);
-  const mx = (a.x + CENTER_X) / 2;
-  const my = (a.y + CENTER_Y) / 2;
+  // Build a real curve: control point perpendicular to the line, biased outward
+  const dx = CENTER_X - a.x;
+  const dy = CENTER_Y - a.y;
+  const len = Math.hypot(dx, dy);
+  const px = -dy / len; // perpendicular unit vector
+  const py = dx / len;
+  // Curve direction alternates clockwise based on quadrant for visual variety
+  const sign = a.x < CENTER_X ? -1 : 1;
+  const curvature = 24;
+  const mx = (a.x + CENTER_X) / 2 + px * curvature * sign;
+  const my = (a.y + CENTER_Y) / 2 + py * curvature * sign;
   return `M ${a.x} ${a.y} Q ${mx} ${my}, ${CENTER_X} ${CENTER_Y}`;
 }
 
-/* Output chip position: midway between firing node and store, biased toward store */
-function chipPosition(n: AgentNode): { x: number; y: number } {
-  const a = nodeAnchor(n);
-  return {
-    x: a.x + (CENTER_X - a.x) * 0.7,
-    y: a.y + (CENTER_Y - a.y) * 0.7,
-  };
-}
+/* Single fixed chip position above the store — never collides with nodes */
+const CHIP_X = CENTER_X;
+const CHIP_Y = CENTER_Y - 130;
 
 /* ───────── icons ───────── */
 const ClaudeMark = ({ size = 16, fill = 'currentColor' }: { size?: number; fill?: string }) => (
@@ -146,10 +150,10 @@ export default function UnifiedHero() {
         setChips(prev => [...prev, { id, nodeId: next.id }]);
       }, 950);
 
-      setTimeout(() => setBeams(prev => prev.filter(b => b.id !== id)), 1700);
-      setTimeout(() => setActiveId(null), 1500);
-      setTimeout(() => setChips(prev => prev.filter(c => c.id !== id)), 2700);
-    }, 1900);
+      setTimeout(() => setBeams(prev => prev.filter(b => b.id !== id)), 1900);
+      setTimeout(() => setActiveId(null), 1700);
+      setTimeout(() => setChips(prev => prev.filter(c => c.id !== id)), 2900);
+    }, 2200);
     return () => clearInterval(iv);
   }, [counter]);
 
@@ -162,68 +166,61 @@ export default function UnifiedHero() {
         preserveAspectRatio="xMidYMid meet"
         className="uh-stage-svg"
       >
-        {/* Subtle live base paths */}
+        {/* Persistent connection paths — every node always wired to store */}
         {nodes.map(n => (
-          <g key={`base-${n.id}`}>
-            <path
-              d={pathFor(n)}
-              stroke="rgba(31, 30, 27, 0.06)"
-              strokeWidth="1"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <path
-              d={pathFor(n)}
-              stroke={n.color}
-              strokeOpacity="0.22"
-              strokeWidth="1"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray="1 6"
-            >
-              <animate attributeName="stroke-dashoffset" from="0" to="-14" dur="3s" repeatCount="indefinite" />
-            </path>
-          </g>
+          <path
+            key={`base-${n.id}`}
+            d={pathFor(n)}
+            stroke={n.color}
+            strokeOpacity="0.18"
+            strokeWidth="1.2"
+            fill="none"
+            strokeLinecap="round"
+          />
         ))}
 
-        {/* Beams */}
+        {/* Beams — three layers: wide blurred halo, mid solid, bright moving comet */}
         {beams.map(beam => {
           const node = nodes.find(n => n.id === beam.nodeId)!;
           const a = nodeAnchor(node);
           return (
             <g key={beam.id}>
+              {/* Outer halo */}
               <motion.path
                 d={pathFor(node)}
                 stroke={node.color}
-                strokeOpacity="0.4"
-                strokeWidth="7"
+                strokeOpacity="0.45"
+                strokeWidth="10"
                 fill="none"
                 strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: [0, 0.5, 0.5, 0] }}
+                animate={{ pathLength: 1, opacity: [0, 0.55, 0.55, 0] }}
                 transition={{
-                  pathLength: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 1.5, times: [0, 0.4, 0.85, 1] },
+                  pathLength: { duration: 1.05, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.7, times: [0, 0.4, 0.85, 1] },
                 }}
-                style={{ filter: 'blur(6px)' }}
+                style={{ filter: 'blur(8px)' }}
               />
+              {/* Solid line */}
               <motion.path
                 d={pathFor(node)}
                 stroke={node.color}
-                strokeOpacity="0.85"
-                strokeWidth="1.6"
+                strokeOpacity="0.95"
+                strokeWidth="2.6"
                 fill="none"
                 strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
                 transition={{
-                  pathLength: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 1.5, times: [0, 0.3, 0.85, 1] },
+                  pathLength: { duration: 1.05, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.7, times: [0, 0.3, 0.82, 1] },
                 }}
+                style={{ filter: `drop-shadow(0 0 4px ${node.color})` }}
               />
+              {/* Bright comet head with triple glow */}
               <motion.circle
-                r="3.5"
-                fill={node.color}
+                r="5"
+                fill="#FFFFFF"
                 initial={{ opacity: 0 }}
                 animate={{
                   cx: [a.x, CENTER_X],
@@ -231,11 +228,13 @@ export default function UnifiedHero() {
                   opacity: [0, 1, 1, 0],
                 }}
                 transition={{
-                  cx: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
-                  cy: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 1.1, times: [0, 0.1, 0.8, 1] },
+                  cx: { duration: 1.05, ease: [0.4, 0, 0.2, 1] },
+                  cy: { duration: 1.05, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.2, times: [0, 0.08, 0.85, 1] },
                 }}
-                style={{ filter: `drop-shadow(0 0 8px ${node.color}) drop-shadow(0 0 14px ${node.color})` }}
+                style={{
+                  filter: `drop-shadow(0 0 4px ${node.color}) drop-shadow(0 0 10px ${node.color}) drop-shadow(0 0 20px ${node.color})`,
+                }}
               />
             </g>
           );
@@ -243,29 +242,31 @@ export default function UnifiedHero() {
       </svg>
 
       {/* Store at true center */}
-      <motion.div
-        key={`store-${storePulse}`}
+      <div
         className="uh-store"
-        initial={{ scale: 1 }}
-        animate={{
-          scale: [1, 1.06, 1],
-          boxShadow: [
-            '0 0 0 0 rgba(94, 142, 62, 0.45)',
-            '0 0 0 24px rgba(94, 142, 62, 0)',
-            '0 0 0 0 rgba(94, 142, 62, 0)',
-          ],
-        }}
-        transition={{ duration: 1, ease: 'easeOut' }}
         style={{
           left: `${(CENTER_X / CANVAS_W) * 100}%`,
           top: `${(CENTER_Y / CANVAS_H) * 100}%`,
         }}
       >
-        <div className="uh-store-icon">
+        <motion.div
+          key={`store-${storePulse}`}
+          className="uh-store-icon"
+          initial={{ scale: 1 }}
+          animate={{
+            scale: [1, 1.06, 1],
+            boxShadow: [
+              '0 28px 56px -12px rgba(94, 142, 62, 0.4), 0 10px 20px -4px rgba(31, 30, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0 rgba(94, 142, 62, 0.55)',
+              '0 28px 56px -12px rgba(94, 142, 62, 0.4), 0 10px 20px -4px rgba(31, 30, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 22px rgba(94, 142, 62, 0)',
+              '0 28px 56px -12px rgba(94, 142, 62, 0.4), 0 10px 20px -4px rgba(31, 30, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0 rgba(94, 142, 62, 0)',
+            ],
+          }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+        >
           <ShopifyBag size={48} />
-        </div>
+        </motion.div>
         <div className="uh-store-label">your store</div>
-      </motion.div>
+      </div>
 
       {/* Routine + Claude nodes */}
       {nodes.map(n => {
@@ -304,23 +305,21 @@ export default function UnifiedHero() {
         );
       })}
 
-      {/* Result chip — appears near store on beam arrival */}
+      {/* Result chip floats above the store — single anchored slot */}
       <AnimatePresence>
         {chips.map(chip => {
           const node = nodes.find(n => n.id === chip.nodeId)!;
-          const pos = chipPosition(node);
           return (
             <motion.div
               key={chip.id}
               className="uh-result-chip"
-              initial={{ opacity: 0, y: 6, scale: 0.9 }}
+              initial={{ opacity: 0, y: 4, scale: 0.92 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                left: `${(pos.x / CANVAS_W) * 100}%`,
-                top: `${(pos.y / CANVAS_H) * 100}%`,
-                ['--chip-color' as string]: node.color,
+                left: `${(CHIP_X / CANVAS_W) * 100}%`,
+                top: `${(CHIP_Y / CANVAS_H) * 100}%`,
               }}
             >
               <span className="uh-chip-tick" style={{ background: node.color }}>
