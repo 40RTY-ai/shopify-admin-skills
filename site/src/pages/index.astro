@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import TerminalDemo from '../components/illustrations/TerminalDemo';
-import RoutineFeed from '../components/illustrations/RoutineFeed';
+import UnifiedHero from '../components/illustrations/UnifiedHero';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
@@ -224,13 +223,10 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </div>
       </div>
 
-      <!-- Right side: live demo (Claude chat + routine feed) -->
+      <!-- Right side: unified Claude window with chat + routines -->
       <div class="hero-right">
         <div class="hero-illustration">
-          <div class="illustration-stack">
-            <TerminalDemo client:visible />
-            <RoutineFeed client:visible />
-          </div>
+          <UnifiedHero client:visible />
         </div>
         <div class="browse-row">
           <a href={`${base}skills/`} class="browse-link">{skills.length} skills &rarr;</a>
