@@ -13,8 +13,11 @@
   position: absolute;
   inset: -40px;
   background:
+    radial-gradient(circle, rgba(31, 30, 27, 0.07) 0.8px, transparent 0.8px) 0 0 / 22px 22px,
     radial-gradient(700px circle at 50% 50%, rgba(218, 119, 86, 0.05), transparent 55%),
     radial-gradient(500px circle at 50% 60%, rgba(94, 142, 62, 0.04), transparent 60%);
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 80%);
   pointer-events: none;
   z-index: 0;
 }
@@ -35,10 +38,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   z-index: 3;
-  border-radius: 22px;
-  will-change: transform, box-shadow;
 }
 
 .uh-store-icon {
@@ -49,17 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 28px 56px -12px rgba(94, 142, 62, 0.4),
-    0 10px 20px -4px rgba(31, 30, 27, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
-  animation: uh-breathe 4s ease-in-out infinite;
-}
-
-@keyframes uh-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  will-change: transform, box-shadow;
 }
 
 .uh-store-label {
@@ -145,25 +136,26 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--node-color) 18%, transparent);
 }
 
-/* Result chip — appears near store on beam arrival */
+/* Result chip — floats above store on beam arrival */
 .uh-result-chip {
   position: absolute;
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 12px 6px 7px;
+  gap: 8px;
+  padding: 7px 14px 7px 8px;
   background: #1f1e1b;
   color: #F5F0E8;
   border-radius: 100px;
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: -0.005em;
   white-space: nowrap;
   z-index: 4;
   box-shadow:
-    0 12px 28px -6px rgba(31, 30, 27, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 14px 32px -8px rgba(31, 30, 27, 0.38),
+    0 4px 10px -2px rgba(31, 30, 27, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
   pointer-events: none;
 }
 
