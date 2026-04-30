@@ -1,126 +1,99 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import './UnifiedHero.css';
 
-/* ---------- types ---------- */
-type Demo = {
-  command: string;
-  prelude: string;
-  skillLabel: string;
-  toolOutput: string[];
-  closing: string;
-};
-
-type RoutineNode = {
+/* ───────── data ───────── */
+type AgentNode = {
   id: string;
   label: string;
   schedule: string;
-  side: 'left' | 'right';
-  row: 0 | 1 | 2;
+  position: { angle: number; radius: number }; // polar coords from center, angle in deg
   color: string;
-  icon: 'sun' | 'box' | 'shield' | 'truck' | 'chart' | 'heart';
+  icon: 'claude' | 'sun' | 'box' | 'shield' | 'truck' | 'chart' | 'heart';
+  variant: 'agent' | 'routine';
+  example?: string; // short skill the agent runs
 };
 
-/* ---------- data ---------- */
-const demos: Demo[] = [
-  {
-    command: "What's running low? Make me a restock list.",
-    prelude: "Sure. I'll check every product and find the ones below your reorder point.",
-    skillLabel: 'Low Stock Watchdog',
-    toolOutput: [
-      'Connecting to your store',
-      'Reviewing 1,247 products',
-      'Found 23 that need reordering',
-      'Saved your restock list',
-    ],
-    closing: '23 products need reordering. Full list saved as a CSV you can hand to your supplier.',
-  },
-  {
-    command: 'Find products missing SEO titles or descriptions.',
-    prelude: "On it. Auditing every product for missing SEO data.",
-    skillLabel: 'SEO Audit',
-    toolOutput: [
-      'Reviewing 1,247 products',
-      'Checking titles and descriptions',
-      '240 need attention',
-      'Saved the gap report',
-    ],
-    closing: '240 products need SEO updates. Sorted by traffic so you can fix the biggest ones first.',
-  },
-  {
-    command: 'Recover abandoned checkouts from yesterday.',
-    prelude: "I'll pull abandoned checkouts and send personalized recovery emails.",
-    skillLabel: 'Cart Recovery',
-    toolOutput: [
-      '47 abandoned checkouts',
-      'Generating recovery codes',
-      'Emails sent',
-      'About $8,420 in flight',
-    ],
-    closing: 'Sent 47 recovery emails. Roughly $8,420 of cart value back in play.',
-  },
-  {
-    command: 'Flag any high-risk orders from this morning.',
-    prelude: 'Reviewing every new order and risk-scoring it.',
-    skillLabel: 'Fraud Watch',
-    toolOutput: [
-      '184 new orders this morning',
-      'Risk-scoring with Shopify signals',
-      '3 orders look suspicious',
-      'Flagged for your team',
-    ],
-    closing: '3 orders flagged for manual review. Your ops team will see them in their queue.',
-  },
+/* Layout nodes around a center store. Claude at top, routines around the sides + bottom. */
+/* 7 nodes evenly distributed around the store. Claude on top, routines spread around. */
+const nodes: AgentNode[] = [
+  { id: 'claude',   label: 'Claude',           schedule: 'On demand',     position: { angle: -90,  radius: 165 }, color: '#DA7756', icon: 'claude', variant: 'agent', example: 'find low-stock products' },
+  { id: 'morning',  label: 'Morning Briefing', schedule: 'Every morning', position: { angle: -140, radius: 200 }, color: '#5B8DEF', icon: 'sun',    variant: 'routine' },
+  { id: 'fraud',    label: 'Fraud Watch',      schedule: 'Every 2 hours', position: { angle: -40,  radius: 200 }, color: '#E85D75', icon: 'shield', variant: 'routine' },
+  { id: 'lowstock', label: 'Low Stock Alerts', schedule: 'Every morning', position: { angle: 180,  radius: 215 }, color: '#E87838', icon: 'box',    variant: 'routine' },
+  { id: 'shipping', label: 'Shipping Watch',   schedule: 'Twice a day',   position: { angle: 0,    radius: 215 }, color: '#3DBB8F', icon: 'truck',  variant: 'routine' },
+  { id: 'weekly',   label: 'Weekly Review',    schedule: 'Mondays',       position: { angle: 45,   radius: 200 }, color: '#9B6EE3', icon: 'chart',  variant: 'routine' },
+  { id: 'churn',    label: 'Churn Watch',      schedule: 'Wednesdays',    position: { angle: 135,  radius: 200 }, color: '#5BB8A8', icon: 'heart',  variant: 'routine' },
 ];
 
-const routines: RoutineNode[] = [
-  { id: 'morning', label: 'Morning Briefing', schedule: 'Every morning', side: 'left', row: 0, color: '#5B8DEF', icon: 'sun' },
-  { id: 'lowstock', label: 'Low Stock Alerts', schedule: 'Every morning', side: 'left', row: 1, color: '#E87838', icon: 'box' },
-  { id: 'fraud', label: 'Fraud Watch', schedule: 'Every 2 hours', side: 'left', row: 2, color: '#E85D75', icon: 'shield' },
-  { id: 'shipping', label: 'Shipping Watch', schedule: 'Twice a day', side: 'right', row: 0, color: '#3DBB8F', icon: 'truck' },
-  { id: 'weekly', label: 'Weekly Review', schedule: 'Mondays', side: 'right', row: 1, color: '#9B6EE3', icon: 'chart' },
-  { id: 'churn', label: 'At-Risk Customers', schedule: 'Wednesdays', side: 'right', row: 2, color: '#5BB8A8', icon: 'heart' },
-];
-
-/* ---------- canvas geometry ---------- */
+/* ───────── geometry ───────── */
 const CANVAS_W = 600;
-const CANVAS_H = 360;
+const CANVAS_H = 480;
 const CENTER_X = CANVAS_W / 2;
-const CENTER_Y = CANVAS_H / 2;
-const NODE_W = 184;
-const NODE_H = 64;
-const ROW_Y = [42, 148, 254];
-const SIDE_X = { left: 14, right: CANVAS_W - NODE_W - 14 };
+const CENTER_Y = CANVAS_H / 2 + 20; // store node slightly below center to leave room for Claude on top
 
-function nodeAnchor(n: RoutineNode): { x: number; y: number } {
-  const x = n.side === 'left' ? SIDE_X.left + NODE_W : SIDE_X.right;
-  const y = ROW_Y[n.row] + NODE_H / 2;
-  return { x, y };
+function nodePosition(n: AgentNode): { x: number; y: number } {
+  const rad = (n.position.angle * Math.PI) / 180;
+  return {
+    x: CENTER_X + Math.cos(rad) * n.position.radius,
+    y: CENTER_Y + Math.sin(rad) * n.position.radius,
+  };
 }
 
-function pathFor(n: RoutineNode): string {
-  const { x, y } = nodeAnchor(n);
-  const dir = n.side === 'left' ? 1 : -1;
-  const cx1 = x + dir * 80;
-  const cy1 = y;
-  const cx2 = CENTER_X - dir * 60;
-  const cy2 = CENTER_Y;
-  return `M ${x} ${y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${CENTER_X} ${CENTER_Y}`;
+function nodeAnchor(n: AgentNode): { x: number; y: number } {
+  const p = nodePosition(n);
+  // Anchor offset toward center (the side of the card facing center)
+  const dx = CENTER_X - p.x;
+  const dy = CENTER_Y - p.y;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  // approximate node radius
+  const r = 30;
+  return { x: p.x + ux * r, y: p.y + uy * r };
 }
 
-/* ---------- icons ---------- */
-const ClaudeMark = ({ size = 14 }: { size?: number }) => (
+function pathFor(n: AgentNode): string {
+  const a = nodeAnchor(n);
+  // gentle quadratic curve toward center via midpoint biased outward
+  const mx = (a.x + CENTER_X) / 2;
+  const my = (a.y + CENTER_Y) / 2;
+  return `M ${a.x} ${a.y} Q ${mx} ${my}, ${CENTER_X} ${CENTER_Y}`;
+}
+
+/* ───────── icons ───────── */
+const ClaudeMark = ({ size = 22, fill = '#DA7756' }: { size?: number; fill?: string }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
     <path
       d="M16 4.5c2 5 4 8 7 9.5-3 1.5-5 4.5-7 9.5-2-5-4-8-7-9.5 3-1.5 5-4.5 7-9.5z"
-      fill="#DA7756"
+      fill={fill}
     />
   </svg>
 );
 
-function NodeIcon({ kind }: { kind: RoutineNode['icon'] }) {
-  const props = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+/* Official Shopify shopping-bag mark */
+const ShopifyBag = ({ size = 36 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 109 124" fill="none">
+    <path
+      d="M74.7 14.9c-.1-.5-.5-.7-.8-.8-.4-.1-7.6-.1-7.6-.1L60.6 7.9c-.6-.6-1.7-.4-2.1-.3l-3 .9C53.2 4.7 50.4.4 45.6.4c-.1 0-.3 0-.4.1-.1-.2-.3-.4-.4-.5-1.4-1.5-3.2-2.2-5.4-2.2-4.2.1-8.4 3.1-11.8 8.5-2.4 3.8-4.2 8.6-4.7 12.3-4.8 1.5-8.2 2.5-8.3 2.6-2.4.7-2.5.8-2.8 3.1-.2 1.7-6.6 51.5-6.6 51.5l53.6 9.3 23.2-5.8c0-.1-7.3-63.5-7.3-63.9z"
+      fill="#95BF47"
+    />
+    <path
+      d="M68.2 14.7l-1.4-7L60.6 1c-.5-.5-1.5-.4-1.5-.4s-1.5 23.4-3.9 47.7L68.2 14.7z"
+      fill="#5E8E3E"
+    />
+    <path
+      d="M45.5 25.5l-2.4 7.2s-3.7-1.7-8.2-1.4c-6.6.4-6.7 4.6-6.6 5.6.4 5.7 15.4 6.9 16.2 20.3.7 10.5-5.6 17.7-14.6 18.3-10.9.6-16.9-5.7-16.9-5.7l2.3-9.8s6 4.5 10.8 4.2c3.1-.2 4.3-2.7 4.1-4.5-.5-7.4-12.7-7-13.4-19.3-.6-10.3 6.1-20.7 21-21.6 5.8-.3 8.7 1.7 8.7 1.7z"
+      fill="#FFFFFF"
+    />
+  </svg>
+);
+
+function NodeIcon({ kind }: { kind: AgentNode['icon'] }) {
+  const props = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   switch (kind) {
+    case 'claude':
+      return <ClaudeMark size={16} fill="currentColor" />;
     case 'sun':
       return (<svg {...props}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>);
     case 'box':
@@ -136,310 +109,220 @@ function NodeIcon({ kind }: { kind: RoutineNode['icon'] }) {
   }
 }
 
-/* ---------- main component ---------- */
-type Phase = 'typing' | 'thinking' | 'prelude' | 'tool' | 'output' | 'closing' | 'pause';
+/* ───────── component ───────── */
+const claudeExamples = [
+  'find low-stock products',
+  'audit SEO titles',
+  'recover abandoned carts',
+  'flag risky orders',
+];
 
 export default function UnifiedHero() {
-  const [demoIdx, setDemoIdx] = useState(0);
-  const [phase, setPhase] = useState<Phase>('typing');
-  const [typed, setTyped] = useState('');
-  const [outputIdx, setOutputIdx] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [beams, setBeams] = useState<{ id: number; nodeId: string }[]>([]);
   const [storePulse, setStorePulse] = useState(0);
-  const [beamCounter, setBeamCounter] = useState(0);
+  const [counter, setCounter] = useState(0);
+  const [claudeMsgIdx, setClaudeMsgIdx] = useState(0);
+  const [claudeTyped, setClaudeTyped] = useState('');
 
-  const demo = demos[demoIdx];
-
-  /* ---------- chat phases ---------- */
+  // Beam fire cycle. Claude fires more often (every other beam).
   useEffect(() => {
-    if (phase !== 'typing') return;
-    if (typed.length === demo.command.length) {
-      timerRef.current = setTimeout(() => setPhase('thinking'), 600);
-      return () => clearTimeout(timerRef.current!);
-    }
-    timerRef.current = setTimeout(() => {
-      setTyped(demo.command.slice(0, typed.length + 1));
-    }, 32 + Math.random() * 22);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase, typed, demo.command]);
-
-  useEffect(() => {
-    if (phase !== 'thinking') return;
-    timerRef.current = setTimeout(() => setPhase('prelude'), 1100);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== 'prelude') return;
-    timerRef.current = setTimeout(() => setPhase('tool'), 900);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== 'tool') return;
-    timerRef.current = setTimeout(() => setPhase('output'), 600);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== 'output') return;
-    if (outputIdx >= demo.toolOutput.length) {
-      timerRef.current = setTimeout(() => setPhase('closing'), 500);
-      return () => clearTimeout(timerRef.current!);
-    }
-    timerRef.current = setTimeout(() => setOutputIdx(i => i + 1), 500);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase, outputIdx, demo.toolOutput.length]);
-
-  useEffect(() => {
-    if (phase !== 'closing') return;
-    timerRef.current = setTimeout(() => setPhase('pause'), 2600);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== 'pause') return;
-    timerRef.current = setTimeout(() => {
-      setTyped('');
-      setOutputIdx(0);
-      setDemoIdx(i => (i + 1) % demos.length);
-      setPhase('typing');
-    }, 600);
-    return () => clearTimeout(timerRef.current!);
-  }, [phase]);
-
-  /* ---------- routine beams ---------- */
-  useEffect(() => {
+    const order = ['claude', 'morning', 'claude', 'lowstock', 'claude', 'fraud', 'claude', 'shipping', 'claude', 'weekly', 'claude', 'churn'];
     const iv = setInterval(() => {
-      const next = routines[beamCounter % routines.length];
-      const id = beamCounter;
-      setBeams(prev => [...prev, { id, nodeId: next.id }]);
-      setActiveRoutine(next.id);
-      setBeamCounter(c => c + 1);
+      const nextId = order[counter % order.length];
+      const id = counter;
+      setBeams(prev => [...prev, { id, nodeId: nextId }]);
+      setActiveId(nextId);
+      setCounter(c => c + 1);
+
+      // If Claude fires, advance the example bubble
+      if (nextId === 'claude') {
+        setClaudeMsgIdx(i => (i + 1) % claudeExamples.length);
+        setClaudeTyped('');
+      }
+
       setTimeout(() => setStorePulse(p => p + 1), 1100);
       setTimeout(() => setBeams(prev => prev.filter(b => b.id !== id)), 1700);
-      setTimeout(() => setActiveRoutine(null), 1500);
+      setTimeout(() => setActiveId(null), 1500);
     }, 1700);
     return () => clearInterval(iv);
-  }, [beamCounter]);
+  }, [counter]);
 
-  /* ---------- render ---------- */
-  const showAssistant = phase !== 'typing';
-  const showPrelude = ['prelude', 'tool', 'output', 'closing', 'pause'].includes(phase);
-  const showTool = ['tool', 'output', 'closing', 'pause'].includes(phase);
-  const showClosing = ['closing', 'pause'].includes(phase);
+  // Type Claude's example incrementally
+  useEffect(() => {
+    const target = claudeExamples[claudeMsgIdx];
+    if (claudeTyped.length === target.length) return;
+    const t = setTimeout(() => {
+      setClaudeTyped(target.slice(0, claudeTyped.length + 1));
+    }, 36 + Math.random() * 24);
+    return () => clearTimeout(t);
+  }, [claudeMsgIdx, claudeTyped]);
 
   return (
-    <div className="uh-window">
-      {/* macOS-ish title bar */}
-      <div className="uh-title">
-        <div className="uh-traffic">
-          <span className="uh-light uh-light-red" />
-          <span className="uh-light uh-light-yellow" />
-          <span className="uh-light uh-light-green" />
-        </div>
-        <div className="uh-title-brand">
-          <ClaudeMark size={12} />
-          <span>Claude</span>
-        </div>
-        <div className="uh-title-spacer" />
-      </div>
-
-      {/* Region 1: chat */}
-      <div className="uh-chat">
-        <div className="uh-user">
-          <div className="uh-user-bubble">
-            {typed || ' '}
-            {phase === 'typing' && <span className="uh-caret" />}
-          </div>
-        </div>
-
-        <div className="uh-assistant">
-          <div className="uh-row">
-            <div className="uh-avatar"><ClaudeMark size={12} /></div>
-            <div className="uh-row-content">
-              {showAssistant && phase === 'thinking' ? (
-                <span className="uh-thinking">
-                  <span className="uh-thinking-dot" />
-                  <span className="uh-thinking-dot" />
-                  <span className="uh-thinking-dot" />
-                </span>
-              ) : (
-                <span className={`uh-prose ${showPrelude ? 'is-shown' : ''}`}>{demo.prelude}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="uh-row">
-            <div className="uh-avatar uh-avatar-empty" />
-            <div className="uh-row-content">
-              <div className={`uh-tool ${showTool ? 'is-shown' : ''}`}>
-                <div className="uh-tool-head">
-                  <span className="uh-tool-spinner" />
-                  <span className="uh-tool-running">Running</span>
-                  <span className="uh-tool-name">{demo.skillLabel}</span>
-                </div>
-                <div className="uh-tool-output">
-                  {demo.toolOutput.map((line, i) => (
-                    <div
-                      key={`${demoIdx}-${i}`}
-                      className={`uh-tool-line ${i < outputIdx ? 'is-shown' : ''}`}
-                    >
-                      <span className="uh-tool-cont">·</span>
-                      <span>{line}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="uh-row">
-            <div className="uh-avatar uh-avatar-empty" />
-            <div className="uh-row-content">
-              <span className={`uh-prose uh-prose-strong ${showClosing ? 'is-shown' : ''}`}>{demo.closing}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Soft divider with "while you sleep" eyebrow */}
-      <div className="uh-divider">
-        <span className="uh-divider-line" />
-        <span className="uh-divider-text">
-          <span className="uh-divider-pulse" />
-          Always running
-        </span>
-        <span className="uh-divider-line" />
-      </div>
-
-      {/* Region 2: routine beams */}
-      <div className="uh-beams">
-        <svg width={CANVAS_W} height={CANVAS_H} viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} preserveAspectRatio="xMidYMid meet" className="uh-beams-svg">
-          {/* base paths, subtle dashed */}
-          {routines.map(n => (
+    <div className="uh-stage">
+      <svg
+        width={CANVAS_W}
+        height={CANVAS_H}
+        viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="uh-stage-svg"
+      >
+        {/* base paths — subtle solid line with continuous flow */}
+        {nodes.map(n => (
+          <g key={`base-${n.id}`}>
             <path
-              key={`base-${n.id}`}
               d={pathFor(n)}
-              stroke="rgba(31, 30, 27, 0.08)"
-              strokeWidth="1.2"
+              stroke="rgba(31, 30, 27, 0.06)"
+              strokeWidth="1"
               fill="none"
               strokeLinecap="round"
-              strokeDasharray="2 4"
             />
-          ))}
-
-          {/* Comet beams — gradient stroke travels along path via dashoffset */}
-          {beams.map(beam => {
-            const node = routines.find(n => n.id === beam.nodeId)!;
-            const gradId = `uh-grad-${beam.id}`;
-            return (
-              <g key={beam.id}>
-                <defs>
-                  <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="60" y2="0">
-                    <stop offset="0%" stopColor={node.color} stopOpacity="0" />
-                    <stop offset="50%" stopColor={node.color} stopOpacity="1" />
-                    <stop offset="100%" stopColor={node.color} stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {/* Soft halo trailing the comet */}
-                <motion.path
-                  d={pathFor(node)}
-                  stroke={node.color}
-                  strokeOpacity="0.35"
-                  strokeWidth="6"
-                  fill="none"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: [0, 1, 1], opacity: [0, 0.6, 0] }}
-                  transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1], times: [0, 0.7, 1] }}
-                  style={{ filter: 'blur(4px)' }}
-                />
-                {/* Bright comet head + trail */}
-                <motion.path
-                  d={pathFor(node)}
-                  stroke={node.color}
-                  strokeWidth="2.4"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeDasharray="44 800"
-                  initial={{ strokeDashoffset: 800, opacity: 0 }}
-                  animate={{ strokeDashoffset: [800, -44], opacity: [0, 1, 1, 0] }}
-                  transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1], times: [0, 0.15, 0.85, 1] }}
-                  style={{ filter: `drop-shadow(0 0 6px ${node.color})` }}
-                />
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* center store */}
-        <motion.div
-          key={`store-${storePulse}`}
-          className="uh-store"
-          initial={{ scale: 1 }}
-          animate={{
-            scale: [1, 1.04, 1],
-            boxShadow: [
-              '0 0 0 0 rgba(218,119,86,0.4)',
-              '0 0 0 16px rgba(218,119,86,0)',
-              '0 0 0 0 rgba(218,119,86,0)',
-            ],
-          }}
-          transition={{ duration: 0.9, ease: 'easeOut' }}
-          style={{ left: `${(CENTER_X / CANVAS_W) * 100}%`, top: `${(CENTER_Y / CANVAS_H) * 100}%` }}
-        >
-          <div className="uh-store-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-          </div>
-          <div className="uh-store-label">your store</div>
-        </motion.div>
-
-        {/* routine nodes */}
-        {routines.map(node => {
-          const x = node.side === 'left' ? SIDE_X.left : SIDE_X.right;
-          const y = ROW_Y[node.row];
-          const isActive = activeRoutine === node.id;
-          return (
-            <div
-              key={node.id}
-              className={`uh-node uh-node-${node.side} ${isActive ? 'is-active' : ''}`}
-              style={{
-                left: `${(x / CANVAS_W) * 100}%`,
-                top: `${(y / CANVAS_H) * 100}%`,
-                width: `${(NODE_W / CANVAS_W) * 100}%`,
-                ['--node-color' as string]: node.color,
-              }}
+            <path
+              d={pathFor(n)}
+              stroke={n.color}
+              strokeOpacity="0.28"
+              strokeWidth="1"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray="1 6"
             >
-              <div className="uh-node-icon" style={{ color: node.color }}>
-                <NodeIcon kind={node.icon} />
-              </div>
-              <div className="uh-node-body">
-                <div className="uh-node-name">{node.label}</div>
-                <div className="uh-node-meta">{node.schedule}</div>
-              </div>
-              <AnimatePresence>
-                {isActive && (
-                  <motion.span
-                    className="uh-node-spark"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.6, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    style={{ background: node.color }}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
+              <animate attributeName="stroke-dashoffset" from="0" to="-14" dur="3s" repeatCount="indefinite" />
+            </path>
+          </g>
+        ))}
+
+        {/* Beams: solid base draw + travelling gradient highlight (Magic UI technique) */}
+        {beams.map(beam => {
+          const node = nodes.find(n => n.id === beam.nodeId)!;
+          const a = nodeAnchor(node);
+          const dx = CENTER_X - a.x;
+          const dy = CENTER_Y - a.y;
+          const len = Math.hypot(dx, dy);
+          return (
+            <g key={beam.id}>
+              {/* Soft halo */}
+              <motion.path
+                d={pathFor(node)}
+                stroke={node.color}
+                strokeOpacity="0.4"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: [0, 0.5, 0.5, 0] }}
+                transition={{
+                  pathLength: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.5, times: [0, 0.4, 0.85, 1] },
+                }}
+                style={{ filter: 'blur(6px)' }}
+              />
+              {/* Solid base — line draws in */}
+              <motion.path
+                d={pathFor(node)}
+                stroke={node.color}
+                strokeOpacity="0.85"
+                strokeWidth="1.6"
+                fill="none"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
+                transition={{
+                  pathLength: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.5, times: [0, 0.3, 0.85, 1] },
+                }}
+              />
+              {/* Travelling comet head */}
+              <motion.circle
+                r="3.5"
+                fill={node.color}
+                initial={{ opacity: 0 }}
+                animate={{
+                  cx: [a.x, CENTER_X],
+                  cy: [a.y, CENTER_Y],
+                  opacity: [0, 1, 1, 0],
+                }}
+                transition={{
+                  cx: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
+                  cy: { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 1.1, times: [0, 0.1, 0.8, 1] },
+                }}
+                style={{ filter: `drop-shadow(0 0 8px ${node.color}) drop-shadow(0 0 14px ${node.color})` }}
+              />
+            </g>
           );
         })}
-      </div>
+      </svg>
+
+      {/* Center store */}
+      <motion.div
+        key={`store-${storePulse}`}
+        className="uh-store"
+        initial={{ scale: 1 }}
+        animate={{
+          scale: [1, 1.05, 1],
+          boxShadow: [
+            '0 0 0 0 rgba(94, 142, 62, 0.45)',
+            '0 0 0 22px rgba(94, 142, 62, 0)',
+            '0 0 0 0 rgba(94, 142, 62, 0)',
+          ],
+        }}
+        transition={{ duration: 0.95, ease: 'easeOut' }}
+        style={{
+          left: `${(CENTER_X / CANVAS_W) * 100}%`,
+          top: `${(CENTER_Y / CANVAS_H) * 100}%`,
+        }}
+      >
+        <div className="uh-store-icon">
+          <ShopifyBag size={46} />
+        </div>
+        <div className="uh-store-label">your store</div>
+      </motion.div>
+
+      {/* All nodes */}
+      {nodes.map(n => {
+        const p = nodePosition(n);
+        const isActive = activeId === n.id;
+        return (
+          <div
+            key={n.id}
+            className={`uh-node uh-node-${n.variant} ${isActive ? 'is-active' : ''}`}
+            style={{
+              left: `${(p.x / CANVAS_W) * 100}%`,
+              top: `${(p.y / CANVAS_H) * 100}%`,
+              ['--node-color' as string]: n.color,
+            }}
+          >
+            <div className="uh-node-icon" style={{ color: n.color }}>
+              <NodeIcon kind={n.icon} />
+            </div>
+            <div className="uh-node-body">
+              <div className="uh-node-name">{n.label}</div>
+              <div className="uh-node-meta">{n.schedule}</div>
+            </div>
+            {n.id === 'claude' && (
+              <div className="uh-claude-bubble">
+                <span className="uh-bubble-tag">PROMPT</span>
+                <span className="uh-claude-bubble-text">
+                  {claudeTyped || claudeExamples[claudeMsgIdx]}
+                  <span className="uh-caret" />
+                </span>
+              </div>
+            )}
+            <AnimatePresence>
+              {isActive && (
+                <motion.span
+                  className="uh-node-spark"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.6, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  style={{ background: n.color }}
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
