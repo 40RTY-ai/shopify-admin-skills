@@ -1,0 +1,356 @@
+/* Outer shell wraps Claude banner + orbital stage */
+.uh-shell {
+  width: 100%;
+  max-width: 600px;
+  font-family: 'Inter Tight', 'Inter', -apple-system, system-ui, sans-serif;
+  color: #1f1e1b;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Claude assistant banner — slim horizontal strip, no overlap risk */
+.uh-claude-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px 9px 9px;
+  background: linear-gradient(180deg, #1f1e1b 0%, #15140f 100%);
+  border-radius: 100px;
+  color: #F5F0E8;
+  box-shadow:
+    0 12px 28px -8px rgba(31, 30, 27, 0.32),
+    0 4px 10px -2px rgba(31, 30, 27, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.uh-cb-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(218, 119, 86, 0.16);
+  border: 1px solid rgba(218, 119, 86, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uh-cb-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #F5F0E8;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.uh-cb-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(245, 240, 232, 0.14);
+  flex-shrink: 0;
+}
+
+.uh-cb-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: rgba(245, 240, 232, 0.92);
+  letter-spacing: -0.005em;
+  flex: 1;
+  min-width: 0;
+}
+
+.uh-cb-prompt-glyph {
+  color: #DA7756;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.uh-cb-prompt-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uh-cb-status {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-width: 130px;
+  justify-content: flex-end;
+}
+
+.uh-cb-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.uh-cb-tdot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #DA7756;
+  animation: uh-tdot 1.2s ease-in-out infinite;
+}
+
+.uh-cb-tdot:nth-child(2) { animation-delay: 0.18s; }
+.uh-cb-tdot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes uh-tdot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
+
+.uh-cb-skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 6px;
+  background: rgba(218, 119, 86, 0.14);
+  border: 1px solid rgba(218, 119, 86, 0.24);
+  border-radius: 100px;
+  font-size: 0.72rem;
+}
+
+.uh-cb-spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(218, 119, 86, 0.3);
+  border-top-color: #DA7756;
+  animation: uh-spin 0.85s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes uh-spin {
+  to { transform: rotate(360deg); }
+}
+
+.uh-cb-skill-label {
+  color: #DA7756;
+  font-weight: 600;
+}
+
+.uh-cb-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 4px;
+  background: rgba(108, 212, 154, 0.14);
+  border: 1px solid rgba(108, 212, 154, 0.26);
+  border-radius: 100px;
+  font-size: 0.72rem;
+  color: #F5F0E8;
+  font-weight: 500;
+}
+
+.uh-cb-tick {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6CD49A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #15140f;
+  flex-shrink: 0;
+}
+
+/* Orbital stage */
+.uh-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.uh-stage::before {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  background:
+    radial-gradient(circle, rgba(31, 30, 27, 0.07) 0.8px, transparent 0.8px) 0 0 / 22px 22px,
+    radial-gradient(700px circle at 50% 50%, rgba(218, 119, 86, 0.05), transparent 55%),
+    radial-gradient(500px circle at 50% 60%, rgba(94, 142, 62, 0.04), transparent 60%);
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.uh-stage-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Center store */
+.uh-store {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 3;
+}
+
+.uh-store-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F0E8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, box-shadow;
+}
+
+.uh-store-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(31, 30, 27, 0.65);
+  letter-spacing: 0.01em;
+  background: rgba(250, 249, 245, 0.85);
+  padding: 4px 10px;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+}
+
+/* Routine nodes — clickable + hoverable */
+.uh-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.02),
+    0 12px 26px -6px rgba(31, 30, 27, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  z-index: 2;
+  white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.uh-node:hover {
+  border-color: var(--node-color);
+  background: color-mix(in srgb, var(--node-color) 4%, #FFFFFF);
+  box-shadow:
+    0 18px 40px -8px color-mix(in srgb, var(--node-color) 30%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--node-color) 60%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.uh-node.is-active {
+  border-color: var(--node-color);
+  box-shadow:
+    0 16px 36px -6px color-mix(in srgb, var(--node-color) 40%, transparent),
+    0 0 0 1px var(--node-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.uh-node-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--node-color) 13%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uh-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.uh-node-name {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1f1e1b;
+  letter-spacing: -0.018em;
+  line-height: 1.18;
+}
+
+.uh-node-meta {
+  font-family: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: rgba(31, 30, 27, 0.5);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.uh-node-spark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--node-color) 18%, transparent);
+}
+
+/* Result chip — floats above store on beam arrival */
+.uh-result-chip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 8px;
+  background: #1f1e1b;
+  color: #F5F0E8;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  z-index: 4;
+  box-shadow:
+    0 14px 32px -8px rgba(31, 30, 27, 0.38),
+    0 4px 10px -2px rgba(31, 30, 27, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.uh-chip-tick {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f1e1b;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .uh-shell { gap: 14px; }
+  .uh-claude-banner { padding: 8px 10px 8px 8px; }
+  .uh-cb-status { min-width: 0; }
+  .uh-cb-prompt-text { font-size: 0.74rem; }
+  .uh-node { padding: 8px 11px; gap: 8px; }
+  .uh-node-name { font-size: 0.74rem; }
+  .uh-node-meta { font-size: 0.6rem; }
+  .uh-store-icon { width: 76px; height: 76px; }
+}

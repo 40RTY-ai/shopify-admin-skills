@@ -1,0 +1,137 @@
+.rb-shell {
+  width: 100%;
+  max-width: 540px;
+  height: 340px; /* fixed — never reflows */
+  background: #FAF9F5;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 24px 60px -12px rgba(31, 30, 27, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+  font-family: -apple-system, 'Inter', system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rb-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.rb-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Center store node */
+.rb-store {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.rb-store-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #1f1e1b 0%, #0f0e0c 100%);
+  color: #F5F0E8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 24px -4px rgba(31, 30, 27, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.rb-store-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(31, 30, 27, 0.75);
+}
+
+/* Routine nodes */
+.rb-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow:
+    0 6px 16px -4px rgba(31, 30, 27, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 2;
+}
+
+.rb-node.is-active {
+  border-color: var(--node-color);
+  box-shadow:
+    0 8px 24px -4px color-mix(in srgb, var(--node-color) 35%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: scale(1.025);
+}
+
+.rb-node-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--node-color) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rb-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rb-node-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1f1e1b;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-node-meta {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.66rem;
+  color: rgba(31, 30, 27, 0.5);
+  white-space: nowrap;
+}
+
+.rb-node-spark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--node-color) 18%, transparent);
+}
+
+@media (max-width: 768px) {
+  .rb-shell { height: 360px; max-width: 100%; }
+  .rb-svg { transform: scale(0.85); transform-origin: center; }
+  .rb-stat { display: none; }
+}

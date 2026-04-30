@@ -4,9 +4,9 @@
 
 
 <p align="center">
-  <strong>AI agent skills to operate your Shopify store with extended capabilities.</strong>
+  <strong>AI agent skills + scheduled routines to operate your Shopify store.</strong>
   <br />
-  Recover abandoned carts, bulk-adjust prices, audit inventory, process refunds — all through your AI agent.
+  106 skills across 10 categories, plus 20 always-on routines that monitor inventory, fraud, fulfillment, finance, and customer health on a schedule.
 </p>
 
 <p align="center">
@@ -33,24 +33,42 @@ npx skills add 40RTY-ai/shopify-admin-skills
 
 ## Skills
 
-66 skills across 10 categories:
+106 skills across 10 categories:
 
 | Category | Skills | Examples |
 |---|---|---|
-| [Marketing](skills/marketing/) | 3 | Abandoned cart recovery, win-back, loyalty exports |
-| [Merchandising](skills/merchandising/) | 19 | Bulk pricing, inventory audits, SEO, dead stock, variant performance |
-| [Customer Support](skills/customer-support/) | 5 | Order lookup, refunds, returns, address correction, WISMO |
-| [Customer Ops](skills/customer-ops/) | 6 | Duplicate finder, spend tiers, cohort analysis, B2B |
-| [Conversion](skills/conversion-optimization/) | 5 | Discount A/B, abandonment reports, gift cards, traffic by page |
-| [Fulfillment Ops](skills/fulfillment-ops/) | 8 | Digest, holds, routing, tracking, delivery SLA |
-| [Finance](skills/finance/) | 7 | Revenue, refund rates, AOV, tax, shipping costs |
-| [Order Intelligence](skills/order-intelligence/) | 5 | Fraud risk, high-risk tagging, repeat purchase, product affinity |
-| [Returns](skills/returns/) | 3 | Reason analysis, exchange ratios, SLA |
-| [Store Management](skills/store-management/) | 5 | Redirects, drafts, discounts, pages, channels |
+| [Marketing](skills/marketing/) | 6 | Cart recovery, win-back, loyalty, VIP, promo codes, attribution |
+| [Merchandising](skills/merchandising/) | 25 | Pricing, stock, demand forecast, variant performance, COGS, vendor consolidation |
+| [Customer Support](skills/customer-support/) | 8 | Order lookup, refunds, returns, address correction, customer merge, timeline export |
+| [Customer Ops](skills/customer-ops/) | 11 | RFM, churn risk, CAC, deliverability, chargeback watch, cohort, B2B |
+| [Conversion](skills/conversion-optimization/) | 10 | FBT, cross-sell, discount ROI, traffic-by-page, post-purchase survey, gift messages |
+| [Fulfillment Ops](skills/fulfillment-ops/) | 11 | Digest, routing, tracking, SLA, shipping rates, carrier comparison, bundles |
+| [Finance](skills/finance/) | 12 | Profit, payout recon, gift card liability, MRR, discount trend, tax, AOV |
+| [Order Intelligence](skills/order-intelligence/) | 9 | Fraud, auto-tagging, attribution, cancellation, product affinity, partial-refund patterns |
+| [Returns](skills/returns/) | 6 | Reason analysis, fraud detection, restock, cost attribution, SLA |
+| [Store Management](skills/store-management/) | 8 | Redirects, drafts, discounts, pages, staff audit, file storage, metafield definitions |
 
-## How skills work
+## Routines
 
-Each skill is a `SKILL.md` file that teaches your agent a complete workflow against the Shopify Admin GraphQL API. When invoked, the agent queries your store, previews mutations with `dry_run: true`, executes on confirmation, and reports exactly what happened.
+20 ready-to-use **scheduled routines** that run autonomously on Claude Code's infrastructure. Each routine fires on a cron schedule, invokes one or more skills, and reports back via Slack or file output.
+
+**Daily / High-frequency:** `morning-store-briefing`, `low-stock-watchdog`, `abandoned-cart-patrol`, `fraud-sentinel`, `fulfillment-sla-watchdog`, `price-anomaly-scanner`, `vip-customer-watcher`, `payout-recon-daily`, `new-product-launch-tracker`
+
+**Weekly:** `weekly-business-review`, `return-fraud-watch`, `discount-roi-weekly`, `catalog-health-weekly`, `customer-churn-watch`, `seo-coverage-weekly`, `dead-stock-weekly`
+
+**Monthly / Quarterly:** `monthly-financial-close`, `staff-activity-monthly`, `inventory-aging-monthly`, `quarterly-business-review`
+
+### Smart install (recommended)
+
+Don't dump all 20 routines on a store that doesn't need them. The smart installer profiles your store, asks 3 questions, and installs only the routines that fit.
+
+See [routines/INSTALL.md](routines/INSTALL.md) for the smart install prompt, or [routines/README.md](routines/README.md) for all install paths and per-routine details.
+
+## How it works
+
+**Skills** — each is a `SKILL.md` file that teaches your agent a complete workflow against the Shopify Admin GraphQL API. When invoked, the agent queries your store, previews mutations with `dry_run: true`, executes on confirmation, and reports exactly what happened.
+
+**Routines** — pre-built scheduled-task definitions that combine skills into automated workflows. Install once via Claude Code, then they fire on schedule autonomously — no machine needs to stay on.
 
 ## Contributing
 

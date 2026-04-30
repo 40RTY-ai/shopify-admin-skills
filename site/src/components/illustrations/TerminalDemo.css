@@ -1,0 +1,259 @@
+/* Compact Claude Code session — minimal chrome, store-manager language */
+.cc-shell {
+  width: 100%;
+  max-width: 540px;
+  height: 380px; /* fixed — surrounding flow never reflows */
+  background: #FAF9F5;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 24px 60px -12px rgba(31, 30, 27, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+  font-family: -apple-system, 'Inter', system-ui, sans-serif;
+  color: #1f1e1b;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title bar — only traffic lights + Claude wordmark, nothing else */
+.cc-titlebar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 10px 14px;
+  background: #F1ECE2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.cc-traffic {
+  display: flex;
+  gap: 6px;
+}
+
+.cc-light {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.cc-light-red { background: #ff5f57; }
+.cc-light-yellow { background: #febc2e; }
+.cc-light-green { background: #28c840; }
+
+.cc-titlebar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(31, 30, 27, 0.65);
+  letter-spacing: -0.01em;
+}
+
+.cc-titlebar-spacer {
+  width: 39px; /* balances traffic-light width to keep title centered */
+}
+
+/* Surface */
+.cc-surface {
+  flex: 1;
+  padding: 18px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* User bubble — right-aligned, soft cream */
+.cc-user {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cc-user-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  background: #ECE4D5;
+  color: #1f1e1b;
+  border-radius: 14px 14px 4px 14px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+}
+
+.cc-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  vertical-align: middle;
+  background: #DA7756;
+  margin-left: 1px;
+  animation: cc-caret-blink 0.85s step-end infinite;
+}
+
+@keyframes cc-caret-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* Assistant region — three slots, fixed grid, blocks reveal by opacity only */
+.cc-assistant {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 12px;
+  flex: 1;
+  align-content: start;
+}
+
+.cc-slot {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.cc-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(218, 119, 86, 0.14);
+  border: 1px solid rgba(218, 119, 86, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cc-avatar-empty {
+  background: transparent;
+  border: none;
+}
+
+.cc-slot-content {
+  min-width: 0;
+}
+
+/* Thinking */
+.cc-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 6px;
+}
+
+.cc-thinking-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #DA7756;
+  animation: cc-thinking 1.2s ease-in-out infinite;
+}
+
+.cc-thinking-dot:nth-child(2) { animation-delay: 0.18s; }
+.cc-thinking-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes cc-thinking {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* Prose */
+.cc-prose {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(31, 30, 27, 0.78);
+  letter-spacing: -0.005em;
+  display: inline-block;
+  opacity: 0;
+  transition: opacity 0.32s ease-out;
+}
+
+.cc-prose.is-shown { opacity: 1; }
+
+.cc-prose-strong {
+  color: #1f1e1b;
+  font-weight: 500;
+}
+
+/* Tool card */
+.cc-tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.32s ease-out;
+}
+
+.cc-tool-card.is-shown { opacity: 1; }
+
+.cc-tool-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.cc-tool-spinner {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(218, 119, 86, 0.3);
+  border-top-color: #DA7756;
+  animation: cc-spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cc-tool-running {
+  color: rgba(31, 30, 27, 0.5);
+  font-weight: 500;
+}
+
+.cc-tool-name {
+  color: #C26847;
+  font-weight: 600;
+}
+
+.cc-tool-output {
+  display: grid;
+  grid-template-rows: repeat(4, 1.5em); /* fixed 4 rows so streaming never pushes */
+  gap: 2px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(218, 119, 86, 0.15);
+  margin-top: 2px;
+}
+
+.cc-tool-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: rgba(31, 30, 27, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.cc-tool-line.is-shown { opacity: 1; }
+
+.cc-tool-cont {
+  color: rgba(31, 30, 27, 0.3);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .cc-shell { max-width: 100%; height: 360px; }
+  .cc-surface { padding: 14px 16px; }
+  .cc-titlebar-brand { font-size: 0.74rem; }
+}

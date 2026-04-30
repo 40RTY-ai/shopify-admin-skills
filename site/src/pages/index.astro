@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import UnifiedHero from '../components/illustrations/UnifiedHero';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
@@ -7,6 +8,7 @@ import matter from 'gray-matter';
 const base = import.meta.env.BASE_URL;
 
 const skillsRoot = path.resolve(process.cwd(), '../skills');
+const routinesRoot = path.resolve(process.cwd(), '../routines');
 const categories = fs.readdirSync(skillsRoot).filter((d: string) =>
   fs.statSync(path.join(skillsRoot, d)).isDirectory()
 );
@@ -17,6 +19,12 @@ interface Skill {
   category: string;
   categorySlug: string;
   slug: string;
+}
+
+interface Routine {
+  id: string;
+  description: string;
+  cron: string;
 }
 
 const skills: Skill[] = [];
@@ -36,6 +44,23 @@ for (const cat of categories) {
         category: cat.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         categorySlug: cat,
         slug: skill,
+      });
+    }
+  }
+}
+
+const routines: Routine[] = [];
+if (fs.existsSync(routinesRoot)) {
+  const routineFiles = fs.readdirSync(routinesRoot)
+    .filter((f: string) => f.endsWith('.md') && f !== 'README.md');
+  for (const file of routineFiles) {
+    const content = fs.readFileSync(path.join(routinesRoot, file), 'utf-8');
+    const { data } = matter(content);
+    if (data.routine_id && data.cron) {
+      routines.push({
+        id: data.routine_id,
+        description: data.description || '',
+        cron: data.cron,
       });
     }
   }
@@ -88,7 +113,11 @@ const col2Base = shuffled.slice(half);
 const row1 = [...col1Base, ...col1Base, ...col1Base];
 const row2 = [...col2Base, ...col2Base, ...col2Base];
 
-const installPrompt = `Please guide me through setting up Shopify Admin Skills. Act as a concierge: walk me through each step one at a time, keep your messages short and friendly, and DO NOT paste raw command output, logs, or stack traces into the chat. Summarize results in one line ("✅ plugins installed", "✅ connected to my-store"). Only surface details if something actually fails, and then only the relevant error.
+const installPrompt = `Please guide me through setting up Shopify Admin Skills + Routines. Act as a concierge: walk me through each step one at a time, keep your messages short and friendly, and DO NOT paste raw command output, logs, or stack traces into the chat. Summarize results in one line ("✅ plugins installed", "✅ connected to my-store"). Only surface details if something actually fails, and then only the relevant error.
+
+What you're installing:
+  • SKILLS — 100+ on-demand workflows your agent can run (recover carts, audit inventory, process refunds, etc.)
+  • ROUTINES — 20 always-on scheduled agents that watch the store on a cron (morning briefing, fraud sentinel, monthly close, etc.)
 
 Follow these steps in order, confirming each before moving on:
 
@@ -111,14 +140,20 @@ Command:
   shopify store auth --store <domain> --scopes <scopes>
 and confirm with a one-line "✅ connected to <domain>".
 
-Step 4 — Now guide me into actually using the skills. Present a short menu (3–5 options) of guided examples tailored to what the skills can do, like:
+Step 4 — Ask me what I want to do first:
+  a) "Try a skill — run something on demand right now"
+  b) "Set up routines — install always-on scheduled agents"
+  c) "Both — try a skill first, then set up routines"
+
+If I pick (a) or (c) — present a short menu (3–5 options) of guided skill examples like:
   • "Find variants with low inventory and export a restock list"
   • "Show abandoned checkouts from the last 7 days"
   • "Audit products missing SEO titles or descriptions"
   • "Rank my top products by revenue this month"
   • "Find duplicate customer records"
+For each, give a one-sentence description. Ask me to pick one (or describe my own goal), then run the matching skill — quietly, reporting results as a clean summary, not raw JSON.
 
-For each, give a one-sentence description. Ask me to pick one (or describe my own goal), then run the matching skill — again, quietly, reporting results as a clean summary, not raw JSON.
+If I pick (b) or (c) — kick off the smart routine onboarding flow. Read the file routines/INSTALL.md from the installed plugin to get the full smart-install protocol. The short version: silently profile my store (volume, catalog size, locations, subscriptions, payments), ask 3 short questions (priorities, alert destination, aggressiveness), score routines against my profile + answers, show a tailored recommendation list with reasoning + skipped routines explained, wait for "yes / edit / cancel", then install only approved routines via mcp__scheduled-tasks__create_scheduled_task. Never install all 20 blindly. Tailor crons to my volume.
 
 Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text, no logs, no "here's what I ran" unless I ask.`;
 ---
@@ -155,7 +190,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   <!-- HERO — split layout: left title, right skills grid -->
   
 
-  
   <section class="hero">
     <div class="hero-split">
       <div class="hero-left">
@@ -163,12 +197,12 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         <h1 class="hero-title">
           <span class="line typewriter" id="t1">Shopify</span>
           <span class="line typewriter" id="t2">Admin</span>
-          <span class="line typewriter" id="t3">Skills</span>
+          <span class="line typewriter" id="t3">Skills<span class="dot">.</span></span>
         </h1>
         <p class="hero-sub">
           <span id="rotating-text"></span>
         </p>
-        <p class="hero-sub-static">through your AI agent.</p>
+        <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <div class="hero-cta">
           <div class="install-tabs">
             <button class="tab active" data-tab="claude-code">
@@ -187,10 +221,10 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
           <div class="install-panel" data-panel="claude-code">
             <p class="install-hint">
-              Paste into Claude Code — it'll install everything for you.
+              Copy this prompt and paste it into Claude Code — Claude will install everything for you.
             </p>
             <div class="prompt-wrap">
-              <button class="cmd cmd-prompt" data-cmd={installPrompt} data-tooltip={installPrompt.slice(0, 120) + '…'}>
+              <button class="cmd cmd-prompt" data-cmd={installPrompt}>
                 <span class="cmd-dollar">✨</span>
                 <code>Install Shopify Admin Skills for me</code>
                 <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
@@ -215,32 +249,16 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </div>
       </div>
 
-      <!-- Right side: skills grid scrolling vertically -->
-      <a href="#signup" class="signup-teaser mobile-teaser">
-        Tell me more cool stuff
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="teaser-arrow"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-      </a>
-
+      <!-- Right side: unified Claude window with chat + routines -->
       <div class="hero-right">
-        <div class="skills-scroll-mask">
-          <div class="skills-scroll-col col-up">
-            {row1.map(s => (
-              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
-                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
-                <code class="s-name">{s.name}</code>
-              </a>
-            ))}
-          </div>
-          <div class="skills-scroll-col col-down">
-            {row2.map(s => (
-              <a href={`${base}skills/${s.categorySlug}/${s.slug}/`} class="s-chip">
-                <span class="s-cat" style={`color: ${categoryColors[s.category] || '#888'}; background: ${categoryColors[s.category] || '#888'}15;`}>{categoryIcons[s.category] || ''} {categoryLabels[s.category] || s.category}</span>
-                <code class="s-name">{s.name}</code>
-              </a>
-            ))}
-          </div>
+        <div class="hero-illustration">
+          <UnifiedHero client:visible />
         </div>
-        <a href={`${base}skills/`} class="browse-link">Browse all {skills.length} skills &rarr;</a>
+        <div class="browse-row">
+          <a href={`${base}skills/`} class="browse-link">{skills.length} skills &rarr;</a>
+          <span class="browse-sep">·</span>
+          <a href={`${base}routines/`} class="browse-link">{routines.length} routines &rarr;</a>
+        </div>
       </div>
     </div>
 
@@ -321,16 +339,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         btn.classList.add('copied');
         setTimeout(() => btn.classList.remove('copied'), 1500);
       });
-    });
-
-    // Expand/collapse full prompt
-    const expandBtn = document.querySelector<HTMLButtonElement>('.prompt-expand-btn');
-    const promptFull = document.getElementById('prompt-full');
-    expandBtn?.addEventListener('click', () => {
-      if (!promptFull) return;
-      const expanded = expandBtn.getAttribute('aria-expanded') === 'true';
-      expandBtn.setAttribute('aria-expanded', (!expanded).toString());
-      promptFull.hidden = expanded;
     });
 
     // Install tabs
@@ -721,9 +729,12 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .cmd-prompt code {
-    font-family: var(--font-body);
-    font-style: italic;
-    opacity: 0.9;
+    font-family: var(--font-heading);
+    font-style: normal;
+    font-weight: 600;
+    color: var(--color-dark);
+    background: transparent;
+    letter-spacing: -0.01em;
   }
 
   .prompt-wrap {
@@ -860,6 +871,31 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   .cmd-copy { opacity: 0.4; transition: opacity 0.15s; }
   .cmd:hover .cmd-copy { opacity: 1; }
 
+  /* Prompt button — softer, less terminal-like */
+  .cmd-prompt {
+    background: var(--color-card);
+    color: var(--color-dark);
+    padding: 16px 22px;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1.5px solid var(--color-card-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .cmd-prompt:hover {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-card));
+    color: var(--color-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(232, 168, 56, 0.14);
+  }
+
+  .cmd-prompt .cmd-dollar { color: var(--color-accent); font-weight: 700; font-size: 1.05rem; }
+  .cmd-prompt .cmd-copy { color: var(--color-muted); opacity: 0.6; }
+  .cmd-prompt:hover .cmd-copy { opacity: 1; color: var(--color-accent); }
+
   .cmd-toast {
     position: absolute;
     top: -30px;
@@ -901,13 +937,31 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     color: var(--color-muted);
   }
 
-  /* RIGHT SIDE — vertical scroll columns */
+  /* RIGHT SIDE — live illustration, centered vertically in hero */
   .hero-right {
     height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
     position: relative;
+    gap: 18px;
+  }
+
+  .hero-illustration {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .illustration-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    max-width: 540px;
+    align-items: center;
   }
 
   .skills-scroll-mask {
@@ -977,9 +1031,21 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     display: block;
   }
   
-  .browse-link {
-    display: block;
+  .browse-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-top: 16px;
+  }
+
+  .browse-sep {
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .browse-link {
+    display: inline-block;
     font-family: var(--font-mono);
     font-size: 0.82rem;
     font-weight: 500;
@@ -989,7 +1055,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     transition: all 0.15s;
     width: fit-content;
   }
-  
+
   .browse-link:hover {
     color: var(--color-dark);
     border-color: var(--color-dark);

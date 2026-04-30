@@ -11,7 +11,7 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
 
 ## Purpose
-Queries all tracked product variants at or below a configurable stock threshold and exports a restock CSV grouped by vendor. By pulling live inventory counts directly from the Shopify Admin API and sorting results by vendor name, this skill gives procurement teams an immediately actionable reorder list without requiring third-party inventory management apps like Stocky or manual exports from the Shopify admin inventory view.
+Queries all tracked product variants at or below a configurable stock threshold and exports a restock CSV grouped by vendor. By pulling live inventory counts directly from the Shopify Admin API and sorting results by vendor name, this skill gives procurement teams an immediately actionable reorder list without manual exports from the Shopify admin inventory view.
 
 ## Prerequisites
 - Authenticated Shopify CLI session: `shopify auth login --store <domain>`

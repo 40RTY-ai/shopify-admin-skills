@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Geist+Mono:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap');
 
 :root {
   --color-bg: #FAFAFA;
@@ -48,4 +48,59 @@ h1, h2, h3, h4, h5, h6 {
 ::selection {
   background: var(--color-dark);
   color: var(--color-bg);
+}
+
+/* ─── Spell-UI inspired: Shimmer Text ─── */
+.shimmer-text {
+  background: linear-gradient(
+    110deg,
+    currentColor 35%,
+    rgba(232, 168, 56, 0.7) 50%,
+    currentColor 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 200% center; }
+  50% { background-position: -200% center; }
+}
+
+/* ─── Scroll Reveal (fade + slide, no blur) ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.625, 0.05, 0, 1),
+              transform 0.7s cubic-bezier(0.625, 0.05, 0, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.625, 0.05, 0, 1),
+              transform 0.6s cubic-bezier(0.625, 0.05, 0, 1);
+}
+
+.reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 0.08s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 0.24s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 0.32s; opacity: 1; transform: translateY(0); }
+.reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-text { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal-stagger > * { opacity: 1; transform: none; transition: none; }
 }
