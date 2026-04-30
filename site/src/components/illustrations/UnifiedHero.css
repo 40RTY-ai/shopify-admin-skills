@@ -1,9 +1,9 @@
-/* Single-illustration stage. No window chrome. Just the diagram. */
+/* Single-illustration stage. Store at true center, 7 nodes evenly around. */
 .uh-stage {
   position: relative;
   width: 100%;
   max-width: 600px;
-  aspect-ratio: 600 / 480;
+  aspect-ratio: 1 / 1;
   font-family: -apple-system, 'Inter', system-ui, sans-serif;
   color: #1f1e1b;
 }
@@ -13,8 +13,8 @@
   position: absolute;
   inset: -40px;
   background:
-    radial-gradient(700px circle at 50% 50%, rgba(218, 119, 86, 0.06), transparent 55%),
-    radial-gradient(500px circle at 50% 80%, rgba(94, 142, 62, 0.05), transparent 60%);
+    radial-gradient(700px circle at 50% 50%, rgba(218, 119, 86, 0.05), transparent 55%),
+    radial-gradient(500px circle at 50% 60%, rgba(94, 142, 62, 0.04), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -35,23 +35,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   z-index: 3;
-  border-radius: 18px;
+  border-radius: 22px;
   will-change: transform, box-shadow;
 }
 
 .uh-store-icon {
-  width: 88px;
-  height: 88px;
+  width: 96px;
+  height: 96px;
   border-radius: 22px;
   background: linear-gradient(180deg, #FFFFFF 0%, #F5F0E8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 24px 48px -10px rgba(94, 142, 62, 0.38),
-    0 8px 16px -4px rgba(31, 30, 27, 0.14),
+    0 28px 56px -12px rgba(94, 142, 62, 0.4),
+    0 10px 20px -4px rgba(31, 30, 27, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 -1px 0 rgba(0, 0, 0, 0.04);
   animation: uh-breathe 4s ease-in-out infinite;
@@ -59,61 +59,54 @@
 
 @keyframes uh-breathe {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.025); }
+  50% { transform: scale(1.02); }
 }
 
 .uh-store-label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: rgba(31, 30, 27, 0.65);
   letter-spacing: 0.01em;
   background: rgba(250, 249, 245, 0.85);
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 100px;
   backdrop-filter: blur(8px);
 }
 
-/* Nodes — same chrome for routines + Claude */
+/* Nodes — uniform card across Claude + routines */
 .uh-node {
   position: absolute;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 9px 12px;
+  gap: 10px;
+  padding: 10px 14px;
   background: #FFFFFF;
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
     0 1px 0 rgba(0, 0, 0, 0.02),
-    0 10px 22px -6px rgba(31, 30, 27, 0.10),
+    0 12px 26px -6px rgba(31, 30, 27, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   z-index: 2;
-  min-width: 0;
+  white-space: nowrap;
 }
 
 .uh-node.is-active {
   border-color: var(--node-color);
   box-shadow:
-    0 14px 32px -6px color-mix(in srgb, var(--node-color) 35%, transparent),
+    0 16px 36px -6px color-mix(in srgb, var(--node-color) 40%, transparent),
     0 0 0 1px var(--node-color),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transform: translate(-50%, -50%) scale(1.04);
 }
 
-/* Claude node has subtle different styling — primary agent */
-.uh-node-agent {
-  background: linear-gradient(180deg, #FFF8F2 0%, #FFFFFF 100%);
-  border-color: rgba(218, 119, 86, 0.22);
-  padding: 10px 14px;
-}
-
 .uh-node-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
   background: color-mix(in srgb, var(--node-color) 13%, transparent);
   display: flex;
   align-items: center;
@@ -121,38 +114,24 @@
   flex-shrink: 0;
 }
 
-.uh-node-agent .uh-node-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, rgba(218, 119, 86, 0.18) 0%, rgba(218, 119, 86, 0.08) 100%);
-}
-
 .uh-node-body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
 .uh-node-name {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #1f1e1b;
   letter-spacing: -0.01em;
-  white-space: nowrap;
   line-height: 1.2;
-}
-
-.uh-node-agent .uh-node-name {
-  font-size: 0.86rem;
-  font-weight: 700;
 }
 
 .uh-node-meta {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   color: rgba(31, 30, 27, 0.5);
-  white-space: nowrap;
   line-height: 1.2;
 }
 
@@ -166,75 +145,43 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--node-color) 18%, transparent);
 }
 
-/* Claude's "prompt" bubble — looks like a real chat input being typed */
-.uh-claude-bubble {
+/* Result chip — appears near store on beam arrival */
+.uh-result-chip {
   position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  padding: 6px 12px 6px 7px;
   background: #1f1e1b;
   color: #F5F0E8;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 0.78rem;
+  border-radius: 100px;
+  font-size: 0.74rem;
   font-weight: 500;
-  line-height: 1.3;
-  white-space: nowrap;
-  box-shadow:
-    0 12px 28px -6px rgba(31, 30, 27, 0.3),
-    0 4px 8px -2px rgba(31, 30, 27, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
   letter-spacing: -0.005em;
+  white-space: nowrap;
+  z-index: 4;
+  box-shadow:
+    0 12px 28px -6px rgba(31, 30, 27, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  pointer-events: none;
 }
 
-.uh-claude-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  width: 10px;
-  height: 10px;
-  background: #1f1e1b;
-}
-
-.uh-bubble-tag {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: rgba(218, 119, 86, 0.9);
-  padding: 2px 7px;
-  background: rgba(218, 119, 86, 0.12);
-  border-radius: 4px;
-}
-
-.uh-claude-bubble-text {
-  color: #F5F0E8;
-}
-
-.uh-caret {
-  display: inline-block;
-  width: 1.5px;
-  height: 0.9em;
-  vertical-align: middle;
-  background: #DA7756;
-  margin-left: 2px;
-  animation: uh-blink 0.85s step-end infinite;
-}
-
-@keyframes uh-blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
+.uh-chip-tick {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f1e1b;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
   .uh-stage { max-width: 100%; }
-  .uh-node { padding: 7px 10px; gap: 7px; }
-  .uh-node-name { font-size: 0.72rem; }
-  .uh-node-meta { font-size: 0.58rem; }
-  .uh-store-icon { width: 58px; height: 58px; }
+  .uh-node { padding: 8px 11px; gap: 8px; }
+  .uh-node-name { font-size: 0.74rem; }
+  .uh-node-meta { font-size: 0.6rem; }
+  .uh-store-icon { width: 76px; height: 76px; }
 }
