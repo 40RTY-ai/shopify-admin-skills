@@ -7,6 +7,16 @@ api_version: "2025-01"
 graphql_operations:
   - OperationName:query
   - OperationName:mutation
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: OperationName:query
+        prefer_tool: graphql_query       # or list-orders / search_products / etc.
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 status: stable
 compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
@@ -15,7 +25,10 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 One paragraph describing the business outcome, when to use this skill, and what it replaces.
 
 ## Prerequisites
-- Authenticated Shopify CLI session (`shopify auth login --store <domain>`)
+Either auth path works. See [docs/execution-adapters.md](../docs/execution-adapters.md).
+
+- **Shopify CLI:** `shopify auth login --store <domain>` with required scopes
+- **Shopify MCP connector** (official, `https://setup.shopify.com/mcp`): connect via `/mcp` and ensure required scopes were granted at install. Switch stores with the `switch-shop` tool.
 - Required API scopes: `read_orders`, `write_discounts` (list all required scopes)
 
 ## Parameters

@@ -129,16 +129,17 @@ Step 1 — Tell me you're about to install two plugins (Shopify AI Toolkit + Sho
 
 Step 2 — Silently verify with "claude plugin list" that both plugins are present. Don't show me the list; just confirm "✅ both plugins active".
 
-Step 3 — Ask me (one question at a time, conversationally):
-  a) What's your store domain? (e.g. my-store.myshopify.com)
-  b) Want to use the default scope set, or customize? Default covers products, orders, customers, inventory, discounts, fulfillments, returns, price rules, publications, and payouts.
+Step 3 — Connect to my store. Pick the easiest path that works; do NOT ask me to choose unless something fails. Try in this order, silently:
 
-Then run auth silently. Use EXACTLY this scope string for the default (do not abbreviate or invent scopes — Shopify will reject unknown scopes like "read_payouts"):
-  read_products,write_products,read_orders,write_orders,read_customers,write_customers,read_inventory,write_inventory,read_discounts,write_discounts,read_fulfillments,write_fulfillments,read_returns,write_returns,read_price_rules,write_price_rules,read_publications,write_publications,read_shopify_payments_payouts
+  3a) Detect if the official Shopify MCP connector is already wired. Call the "get-shop-info" tool from the shopify connector. If it returns a shop, you're done — confirm "✅ connected to <domain>" and skip the rest of Step 3.
 
-Command:
-  shopify store auth --store <domain> --scopes <scopes>
-and confirm with a one-line "✅ connected to <domain>".
+  3b) If no shopify MCP tool is available yet, try to add it. Tell me in one line: "I'll connect the official Shopify MCP — approve the popup." Then instruct me to run "/mcp" → "Add server" → paste https://setup.shopify.com/mcp → approve in browser. Wait for me to confirm. Re-run "get-shop-info"; on success, "✅ connected to <domain>".
+
+  3c) Only if (3a) and (3b) both fail (e.g. no Claude Code MCP UI, headless run, user declines OAuth), fall back to Shopify CLI. Ask my store domain, then run silently. Use EXACTLY this scope string (do not abbreviate or invent scopes — Shopify will reject unknown scopes like "read_payouts"):
+    read_products,write_products,read_orders,write_orders,read_customers,write_customers,read_inventory,write_inventory,read_discounts,write_discounts,read_fulfillments,write_fulfillments,read_returns,write_returns,read_price_rules,write_price_rules,read_publications,write_publications,read_shopify_payments_payouts
+  Command:
+    shopify store auth --store <domain> --scopes <scopes>
+  Confirm with "✅ connected to <domain>".
 
 Step 4 — Ask me what I want to do first:
   a) "Try a skill — run something on demand right now"
@@ -204,6 +205,10 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </p>
         <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <div class="hero-cta">
+          <a href="https://claude.ai/cowork" target="_blank" rel="noopener" class="cowork-pill">
+            <span class="cowork-pill-dot"></span>
+            <strong>New</strong> &middot; Now in Claude Cowork via the official Shopify connector
+          </a>
           <div class="install-tabs">
             <button class="tab active" data-tab="claude-code">
               <img src="/claude-logo.svg" alt="" class="tab-icon" width="14" height="14" />
@@ -611,6 +616,31 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .hero-cta { margin-top: 28px; }
+
+  .cowork-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin-bottom: 14px;
+    background: rgba(95, 23, 122, 0.06);
+    color: #5f177a;
+    border: 1px solid rgba(95, 23, 122, 0.18);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .cowork-pill:hover { background: rgba(95, 23, 122, 0.1); }
+  .cowork-pill strong { font-weight: 600; }
+  .cowork-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5f177a;
+    box-shadow: 0 0 0 3px rgba(95, 23, 122, 0.18);
+  }
 
   .install-tabs {
     display: inline-flex;

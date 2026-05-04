@@ -1,6 +1,15 @@
 # Shopify Admin Skills — Claude Session Guide
 
-## Cold Start Checklist
+Skills are runtime-agnostic. Two execution adapters are supported — see [docs/execution-adapters.md](docs/execution-adapters.md) for the full contract.
+
+| Adapter | When to use |
+|---|---|
+| **Shopify MCP connector** (official, `https://setup.shopify.com/mcp`) | Interactive Claude Code / Cursor sessions. Renders rich widgets. Auth via OAuth, store-switch via `switch-shop` tool. |
+| **Shopify CLI** (`shopify auth login`) | Headless / CI runs. Higher pagination cap. Multi-store batch operations. |
+
+The cold-start steps below cover the CLI path. For the MCP path: connect the official Shopify connector via `/mcp` (one-time), then call `switch-shop` to bind to your target store — no other setup needed.
+
+## Cold Start Checklist (CLI adapter)
 
 Run this from the repo root in a terminal **before** starting Claude Code:
 
