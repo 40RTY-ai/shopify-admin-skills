@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-inventory-adjustment
 role: merchandising
-description: "Apply inventory quantity adjustments to specific variants at specific locations — after a cycle count, 3PL return batch, or sync discrepancy correction."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Apply inventory quantity adjustments to specific variants at specific locations — after a cycle count, 3PL return batch, or sync discrepancy correction.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - productVariants:query
-  - inventoryAdjustQuantities:mutation
+  - 'productVariants:query'
+  - 'inventoryAdjustQuantities:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryAdjustQuantities:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Applies inventory quantity corrections to specific variants at specific locations — the programmatic equivalent of manually editing inventory in the Shopify admin. Use after a cycle count reveals discrepancies, after a 3PL return batch posts late, or after the `multi-location-inventory-audit` skill identifies Available/Committed drift. Replaces manual row-by-row inventory editing in the Shopify admin.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_inventory`
 
 ## Parameters

@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-url-redirect-audit
 role: store-management
-description: "Read-only: lists all URL redirects, flags redirect chains (A→B→C) and duplicate targets."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists all URL redirects, flags redirect chains (A→B→C) and duplicate targets.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - urlRedirects:query
+  - 'urlRedirects:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'urlRedirects:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all URL redirects in the store and identifies redirect chains (where redirect target A is itself redirected to B), duplicate targets (multiple paths pointing to the same destination), and orphaned redirects (pointing to non-existent pages). Redirect chains add latency and hurt SEO. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_content`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_content`
 
 ## Parameters
@@ -44,8 +57,8 @@ Queries all URL redirects in the store and identifies redirect chains (where red
 
 ```graphql
 # urlRedirects:query — validated against api_version 2025-01
-query URLRedirects($after: String) {
-  urlRedirects(first: 250, after: $after) {
+query URLRedirects($first: Int!, $after: String) {
+  urlRedirects(first: $first, after: $after) {
     edges {
       node {
         id

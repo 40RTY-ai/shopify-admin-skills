@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-product-lifecycle-manager
 role: merchandising
-description: "Bulk transition products through DRAFT → ACTIVE → ARCHIVED status for seasonal launches and sunsetting."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Bulk transition products through DRAFT → ACTIVE → ARCHIVED status for seasonal launches and sunsetting.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - productUpdate:mutation
+  - 'products:query'
+  - 'productUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'productUpdate:mutation'
+        prefer_tool: update-product
+        fallback: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries products matching a tag, vendor, collection, or status filter and bulk-transitions them to a target status (DRAFT, ACTIVE, or ARCHIVED). Used for seasonal launches (DRAFT → ACTIVE), end-of-season sunsetting (ACTIVE → ARCHIVED), and pre-launch staging (creating as DRAFT, activating on a date).
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,write_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
 
 ## Parameters
@@ -48,8 +65,8 @@ Queries products matching a tag, vendor, collection, or status filter and bulk-t
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductsByFilter($query: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductsByFilter($first: Int!, $query: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

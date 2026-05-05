@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-variant-performance-report
 role: merchandising
-description: "Rank every product variant by revenue, units sold, and refund rate, then cross-reference against current inventory to identify dead weight vs. top performers."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Rank every product variant by revenue, units sold, and refund rate, then cross-reference against current inventory to identify dead weight vs. top performers.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - productVariants:query
+  - 'orders:query'
+  - 'productVariants:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Goes beyond product-level revenue by ranking every individual variant (size, color, option combination) on revenue, units sold, and refund rate, then joining against live inventory levels. Reveals which specific SKUs are driving the business and which are tying up capital on the shelf. Read-only — no mutations are executed.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_products` (validator-confirmed: orders query traverses variant→product graph)
 
 ## Parameters

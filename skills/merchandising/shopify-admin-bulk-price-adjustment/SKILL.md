@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-bulk-price-adjustment
 role: merchandising
-description: "Query products by collection or tag and update all variant prices by a percentage or fixed amount, with optional floor/ceiling constraints."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Query products by collection or tag and update all variant prices by a percentage or fixed amount, with optional floor/ceiling constraints.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - productVariantsBulkUpdate:mutation
+  - 'products:query'
+  - 'productVariantsBulkUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'productVariantsBulkUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Applies a percentage or fixed price adjustment to every variant across a Shopify collection or tag in a single automated workflow — without manually navigating products in the admin UI, exporting CSVs, editing them, and re-importing. Use this skill when you need to run a storewide or collection-level sale, revert prices after a promotion ends, pass through a supplier cost increase, or align pricing across a segment of products.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
 
 ## Parameters

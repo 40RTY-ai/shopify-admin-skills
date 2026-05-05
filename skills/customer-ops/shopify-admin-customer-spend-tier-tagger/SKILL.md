@@ -1,22 +1,41 @@
 ---
 name: shopify-admin-customer-spend-tier-tagger
 role: customer-ops
-description: "Calculates lifetime spend per customer and applies tier tags (Bronze/Silver/Gold/Platinum) based on configurable thresholds."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Calculates lifetime spend per customer and applies tier tags (Bronze/Silver/Gold/Platinum) based on configurable thresholds.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - orders:query
-  - tagsAdd:mutation
+  - 'customers:query'
+  - 'orders:query'
+  - 'tagsAdd:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'tagsAdd:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all customers, calculates their lifetime spend using order history, and assigns a spend-tier tag (Bronze/Silver/Gold/Platinum by default). Enables VIP segmentation for loyalty programs, exclusive offers, and CX prioritization without a third-party loyalty app. Extends the existing `loyalty-segment-export` skill with a write step.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,read_orders,write_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `read_orders`, `write_customers`
 
 ## Parameters
@@ -60,8 +79,8 @@ platinum: $5,000+
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CustomerSpendLevels($after: String) {
-  customers(first: 250, after: $after) {
+query CustomerSpendLevels($first: Int!, $after: String) {
+  customers(first: $first, after: $after) {
     edges {
       node {
         id
@@ -87,8 +106,8 @@ query CustomerSpendLevels($after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query CustomerOrderHistory($customerId: String!, $after: String) {
-  orders(first: 250, after: $after, query: $customerId) {
+query CustomerOrderHistory($first: Int!, $customerId: String!, $after: String) {
+  orders(first: $first, after: $after, query: $customerId) {
     edges {
       node {
         id

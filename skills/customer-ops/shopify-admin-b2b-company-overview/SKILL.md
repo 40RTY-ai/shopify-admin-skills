@@ -1,23 +1,37 @@
 ---
 name: shopify-admin-b2b-company-overview
 role: customer-ops
-description: "Read-only: lists B2B company accounts with locations, catalogs, and payment terms for wholesale management."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists B2B company accounts with locations, catalogs, and payment terms for wholesale management.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - companies:query
-  - companyLocations:query
+  - 'companies:query'
+  - 'companyLocations:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'companies:query'
+        prefer_tool: graphql_query
+      - skill_op: 'companyLocations:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all B2B company accounts and their associated locations, price lists, and payment terms. Provides a consolidated view of the wholesale account portfolio for ops and sales teams. Read-only — no mutations. Requires Shopify B2B (available on Shopify Plus).
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`
-- Store must be on Shopify Plus with B2B enabled
 
 ## Parameters
 
@@ -44,8 +58,8 @@ Queries all B2B company accounts and their associated locations, price lists, an
 
 ```graphql
 # companies:query — validated against api_version 2025-01
-query B2BCompanies($after: String) {
-  companies(first: 250, after: $after) {
+query B2BCompanies($first: Int!, $after: String) {
+  companies(first: $first, after: $after) {
     edges {
       node {
         id

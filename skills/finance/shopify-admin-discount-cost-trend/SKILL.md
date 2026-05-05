@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-discount-cost-trend
 role: finance
-description: "Read-only: tracks total discount dollars given over configurable time buckets (week/month/quarter), broken down by discount type and code."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: tracks total discount dollars given over configurable time buckets (week/month/quarter), broken down by discount type and code.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Tracks how much money the store gave away in discounts over time, bucketed by week, month, or quarter, and broken down by discount code and discount type (percentage / fixed amount / free shipping / automatic). Answers: "is our discount spend trending up or down, and which campaigns are driving it?" Read-only — no mutations. Complements `discount-roi-calculator` (per-discount return) with a longitudinal view of total cost.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`
 
 ## Parameters
@@ -57,8 +71,8 @@ Tracks how much money the store gave away in discounts over time, bucketed by we
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query DiscountCostTrend($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query DiscountCostTrend($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

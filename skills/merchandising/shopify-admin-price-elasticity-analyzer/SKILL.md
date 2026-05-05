@@ -1,22 +1,41 @@
 ---
 name: shopify-admin-price-elasticity-analyzer
 role: merchandising
-description: "Read-only: analyzes the relationship between product pricing and sales velocity to identify optimal price points and price-sensitive products."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: analyzes the relationship between product pricing and sales velocity to identify optimal price points and price-sensitive products.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - orders:query
-  - productVariants:query
+  - 'products:query'
+  - 'orders:query'
+  - 'productVariants:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Analyzes price-to-velocity relationships across the product catalog to identify which products are price-sensitive and where optimal price points might exist. Compares products within the same category/vendor at different price tiers, and examines how products with compare-at prices (on sale) perform vs. full-price items. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_products`
 
 ## Parameters
@@ -64,8 +83,8 @@ Analyzes price-to-velocity relationships across the product catalog to identify 
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ActiveProductsWithPricing($after: String) {
-  products(first: 250, after: $after, query: "status:active") {
+query ActiveProductsWithPricing($first: Int!, $after: String) {
+  products(first: $first, after: $after, query: "status:active") {
     edges {
       node {
         id
@@ -92,8 +111,8 @@ query ActiveProductsWithPricing($after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query SalesVelocityData($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query SalesVelocityData($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         createdAt
@@ -114,8 +133,8 @@ query SalesVelocityData($query: String!, $after: String) {
 
 ```graphql
 # productVariants:query — validated against api_version 2025-01
-query VariantsOnSale($query: String, $after: String) {
-  productVariants(first: 250, after: $after, query: $query) {
+query VariantsOnSale($first: Int!, $query: String, $after: String) {
+  productVariants(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

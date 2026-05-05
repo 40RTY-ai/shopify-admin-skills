@@ -1,24 +1,40 @@
 ---
 name: shopify-admin-inventory-transfer-between-locations
 role: merchandising
-description: "Moves inventory units from one location to another by decrementing the source and incrementing the destination."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Moves inventory units from one location to another by decrementing the source and incrementing the destination.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - locations:query
-  - inventoryItems:query
-  - inventoryAdjustQuantities:mutation
+  - 'locations:query'
+  - 'inventoryItems:query'
+  - 'inventoryAdjustQuantities:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'locations:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryAdjustQuantities:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Transfers a specified quantity of inventory from a source location to a destination location using paired inventory adjustments (decrement source, increment destination). Used for inter-warehouse rebalancing, pre-positioning stock before a sale, or redistributing inventory after a location change. Replaces manual inventory transfer in Shopify Admin.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,write_inventory,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_inventory`, `write_inventory`
-- Both source and destination must be active Shopify locations
 
 ## Parameters
 

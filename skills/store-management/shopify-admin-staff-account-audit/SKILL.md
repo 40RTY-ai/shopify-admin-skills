@@ -1,22 +1,34 @@
 ---
 name: shopify-admin-staff-account-audit
 role: store-management
-description: "Read-only: reviews staff accounts for stale logins, inactive status, and overpermissioned roles to surface security and access hygiene issues."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: reviews staff accounts for stale logins, inactive status, and overpermissioned roles to surface security and access hygiene issues.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - staffMembers:query
+  - 'staffMembers:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'staffMembers:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Audits all staff member accounts on the store to surface security and access-hygiene risks. Flags accounts that have not logged in for more than `stale_days` days, accounts that are inactive but still provisioned, and accounts with full / shop-owner-equivalent permissions. Read-only — no mutations. Provides the data foundation for a follow-up access review or deprovisioning workflow.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_users`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_users`
-- Caller must be Shop Owner or have staff-management permissions to query staff data
 
 ## Parameters
 
@@ -50,8 +62,8 @@ Audits all staff member accounts on the store to surface security and access-hyg
 
 ```graphql
 # staffMembers:query — validated against api_version 2025-01
-query StaffAccountAudit($after: String) {
-  staffMembers(first: 250, after: $after) {
+query StaffAccountAudit($first: Int!, $after: String) {
+  staffMembers(first: $first, after: $after) {
     edges {
       node {
         id

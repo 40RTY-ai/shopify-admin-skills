@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-address-correction
 role: customer-support
-description: "Update the shipping address on an unfulfilled order before it ships."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Update the shipping address on an unfulfilled order before it ships.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - order:query
-  - orderUpdate:mutation
+  - 'order:query'
+  - 'orderUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'order:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orderUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Corrects a shipping address on an unfulfilled order without navigating the Shopify admin UI. This skill is useful when a customer provides a correction after placing the order — for example, a typo in the street address or a wrong ZIP code. It replaces the manual address editing flow in the Shopify admin by executing the address update directly via the Admin API. The update must be performed before the order is fulfilled; this skill will abort with an error if the order has already been fulfilled or is partially fulfilled. Once fulfillment begins, the Shopify order record cannot be updated through this skill.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_orders`
 
 ## Parameters

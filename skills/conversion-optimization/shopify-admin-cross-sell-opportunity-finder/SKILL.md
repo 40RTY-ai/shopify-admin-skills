@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-cross-sell-opportunity-finder
 role: conversion-optimization
-description: "Read-only: identifies products with high single-purchase rates that could benefit from cross-sell pairing based on category and price affinity."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: identifies products with high single-purchase rates that could benefit from cross-sell pairing based on category and price affinity.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - products:query
+  - 'orders:query'
+  - 'products:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Finds products that are almost always purchased alone (single-item orders) and identifies potential cross-sell partners based on category affinity, price complementarity, and customer overlap. While `frequently-bought-together` finds existing patterns, this skill finds MISSING patterns — products that SHOULD be cross-sold but aren't. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_products`
 
 ## Parameters
@@ -60,8 +77,8 @@ Finds products that are almost always purchased alone (single-item orders) and i
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForCrossSell($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForCrossSell($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

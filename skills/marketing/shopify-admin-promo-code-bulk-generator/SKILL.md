@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-promo-code-bulk-generator
 role: marketing
-description: "Bulk-creates a batch of unique discount codes for campaigns, giveaways, or partner distributions — each code is its own DiscountCodeBasic with single-use limit by default."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Bulk-creates a batch of unique discount codes for campaigns, giveaways, or partner distributions — each code is its own DiscountCodeBasic with single-use limit by default.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - discountCodeBasicCreate:mutation
+  - 'discountCodeBasicCreate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'discountCodeBasicCreate:mutation'
+        prefer_tool: create-discount
+        fallback: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Generates N unique discount codes (e.g., 100 codes for an influencer giveaway, 500 for a partner distribution drop) with a shared prefix and configurable value, usage limit, and validity window. Each code is created as a standalone `DiscountCodeBasic` discount node so it can be tracked independently in Shopify Admin and revoked individually if leaked. Typical use: handing each code to a different recipient where each redemption must be tied to one person.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes write_discounts`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_discounts`, `write_discounts`
 
 ## Parameters

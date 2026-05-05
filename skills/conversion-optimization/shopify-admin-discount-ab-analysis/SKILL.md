@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-discount-ab-analysis
 role: conversion-optimization
-description: "Compare redemption rates and revenue performance across two or more discount codes over a specified date range."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Compare redemption rates and revenue performance across two or more discount codes over a specified date range.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - discountNodes:query
-  - orders:query
+  - 'discountNodes:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'discountNodes:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Compares how different discount codes perform against each other by redemption count and revenue generated. Useful for A/B testing promotional offers without a dedicated analytics app — provide two or more codes and a date range, and the skill queries Shopify for discount metadata and order revenue, then produces a side-by-side comparison table. Read-only: no mutations are executed.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_discounts`, `read_orders`
 
 ## Parameters

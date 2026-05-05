@@ -1,23 +1,38 @@
 ---
 name: shopify-admin-payout-reconciliation
 role: finance
-description: "Read-only: reconciles Shopify Payments payouts against the order transactions that funded them and flags amount discrepancies."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: reconciles Shopify Payments payouts against the order transactions that funded them and flags amount discrepancies.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - shopifyPaymentsAccount:query
-  - orders:query
+  - 'shopifyPaymentsAccount:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'shopifyPaymentsAccount:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Reconciles Shopify Payments payouts to the order transactions that contributed to them. For each payout, sums gross sales, refunds, adjustments, and fees, and compares the computed net to the payout's reported `net` amount. Discrepancies are flagged with a delta and the suspected cause. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_shopify_payments_payouts,read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_shopify_payments_payouts`, `read_orders`
-- Store must use Shopify Payments. If the store uses only third-party gateways, this skill exits cleanly with a message.
 
 ## Parameters
 
@@ -93,8 +108,8 @@ query PayoutReconciliation($payoutQuery: String!, $payoutAfter: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersFundingPayout($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersFundingPayout($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

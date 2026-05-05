@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-vendor-consolidation
 role: merchandising
-description: "Read-only: detects vendor field typos, casing variants, and trailing-whitespace duplicates across the catalog and proposes a canonical merge per cluster."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: detects vendor field typos, casing variants, and trailing-whitespace duplicates across the catalog and proposes a canonical merge per cluster.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
+  - 'products:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Walks every product in the catalog, normalizes the `vendor` field, and clusters near-duplicates such as `Acme`, `ACME`, `Acme Inc`, and `Acme  ` (trailing whitespace). Surfaces a recommended canonical form per cluster and the count of products that would migrate. Vendor sprawl breaks vendor-based reports, navigation, and supplier reconciliation. Read-only — no mutations; output is the worklist for a follow-up consolidation. 
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`
 
 ## Parameters
@@ -50,8 +64,8 @@ Walks every product in the catalog, normalizes the `vendor` field, and clusters 
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query AllVendors($query: String, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query AllVendors($first: Int!, $query: String, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

@@ -1,22 +1,40 @@
 ---
 name: shopify-admin-seo-metadata-audit
 role: merchandising
-description: "Read-only: scans products, collections, and pages for missing SEO titles or meta descriptions."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: scans products, collections, and pages for missing SEO titles or meta descriptions.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - collections:query
-  - pages:query
+  - 'products:query'
+  - 'collections:query'
+  - 'pages:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'collections:query'
+        prefer_tool: graphql_query
+      - skill_op: 'pages:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans all active products, collections, and pages and flags records with missing or short SEO titles (`seo.title`) and meta descriptions (`seo.description`). Produces a prioritized list of SEO gaps sorted by traffic potential (products → collections → pages). Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_content`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_content`
 
 ## Parameters
@@ -53,8 +71,8 @@ Scans all active products, collections, and pages and flags records with missing
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductSEO($after: String) {
-  products(first: 250, after: $after, query: "status:active") {
+query ProductSEO($first: Int!, $after: String) {
+  products(first: $first, after: $after, query: "status:active") {
     edges {
       node {
         id
@@ -76,8 +94,8 @@ query ProductSEO($after: String) {
 
 ```graphql
 # collections:query — validated against api_version 2025-01
-query CollectionSEO($after: String) {
-  collections(first: 250, after: $after) {
+query CollectionSEO($first: Int!, $after: String) {
+  collections(first: $first, after: $after) {
     edges {
       node {
         id
@@ -99,8 +117,8 @@ query CollectionSEO($after: String) {
 
 ```graphql
 # pages:query — validated against api_version 2025-04
-query PageSEO($after: String) {
-  pages(first: 250, after: $after) {
+query PageSEO($first: Int!, $after: String) {
+  pages(first: $first, after: $after) {
     edges {
       node {
         id

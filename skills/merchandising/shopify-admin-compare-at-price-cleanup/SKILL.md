@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-compare-at-price-cleanup
 role: merchandising
-description: "Removes stale compareAtPrice values where current price >= compareAtPrice (no real discount) or compareAtPrice has been set for over a configurable age threshold."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Removes stale compareAtPrice values where current price >= compareAtPrice (no real discount) or compareAtPrice has been set for over a configurable age threshold.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - productVariants:query
-  - productVariantsBulkUpdate:mutation
+  - 'productVariants:query'
+  - 'productVariantsBulkUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'productVariantsBulkUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Identifies variants with a `compareAtPrice` that no longer represents a genuine discount and clears it, so storefront strikethrough pricing reflects real savings rather than legacy noise. Two conditions are flagged: (a) `compareAtPrice <= price` (no discount, often left over from a price increase), and (b) `compareAtPrice` set for longer than `max_age_days` (stale "always on sale" optics that hurt long-term price perception and can violate advertising standards in some regions). Defaults to dry-run.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,write_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
 
 ## Parameters
@@ -53,8 +68,8 @@ Identifies variants with a `compareAtPrice` that no longer represents a genuine 
 
 ```graphql
 # productVariants:query — validated against api_version 2025-01
-query VariantsForCompareAtCleanup($query: String, $after: String) {
-  productVariants(first: 250, after: $after, query: $query) {
+query VariantsForCompareAtCleanup($first: Int!, $query: String, $after: String) {
+  productVariants(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

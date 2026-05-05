@@ -1,22 +1,40 @@
 ---
 name: shopify-admin-order-hold-and-release
 role: fulfillment-ops
-description: "Place or release fulfillment holds on open orders in batch — with a stated reason and optional expiry date."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Place or release fulfillment holds on open orders in batch — with a stated reason and optional expiry date.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - fulfillmentOrderHold:mutation
-  - fulfillmentOrderReleaseHold:mutation
+  - 'orders:query'
+  - 'fulfillmentOrderHold:mutation'
+  - 'fulfillmentOrderReleaseHold:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'fulfillmentOrderHold:mutation'
+        prefer_tool: graphql_mutation
+      - skill_op: 'fulfillmentOrderReleaseHold:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Places or releases holds on fulfillment orders programmatically without navigating the Shopify admin. Useful for fraud review queues, inventory shortages, or payment verification workflows. Works on orders with fulfillment orders in `OPEN` status.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_merchant_managed_fulfillment_orders`
 
 ## Parameters

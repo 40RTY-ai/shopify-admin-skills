@@ -1,23 +1,37 @@
 ---
 name: shopify-admin-fulfillment-location-routing
 role: fulfillment-ops
-description: "Reassign fulfillment orders from one location to another for warehouse overflow or regional routing."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Reassign fulfillment orders from one location to another for warehouse overflow or regional routing.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - fulfillmentOrders:query
-  - fulfillmentOrderMove:mutation
+  - 'fulfillmentOrders:query'
+  - 'fulfillmentOrderMove:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'fulfillmentOrders:query'
+        prefer_tool: graphql_query
+      - skill_op: 'fulfillmentOrderMove:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries open fulfillment orders assigned to a source location and moves them to a destination location. Used when a warehouse is at capacity, a location is closing, or regional routing rules change. Replaces manual reassignment in Shopify Admin — this skill handles bulk location transfers for any number of open orders in a single workflow.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_fulfillments`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_fulfillments`
-- Both source and destination locations must be active fulfillment locations in Shopify
 
 ## Parameters
 
@@ -48,10 +62,10 @@ Queries open fulfillment orders assigned to a source location and moves them to 
 
 ```graphql
 # fulfillmentOrders:query — validated against api_version 2025-01
-query FulfillmentOrdersByLocation($locationId: ID!, $after: String) {
+query FulfillmentOrdersByLocation($first: Int!, $locationId: ID!, $after: String) {
   fulfillmentOrders(
     assignedLocationId: $locationId
-    first: 250
+    first: $first
     after: $after
     query: "status:open"
   ) {

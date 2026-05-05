@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-product-affinity-cross-sell
 role: order-intelligence
-description: "Mine order history to find which products are most frequently bought together, then rank pairs by support, confidence, and lift to power bundles and cross-sell recommendations."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Mine order history to find which products are most frequently bought together, then rank pairs by support, confidence, and lift to power bundles and cross-sell recommendations.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Applies market basket analysis to your order history to surface product pairs that customers naturally buy together. For every co-purchased pair it calculates **support** (how often the pair appears), **confidence** (given product A, how likely is B?), and **lift** (how much more likely than chance). The output is actionable input for product bundles, "frequently bought together" widgets, cross-sell email flows, and homepage recommendations. Read-only — no mutations are executed.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_products` (validator-confirmed: line item `product` field traverses the product graph)
 
 ## Parameters

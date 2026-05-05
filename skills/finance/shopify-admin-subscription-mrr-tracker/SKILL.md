@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-subscription-mrr-tracker
 role: finance
-description: "Read-only: for stores with subscription products, calculates MRR, ARR, active subscriber count, and rolling churn rate from subscription contracts."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: for stores with subscription products, calculates MRR, ARR, active subscriber count, and rolling churn rate from subscription contracts.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - subscriptionContracts:query
+  - 'subscriptionContracts:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'subscriptionContracts:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 For stores selling subscription products via Shopify's native subscriptions, this skill aggregates active subscription contracts into the standard SaaS-style metrics finance teams care about: monthly recurring revenue (MRR), annualized recurring revenue (ARR), active subscriber count, average revenue per subscriber (ARPU), and a rolling churn rate. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_own_subscription_contracts`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_own_subscription_contracts`
 
 ## Parameters
@@ -74,8 +87,8 @@ Aggregations:
 
 ```graphql
 # subscriptionContracts:query — validated against api_version 2025-01
-query SubscriptionMRR($after: String) {
-  subscriptionContracts(first: 250, after: $after) {
+query SubscriptionMRR($first: Int!, $after: String) {
+  subscriptionContracts(first: $first, after: $after) {
     edges {
       node {
         id

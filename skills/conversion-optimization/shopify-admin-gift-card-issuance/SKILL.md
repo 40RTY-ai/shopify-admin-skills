@@ -1,23 +1,37 @@
 ---
 name: shopify-admin-gift-card-issuance
 role: conversion-optimization
-description: "Issue Shopify gift cards (store credit) to customers as a goodwill gesture, post-return incentive, or loyalty reward."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Issue Shopify gift cards (store credit) to customers as a goodwill gesture, post-return incentive, or loyalty reward.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customer:query
-  - giftCardCreate:mutation
+  - 'customer:query'
+  - 'giftCardCreate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customer:query'
+        prefer_tool: graphql_query
+      - skill_op: 'giftCardCreate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Issues Shopify native gift cards to customers programmatically — as goodwill for a delayed shipment, as store credit instead of a cash refund, or as a loyalty reward. Uses Shopify's built-in gift card system; no 3rd-party app required. Gift cards issued here are redeemable at checkout exactly like manual gift cards. Note: `giftCardCreate` is available on all Shopify plans but may require the store to have gift cards enabled in settings.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `write_gift_cards`
-- Gift cards must be enabled in Shopify admin → Settings → Gift cards
 
 ## Parameters
 

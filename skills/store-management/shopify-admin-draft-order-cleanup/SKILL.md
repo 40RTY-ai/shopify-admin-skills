@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-draft-order-cleanup
 role: store-management
-description: "Finds stale draft orders older than N days and optionally deletes them to reduce admin clutter."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Finds stale draft orders older than N days and optionally deletes them to reduce admin clutter.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - draftOrders:query
-  - draftOrderDelete:mutation
+  - 'draftOrders:query'
+  - 'draftOrderDelete:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'draftOrders:query'
+        prefer_tool: graphql_query
+      - skill_op: 'draftOrderDelete:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries open draft orders older than a configurable age and optionally deletes them. Draft orders accumulate from abandoned B2B quotes, incomplete manual orders, or old integrations and clutter the admin. Stale drafts also inflate pending revenue metrics.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_orders`
 
 ## Parameters
@@ -45,8 +60,8 @@ Queries open draft orders older than a configurable age and optionally deletes t
 
 ```graphql
 # draftOrders:query — validated against api_version 2025-01
-query StaleDraftOrders($query: String!, $after: String) {
-  draftOrders(first: 250, after: $after, query: $query) {
+query StaleDraftOrders($first: Int!, $query: String!, $after: String) {
+  draftOrders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

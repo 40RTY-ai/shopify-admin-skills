@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-referral-source-attribution
 role: marketing
-description: "Read-only: parses each order's landing site and referrer URL to break down orders, revenue, and AOV by traffic source — direct, organic, paid, social, email, or referral domain."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: parses each order''s landing site and referrer URL to break down orders, revenue, and AOV by traffic source — direct, organic, paid, social, email, or referral domain.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Aggregates orders by their first-touch traffic source — extracted from each order's `landingPageUrl`, `referrerUrl`, and any UTM parameters embedded in the landing URL. Produces an attribution table showing orders, revenue, and AOV per source so merchants can see which channels are actually converting. Read-only — no mutations. Use when native Shopify analytics dashboards aren't granular enough or when you need to export raw attribution data for an external model.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`
 
 ## Parameters
@@ -59,8 +73,8 @@ Aggregates orders by their first-touch traffic source — extracted from each or
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForAttribution($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForAttribution($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

@@ -1,22 +1,34 @@
 ---
 name: shopify-admin-traffic-by-page-report
 role: conversion-optimization
-description: "Report sessions, conversion rate, and bounce rate for every product and collection page using Shopify's analytics API — surfaces which pages earn eyeballs and which convert them."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Report sessions, conversion rate, and bounce rate for every product and collection page using Shopify''s analytics API — surfaces which pages earn eyeballs and which convert them.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - shopifyqlQuery:query
+  - 'shopifyqlQuery:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'shopifyqlQuery:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries Shopify's built-in analytics engine (ShopifyQL) to surface session-level traffic data scoped to product and collection pages. Shows which pages are attracting the most traffic, how many sessions convert to orders, and where visitors are bouncing — ready input for SEO prioritisation, merchandising focus, and A/B test targeting. Read-only — no mutations are executed.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_reports`
-- Shopify plan: ShopifyQL analytics is available on Basic and above; availability of `sessions` as a data source requires Shopify plan or higher
 
 ## Parameters
 

@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-gift-card-liability-report
 role: finance
-description: "Read-only: calculates total outstanding gift card balance as a financial liability, broken down by issue cohort and remaining balance band."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: calculates total outstanding gift card balance as a financial liability, broken down by issue cohort and remaining balance band.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - giftCards:query
+  - 'giftCards:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'giftCards:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Calculates the store's total outstanding gift card liability — the sum of unredeemed gift card balances that represent a future obligation to deliver goods. Breaks the liability down by **issue-month cohort** and **remaining-balance band** so finance can size the obligation, age it, and forecast breakage. This is the bookkeeping companion to `gift-card-balance-report` (which lists individual cards). Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_gift_cards`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_gift_cards`
 
 ## Parameters
@@ -63,8 +76,8 @@ Aggregations:
 
 ```graphql
 # giftCards:query — validated against api_version 2025-01
-query GiftCardLiability($query: String, $after: String) {
-  giftCards(first: 250, after: $after, query: $query) {
+query GiftCardLiability($first: Int!, $query: String, $after: String) {
+  giftCards(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

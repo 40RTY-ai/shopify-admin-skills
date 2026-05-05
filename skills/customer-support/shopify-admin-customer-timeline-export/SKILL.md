@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-customer-timeline-export
 role: customer-support
-description: "Read-only: exports a complete chronological history for a single customer — orders, refunds, returns, addresses, notes, tags, marketing consent, and lifetime spend — as one consolidated CSV."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: exports a complete chronological history for a single customer — orders, refunds, returns, addresses, notes, tags, marketing consent, and lifetime spend — as one consolidated CSV.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customer:query
-  - orders:query
+  - 'customer:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customer:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Produces a complete, chronological dossier for a single customer. Pulls the customer record (identity, marketing consent, lifetime totals, tags, notes, addresses) and every order they've placed (with line items, fulfillments, refunds, and returns) and emits one merged CSV plus a human-readable timeline. Used by support agents handling escalations, by data export requests, and as the source-of-truth dump before an account merge or deletion. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `read_orders`
 
 ## Parameters
@@ -75,8 +91,8 @@ query CustomerHeaderForTimeline($id: ID!) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query CustomerOrdersForTimeline($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query, sortKey: CREATED_AT, reverse: true) {
+query CustomerOrdersForTimeline($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query, sortKey: CREATED_AT, reverse: true) {
     edges {
       node {
         id

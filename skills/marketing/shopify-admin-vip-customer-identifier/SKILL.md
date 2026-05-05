@@ -1,22 +1,41 @@
 ---
 name: shopify-admin-vip-customer-identifier
 role: marketing
-description: "Identifies top-spending customers (top N% by lifetime value or order frequency) and exports a VIP candidate list; optionally tags qualified customers as VIPs."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Identifies top-spending customers (top N% by lifetime value or order frequency) and exports a VIP candidate list; optionally tags qualified customers as VIPs.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - orders:query
-  - customerUpdate:mutation
+  - 'customers:query'
+  - 'orders:query'
+  - 'customerUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'customerUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Ranks customers by lifetime spend and order frequency, identifies the top N% (by value, frequency, or both), and outputs a CSV of VIP candidates. Optionally applies a VIP tag to qualified customers via `customerUpdate`. Used to build loyalty segments, prioritize white-glove support, or seed exclusive-access campaigns. The lifetime spend and order count are pulled directly from Shopify customer aggregates — no external CRM required.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,read_orders,write_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `read_orders`, `write_customers` (only if `tag_customers: true`)
 
 ## Parameters

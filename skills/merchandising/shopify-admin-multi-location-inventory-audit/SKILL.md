@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-multi-location-inventory-audit
 role: merchandising
-description: "Audit inventory levels across all active locations, flagging variants where Available quantity is negative or Committed exceeds On Hand — a signal of inventory sync drift."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Audit inventory levels across all active locations, flagging variants where Available quantity is negative or Committed exceeds On Hand — a signal of inventory sync drift.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - locations:query
-  - inventoryItems:query
+  - 'locations:query'
+  - 'inventoryItems:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'locations:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Surfaces inventory sync discrepancies across locations — specifically variants where `available` is negative or `committed` > `on_hand`, which indicate drift between Shopify's committed counter and actual physical stock. Common causes: 3PL delays posting returns, WMS deductions stacking with Shopify's committed count, or multi-store sync issues. Read-only — no mutations. Replaces manual inventory reconciliation spreadsheets and the need to navigate each location separately in the Shopify admin.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_inventory`, `read_locations`
 
 ## Parameters
@@ -51,7 +66,7 @@ query ActiveLocations($first: Int!) {
         id
         name
         isActive
-        inventoryLevels(first: 250) {
+        inventoryLevels(first: $first) {
           edges {
             node {
               id
@@ -84,11 +99,11 @@ query ActiveLocations($first: Int!) {
 
 ```graphql
 # inventoryItems:query — validated against api_version 2025-01
-query InventoryItemLevels($id: ID!, $after: String) {
+query InventoryItemLevels($first: Int!, $id: ID!, $after: String) {
   location(id: $id) {
     id
     name
-    inventoryLevels(first: 250, after: $after) {
+    inventoryLevels(first: $first, after: $after) {
       edges {
         node {
           id

@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-return-reason-analysis
 role: returns
-description: "Read-only: aggregates return reasons across orders to identify product quality or listing issues."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: aggregates return reasons across orders to identify product quality or listing issues.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - returns:query
-  - orders:query
+  - 'returns:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'returns:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all return requests within a date window and aggregates them by return reason code, product, and SKU. Surfaces which products have the highest return rates and which reasons (wrong size, damaged, not as described, etc.) are most common. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_returns`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_returns`
 
 ## Parameters
@@ -46,8 +62,8 @@ Queries all return requests within a date window and aggregates them by return r
 
 ```graphql
 # returns:query — validated against api_version 2025-01
-query ReturnsAnalysis($query: String!, $after: String) {
-  returns(first: 250, after: $after, query: $query) {
+query ReturnsAnalysis($first: Int!, $query: String!, $after: String) {
+  returns(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -92,13 +108,13 @@ query ReturnsAnalysis($query: String!, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrderCountForPeriod($query: String!) {
+query OrderCountForPeriod($first: Int!, $query: String!) {
   orders(first: 1, query: $query) {
     pageInfo {
       hasNextPage
     }
   }
-  ordersCount: orders(first: 250, query: $query) {
+  ordersCount: orders(first: $first, query: $query) {
     edges {
       node {
         id

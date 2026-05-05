@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-customer-cohort-analysis
 role: customer-ops
-description: "Read-only: groups customers by first-purchase month and tracks repeat purchase rate and revenue per cohort."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: groups customers by first-purchase month and tracks repeat purchase rate and revenue per cohort.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - orders:query
+  - 'customers:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Groups customers by the month of their first purchase and tracks how each cohort performs over time: how many customers repurchase, how many orders they place, and how much revenue each cohort generates in subsequent months. Cohort analysis is the gold standard for measuring retention and the health of a subscription or loyalty program. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `read_orders`
 
 ## Parameters
@@ -47,8 +64,8 @@ Groups customers by the month of their first purchase and tracks how each cohort
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CohortCustomers($query: String!, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query CohortCustomers($first: Int!, $query: String!, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -73,8 +90,8 @@ query CohortCustomers($query: String!, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query CohortOrders($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query CohortOrders($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

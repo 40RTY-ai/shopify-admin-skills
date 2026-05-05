@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-cogs-completeness-audit
 role: merchandising
-description: "Read-only: identifies products and variants that are missing inventoryItem.unitCost so margin and inventory valuation reports stay accurate."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: identifies products and variants that are missing inventoryItem.unitCost so margin and inventory valuation reports stay accurate.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - productVariants:query
-  - inventoryItems:query
+  - 'productVariants:query'
+  - 'inventoryItems:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans every variant in the catalog and surfaces those whose `inventoryItem.unitCost` is missing or zero. Cost of goods sold (COGS) is the foundation for margin reporting, profit-based pricing decisions, and inventory valuation — a single missing cost silently corrupts every downstream calculation. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_inventory`
 
 ## Parameters
@@ -51,8 +66,8 @@ Scans every variant in the catalog and surfaces those whose `inventoryItem.unitC
 
 ```graphql
 # productVariants:query — validated against api_version 2025-01
-query VariantsForCogsAudit($query: String, $after: String) {
-  productVariants(first: 250, after: $after, query: $query) {
+query VariantsForCogsAudit($first: Int!, $query: String, $after: String) {
+  productVariants(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

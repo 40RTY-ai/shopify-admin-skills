@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-cancel-and-restock
 role: fulfillment-ops
-description: "Cancel an unfulfilled order, optionally restock inventory, and optionally notify the customer — all in a single validated workflow."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Cancel an unfulfilled order, optionally restock inventory, and optionally notify the customer — all in a single validated workflow.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - order:query
-  - orderCancel:mutation
+  - 'order:query'
+  - 'orderCancel:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'order:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orderCancel:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Cancels an unfulfilled or partially-unfulfilled order with configurable restock, refund, and customer notification options — without navigating the Shopify admin. Useful for fraud exception handling, out-of-stock cancellations, or customer-requested cancellations before dispatch. Cannot cancel orders that are already fully fulfilled.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_orders`
 
 ## Parameters

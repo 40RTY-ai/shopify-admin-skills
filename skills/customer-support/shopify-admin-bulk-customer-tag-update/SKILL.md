@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-bulk-customer-tag-update
 role: customer-support
-description: "Adds and/or removes tags across a filtered set of customers — supports query-based selection, explicit ID lists, and union/replace tag modes."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Adds and/or removes tags across a filtered set of customers — supports query-based selection, explicit ID lists, and union/replace tag modes.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - customerUpdate:mutation
+  - 'customers:query'
+  - 'customerUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'customerUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Applies bulk tag changes (add, remove, or both) to customers selected by a query filter (e.g., `total_spent:>=500`, `tag:newsletter`) or by an explicit list of customer GIDs. Tags are how Shopify segments customers for discounts, marketing, and support workflows; this skill makes batch changes safe, dry-runnable, and auditable. Use when migrating from one tag taxonomy to another, when retiring a campaign-specific tag, or when applying a new segment tag identified by an analytics report.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,write_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `write_customers`
 
 ## Parameters
@@ -55,8 +71,8 @@ Applies bulk tag changes (add, remove, or both) to customers selected by a query
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CustomersForBulkTagging($query: String!, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query CustomersForBulkTagging($first: Int!, $query: String!, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

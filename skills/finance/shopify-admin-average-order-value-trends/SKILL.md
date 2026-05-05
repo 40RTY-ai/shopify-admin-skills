@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-average-order-value-trends
 role: finance
-description: "Read-only: tracks AOV over time buckets and segments by new vs. returning customers."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: tracks AOV over time buckets and segments by new vs. returning customers.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - customers:query
+  - 'orders:query'
+  - 'customers:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Calculates Average Order Value (AOV) over configurable time buckets (daily, weekly, monthly) and segments results by new vs. returning customers. Tracks AOV trends to measure the impact of upsell programs, bundle offers, or free shipping thresholds. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_customers`
 
 ## Parameters
@@ -48,8 +65,8 @@ Calculates Average Order Value (AOV) over configurable time buckets (daily, week
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query AOVData($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query AOVData($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -77,8 +94,8 @@ query AOVData($query: String!, $after: String) {
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query NewVsReturningCustomers($query: String!, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query NewVsReturningCustomers($first: Int!, $query: String!, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

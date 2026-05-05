@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-customer-acquisition-cost-by-source
 role: customer-ops
-description: "Read-only: estimates customer acquisition cost (CAC) per traffic source by joining order count per landing site / referrer with configurable ad spend."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: estimates customer acquisition cost (CAC) per traffic source by joining order count per landing site / referrer with configurable ad spend.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Estimates customer acquisition cost (CAC) for each traffic source by combining the number of new-customer orders attributed to a landing page / referrer with a configurable ad spend input per source. Output answers: "for every dollar spent on source X, how many new customers did we acquire and at what unit cost?" Read-only — no mutations. Provides the data foundation for paid-media budget reallocation.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_customers`
 
 ## Parameters
@@ -56,8 +70,8 @@ Estimates customer acquisition cost (CAC) for each traffic source by combining t
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersWithAttribution($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersWithAttribution($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-discount-roi-calculator
 role: conversion-optimization
-description: "Read-only: calculates the true ROI of each discount code and automatic discount by comparing incremental revenue against discount cost."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: calculates the true ROI of each discount code and automatic discount by comparing incremental revenue against discount cost.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - discountNodes:query
-  - orders:query
+  - 'discountNodes:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'discountNodes:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Evaluates the true return on investment for each discount code and automatic discount by measuring revenue generated, number of orders, average order value with vs. without discount, customer acquisition attributed to discounts, and whether discounted orders cannibalized full-price sales. Goes beyond `discount-hygiene-cleanup` (which finds broken/unused codes) to answer "was this discount worth it?" Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_discounts`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_discounts`
 
 ## Parameters
@@ -59,8 +75,8 @@ Evaluates the true return on investment for each discount code and automatic dis
 
 ```graphql
 # discountNodes:query — validated against api_version 2025-01
-query AllDiscounts($after: String) {
-  discountNodes(first: 250, after: $after) {
+query AllDiscounts($first: Int!, $after: String) {
+  discountNodes(first: $first, after: $after) {
     edges {
       node {
         id
@@ -108,8 +124,8 @@ query AllDiscounts($after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersByDiscount($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersByDiscount($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

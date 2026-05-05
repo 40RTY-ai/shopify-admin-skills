@@ -1,22 +1,39 @@
 ---
 name: shopify-admin-abandoned-cart-recovery
 role: marketing
-description: "Query checkouts abandoned in the last N days, generate unique discount codes per customer, and tag them for re-engagement."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Query checkouts abandoned in the last N days, generate unique discount codes per customer, and tag them for re-engagement.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - abandonedCheckouts:query
-  - discountCodeBulkCreate:mutation
-  - tagsAdd:mutation
+  - 'abandonedCheckouts:query'
+  - 'discountCodeBulkCreate:mutation'
+  - 'tagsAdd:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'abandonedCheckouts:query'
+        prefer_tool: graphql_query
+      - skill_op: 'discountCodeBulkCreate:mutation'
+        prefer_tool: graphql_mutation
+      - skill_op: 'tagsAdd:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Identifies customers who started checkout but did not complete their purchase, generates a unique discount code for each one, and tags them in Shopify so they can be targeted in follow-up campaigns. This skill handles the Shopify-native data layer (querying, discounts, tagging); sending the actual email requires an external tool.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_checkouts`, `write_price_rules`, `write_discount_codes`, `write_customers`
 
 ## Parameters

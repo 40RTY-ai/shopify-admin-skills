@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-collection-membership-audit
 role: merchandising
-description: "Read-only: lists orphan products (in zero collections) and over-collected products for catalog hygiene."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists orphan products (in zero collections) and over-collected products for catalog hygiene.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - collections:query
+  - 'products:query'
+  - 'collections:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'collections:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Identifies products that are not in any collection ("orphans" — invisible in store navigation) and products that appear in an unusually high number of collections ("over-collected" — potential merchandising noise). Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`
 
 ## Parameters
@@ -47,8 +63,8 @@ Identifies products that are not in any collection ("orphans" — invisible in s
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductCollectionMembership($query: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductCollectionMembership($first: Int!, $query: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -75,8 +91,8 @@ query ProductCollectionMembership($query: String!, $after: String) {
 
 ```graphql
 # collections:query — validated against api_version 2025-01
-query CollectionOverview($after: String) {
-  collections(first: 250, after: $after) {
+query CollectionOverview($first: Int!, $after: String) {
+  collections(first: $first, after: $after) {
     edges {
       node {
         id

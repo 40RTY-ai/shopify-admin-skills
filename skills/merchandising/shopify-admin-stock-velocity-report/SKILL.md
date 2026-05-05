@@ -1,15 +1,30 @@
 ---
 name: shopify-admin-stock-velocity-report
 role: merchandising
-description: "Read-only: calculates days-of-supply and sell-through rate per SKU and location for replenishment planning."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: calculates days-of-supply and sell-through rate per SKU and location for replenishment planning.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - productVariants:query
-  - orders:query
-  - inventoryItems:query
+  - 'productVariants:query'
+  - 'orders:query'
+  - 'inventoryItems:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
@@ -20,7 +35,10 @@ Calculates two critical replenishment metrics for every stocked SKU:
 Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_orders,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_orders`, `read_inventory`
 
 ## Parameters
@@ -60,8 +78,8 @@ Read-only — no mutations.
 
 ```graphql
 # productVariants:query — validated against api_version 2025-01
-query VariantsForVelocity($query: String, $after: String) {
-  productVariants(first: 250, after: $after, query: $query) {
+query VariantsForVelocity($first: Int!, $query: String, $after: String) {
+  productVariants(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -87,8 +105,8 @@ query VariantsForVelocity($query: String, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query SalesVelocityData($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query SalesVelocityData($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         lineItems(first: 50) {

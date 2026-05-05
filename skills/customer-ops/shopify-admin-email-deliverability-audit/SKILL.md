@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-email-deliverability-audit
 role: customer-ops
-description: "Read-only: scans the customer database for malformed emails, role accounts, disposable domains, and bounce-suspect patterns to protect sender reputation."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: scans the customer database for malformed emails, role accounts, disposable domains, and bounce-suspect patterns to protect sender reputation.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
+  - 'customers:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans the entire customer list and flags addresses that will hurt email deliverability if included in marketing sends: syntactically invalid addresses, role accounts (info@, admin@, sales@), known disposable / temporary domains, and suspected hard-bounce patterns. Output is a suppression list ready to import into your email platform. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`
 
 ## Parameters
@@ -58,8 +72,8 @@ A customer can carry multiple flags; the most severe (`invalid_syntax` > `bounce
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query DeliverabilityAudit($query: String, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query DeliverabilityAudit($first: Int!, $query: String, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

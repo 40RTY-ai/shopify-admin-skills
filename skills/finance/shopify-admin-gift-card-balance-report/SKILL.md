@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-gift-card-balance-report
 role: finance
-description: "Read-only: lists all active gift cards with remaining balance, expiry, and last-used date for liability tracking."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists all active gift cards with remaining balance, expiry, and last-used date for liability tracking.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - giftCards:query
+  - 'giftCards:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'giftCards:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all active and partially-redeemed gift cards and reports the total outstanding gift card liability (unredeemed balances). Used for balance sheet reporting, accounting for deferred revenue, and auditing unused gift cards before they expire. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_gift_cards`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_gift_cards`
 
 ## Parameters
@@ -44,8 +57,8 @@ Queries all active and partially-redeemed gift cards and reports the total outst
 
 ```graphql
 # giftCards:query — validated against api_version 2025-01
-query GiftCardBalances($query: String, $after: String) {
-  giftCards(first: 250, after: $after, query: $query) {
+query GiftCardBalances($first: Int!, $query: String, $after: String) {
+  giftCards(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

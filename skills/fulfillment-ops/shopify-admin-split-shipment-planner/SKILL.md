@@ -1,23 +1,37 @@
 ---
 name: shopify-admin-split-shipment-planner
 role: fulfillment-ops
-description: "Splits a multi-line fulfillment order into separate shipments for partial or location-specific shipping."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Splits a multi-line fulfillment order into separate shipments for partial or location-specific shipping.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - fulfillmentOrders:query
-  - fulfillmentOrderSplit:mutation
+  - 'fulfillmentOrders:query'
+  - 'fulfillmentOrderSplit:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'fulfillmentOrders:query'
+        prefer_tool: graphql_query
+      - skill_op: 'fulfillmentOrderSplit:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Splits a fulfillment order containing multiple line items into two or more separate fulfillment orders, each of which can be shipped independently with its own tracking number. Used when items in an order ship from different locations, on different dates, or require different carriers. Replaces manual split-shipment handling in Shopify Admin.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_fulfillments`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_fulfillments`
-- Target fulfillment order must be in `OPEN` status
 
 ## Parameters
 
