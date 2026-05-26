@@ -8,10 +8,10 @@
     <h2 class="signup-heading">Get new skills first.</h2>
     <p class="signup-desc">New agent skills, operator playbooks, and updates from the 40rty team — straight to your inbox.</p>
 
-    <!-- Step 1: email -->
+    <!-- Step 1: email + store url -->
     <div id="signup-step1">
       <form class="signup-form" id="signup-form" novalidate>
-        <div class="signup-row">
+        <div class="signup-fields">
           <input
             type="email"
             name="email"
@@ -21,13 +21,25 @@
             class="signup-input"
             autocomplete="email"
           />
-          <button type="submit" class="signup-btn">Get updates</button>
+          <input
+            type="text"
+            name="storeUrl"
+            id="signup-store-url"
+            placeholder="Your store domain (e.g. my-store.myshopify.com)"
+            required
+            class="signup-input"
+            autocomplete="url"
+            inputmode="url"
+            spellcheck="false"
+          />
+          <p id="signup-error" class="signup-error" role="alert" hidden></p>
+          <button type="submit" class="signup-btn signup-submit">Get updates</button>
         </div>
         <p class="signup-fine">No spam. Unsubscribe any time.</p>
       </form>
     </div>
 
-    <!-- Step 2: skill request + domain -->
+    <!-- Step 2: skill request -->
     <div id="signup-step2" class="signup-step2">
       <p class="step2-label">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -35,12 +47,6 @@
       </p>
       <form class="signup-form" id="skill-request-form" novalidate>
         <div class="step2-fields">
-          <input
-            type="text"
-            id="domain-input"
-            placeholder="Your store domain (e.g. my-store.myshopify.com)"
-            class="signup-input"
-          />
           <input
             type="text"
             id="skill-request-input"
@@ -62,31 +68,62 @@
 </section>
 
 <script>
+  import { validateStoreDomain } from '../scripts/storeDomain';
+
   const apiBase = import.meta.env.DEV ? 'http://localhost:3000' : 'https://audit.40rty.ai';
   let capturedEmail = '';
+  let capturedDomain = '';
 
   function showSuccess() {
     document.getElementById('signup-step2')?.classList.remove('visible');
     document.getElementById('signup-success')?.classList.add('visible');
   }
 
-  // Step 1 — email
+  // Step 1 — email + store url
   const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
-  const signupBtn = signupForm?.querySelector('.signup-btn') as HTMLButtonElement | null;
+  const signupBtn = signupForm?.querySelector('.signup-submit') as HTMLButtonElement | null;
+  const errorEl = document.getElementById('signup-error') as HTMLParagraphElement | null;
+  const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+  const storeInput = document.getElementById('signup-store-url') as HTMLInputElement | null;
+
+  function setError(msg: string, target?: HTMLInputElement | null) {
+    if (errorEl) {
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+    }
+    if (target) {
+      target.classList.add('signup-input--error');
+      target.focus();
+    }
+  }
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    emailInput?.classList.remove('signup-input--error');
+    storeInput?.classList.remove('signup-input--error');
+  }
+  emailInput?.addEventListener('input', clearError);
+  storeInput?.addEventListener('input', clearError);
 
   signupForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
-    const email = emailInput?.value?.trim();
-    if (!email) return;
+    clearError();
+
+    const email = emailInput?.value?.trim() || '';
+    const rawDomain = storeInput?.value || '';
+
+    if (!email) { setError('Please enter your email.', emailInput); return; }
+
+    const result = validateStoreDomain(rawDomain);
+    if (result.error) { setError(result.error, storeInput); return; }
 
     capturedEmail = email;
+    capturedDomain = result.domain;
     if (signupBtn) { signupBtn.textContent = 'Sending…'; signupBtn.disabled = true; }
 
     fetch(`${apiBase}/api/skills-signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, domain: result.domain }),
     }).catch(() => {});
 
     if (typeof gtag !== 'undefined') {
@@ -101,18 +138,17 @@
     }, 300);
   });
 
-  // Step 2 — skill request + domain
+  // Step 2 — skill request
   const skillRequestForm = document.getElementById('skill-request-form') as HTMLFormElement | null;
 
   skillRequestForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const skillRequest = (document.getElementById('skill-request-input') as HTMLInputElement | null)?.value?.trim();
-    const domain = (document.getElementById('domain-input') as HTMLInputElement | null)?.value?.trim();
-    if (skillRequest || domain) {
+    if (skillRequest) {
       fetch(`${apiBase}/api/skills-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: capturedEmail, skillRequest, domain }),
+        body: JSON.stringify({ email: capturedEmail, domain: capturedDomain, skillRequest }),
       }).catch(() => {});
       if (typeof gtag !== 'undefined') {
         gtag('event', 'skill_request', { method: 'text' });
@@ -177,6 +213,28 @@
     gap: 10px;
     max-width: 460px;
     margin: 0 auto;
+  }
+
+  .signup-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .signup-submit { width: 100%; padding: 14px; }
+
+  .signup-input--error {
+    border-color: #e25c5c !important;
+    background: rgba(226, 92, 92, 0.08) !important;
+  }
+
+  .signup-error {
+    margin: -2px 0 0;
+    font-size: 0.8rem;
+    color: #ff8a8a;
+    text-align: left;
   }
 
   .signup-input {
