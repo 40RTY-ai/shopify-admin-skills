@@ -204,12 +204,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
         </p>
         <p class="hero-sub-static">through your AI agent — on demand or on a schedule.</p>
         <a href={`${base}skills/`} class="browse-all-link">
-          Browse all {skills.length} skills
-          <span class="browse-all-stars">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <span id="gh-stars"></span>
-          </span>
-          &rarr;
+          Browse all {skills.length} skills &rarr;
         </a>
         <div class="hero-cta">
           <div class="install-tabs">
@@ -342,15 +337,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   </section>
 
   <script>
-    // Fetch GitHub stars
-    fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills')
-      .then(r => r.json())
-      .then(d => {
-        const el = document.getElementById('gh-stars');
-        if (el && d.stargazers_count != null) el.textContent = String(d.stargazers_count);
-      })
-      .catch(() => {});
-
     // Copy buttons — handle both .cmd and .prompt-box
     document.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -875,14 +861,6 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
     border-color: var(--color-accent);
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(232, 168, 56, 0.18);
-  }
-
-  .browse-all-stars {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    opacity: 0.55;
-    font-size: 0.75rem;
   }
 
   .signup-teaser {

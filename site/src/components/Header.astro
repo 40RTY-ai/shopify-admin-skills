@@ -366,4 +366,16 @@ const navItems = [
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  fetch('https://api.github.com/repos/40RTY-ai/shopify-admin-skills')
+    .then(r => r.json())
+    .then(d => {
+      const count = d.stargazers_count;
+      if (count == null) return;
+      const el = document.getElementById('gh-stars');
+      const container = document.getElementById('gh-count-container');
+      if (el) el.textContent = String(count);
+      if (container) container.style.display = 'inline-flex';
+    })
+    .catch(() => {});
+
 </script>
