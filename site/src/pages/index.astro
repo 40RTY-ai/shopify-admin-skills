@@ -175,13 +175,49 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       '@type': 'SoftwareApplication',
       name: 'Shopify Admin Skills',
       applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Claude Code, Cursor, Cline, Copilot, Gemini CLI',
+      operatingSystem: 'Claude, Claude Code, Claude Cowork, Cursor, Cline, Copilot, Gemini CLI',
       url: 'https://skills.40rty.ai',
       downloadUrl: 'https://github.com/40RTY-ai/shopify-admin-skills',
       license: 'https://opensource.org/licenses/MIT',
       description: `${skills.length}+ pre-built AI agent skills for Shopify: cart recovery, bulk pricing, inventory audits, refunds, fulfillment routing, SEO, and more.`,
       author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What AI agents does Shopify Admin Skills work with?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Shopify Admin Skills works with Claude (claude.ai), Claude Code (CLI), Claude Cowork, Cursor, Cline, GitHub Copilot, Gemini CLI, and any MCP-compatible AI agent.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is Shopify Admin Skills free?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Yes. Shopify Admin Skills is fully open source under the MIT license. No account, no credit card, and no usage limits.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'How do I install Shopify Admin Skills?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Run `npx skills add 40RTY-ai/shopify-admin-skills` in your terminal, or paste the guided install prompt into Claude or Claude Cowork and Claude will handle everything.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the difference between a skill and a routine?',
+          acceptedAnswer: { '@type': 'Answer', text: 'A skill is an on-demand agent workflow you trigger manually (e.g. "find abandoned carts from the last 7 days"). A routine is a scheduled agent that runs automatically on a cron — for example, a morning store briefing every day at 8am.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What Shopify operations can the AI agent perform?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Shopify Admin Skills covers products, orders, customers, inventory, discounts, fulfillments, returns, price rules, publications, and payouts — both read and write operations via the Shopify Admin GraphQL API.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Who built Shopify Admin Skills?',
+          acceptedAnswer: { '@type': 'Answer', text: '40rty — the team behind AgentIQ, the Answer Engine Optimization (AEO) platform that helps Shopify merchants get their products selected by ChatGPT, Perplexity, Gemini, and other AI shopping agents.' },
+        },
+      ],
     },
   ]}
 >
@@ -224,7 +260,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
 
           <div class="install-panel" data-panel="claude-code">
             <p class="install-hint">
-              Copy this prompt and paste it into Claude — Claude will install everything for you.
+              Copy this prompt and paste it into Claude or Claude Cowork — Claude will install everything for you.
             </p>
             <div class="prompt-wrap">
               <button class="cmd cmd-prompt" data-cmd={installPrompt}>
@@ -243,7 +279,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
               <span class="cmd-copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
               <span class="cmd-toast">Copied!</span>
             </button>
-            <p class="cmd-hint">Works with Cursor, Cline, Copilot, Gemini CLI.</p>
+            <p class="cmd-hint">Works with Claude Code, Claude Cowork, Cursor, Cline, Copilot, Gemini CLI.</p>
           </div>
 
           <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">

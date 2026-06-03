@@ -2,3 +2,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://skills.40rty.ai/sitemap.xml
+
+# AI agent documentation
+# Summary: https://skills.40rty.ai/llms.txt
+# Full docs: https://skills.40rty.ai/llms-full.txt
