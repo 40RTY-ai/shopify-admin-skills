@@ -246,6 +246,9 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
           <a href="https://40rty.ai" target="_blank" rel="noopener" class="built-by">
             Built by <img src="/40rty-logo.png" alt="40rty" class="built-by-logo" /> agents
           </a>
+          <a href={`${base}skills/`} class="browse-all-link">
+            Browse all {skills.length} skills &rarr;
+          </a>
         </div>
       </div>
 
@@ -837,6 +840,28 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
   }
 
   .built-by:hover .built-by-logo { opacity: 0.85; }
+
+  .browse-all-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-dark);
+    text-decoration: none;
+    border: 1.5px solid var(--color-dark);
+    border-radius: 8px;
+    padding: 10px 18px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .browse-all-link:hover {
+    background: var(--color-dark);
+    color: var(--color-text-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
 
   .signup-teaser {
     position: absolute;
