@@ -49,6 +49,7 @@ const grouped = skills.reduce((acc, s) => {
 }, {} as Record<string, Skill[]>);
 
 const categoryMeta: Record<string, { label: string; color: string; icon: string; desc: string }> = {
+  'Agentic': { label: 'Agentic', color: '#FF6B35', icon: '🤖', desc: 'AI-agent readiness — fix agentiq.report findings' },
   'Marketing': { label: 'Marketing', color: '#E8A838', icon: '📣', desc: 'Cart recovery, win-back, loyalty' },
   'Merchandising': { label: 'Catalog & Inventory', color: '#5B8DEF', icon: '📦', desc: 'Pricing, stock, SEO, variant performance' },
   'Customer Support': { label: 'Support', color: '#E85D75', icon: '💬', desc: 'Orders, refunds, returns, WISMO' },
