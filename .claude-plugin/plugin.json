@@ -1,7 +1,7 @@
 {
   "name": "shopify-admin-skills",
-  "version": "1.0.0",
-  "description": "AI agent skills to operate your Shopify store via native Admin GraphQL. 63 workflows across marketing, inventory, fulfillment, finance, and support.",
+  "version": "1.1.0",
+  "description": "AI agent skills to operate your Shopify store via native Admin GraphQL. 116 skills across marketing, merchandising, fulfillment, finance, support, and agentic-commerce readiness.",
   "author": {
     "name": "40rty"
   },
@@ -21,6 +21,7 @@
     "refunds"
   ],
   "skills": [
+    "./skills/agentic",
     "./skills/marketing",
     "./skills/merchandising",
     "./skills/customer-support",

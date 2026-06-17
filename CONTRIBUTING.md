@@ -22,7 +22,7 @@ pnpm validate:index  # should pass on a clean clone
 ### 1. Choose a workflow
 
 Skills live under `skills/<role>/` where role is one of:
-`marketing` | `merchandising` | `customer-support` | `customer-ops` | `conversion-optimization` | `fulfillment-ops` | `finance` | `order-intelligence` | `returns` | `store-management`
+`marketing` | `merchandising` | `customer-support` | `customer-ops` | `conversion-optimization` | `fulfillment-ops` | `finance` | `order-intelligence` | `returns` | `store-management` | `agentic`
 
 A valid skill must:
 - Be achievable with native Shopify Admin GraphQL only (no 3rd-party APIs)

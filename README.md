@@ -6,7 +6,7 @@
 <p align="center">
   <strong>AI agent skills + scheduled routines to operate your Shopify store.</strong>
   <br />
-  106 skills across 10 categories, plus 20 always-on routines that monitor inventory, fraud, fulfillment, finance, and customer health on a schedule.
+  116 skills across 11 categories, plus 21 always-on routines that monitor inventory, fraud, fulfillment, finance, customer health, and AI-agent readiness on a schedule.
 </p>
 
 <p align="center">
@@ -33,10 +33,11 @@ npx skills add 40RTY-ai/shopify-admin-skills
 
 ## Skills
 
-106 skills across 10 categories:
+116 skills across 11 categories:
 
 | Category | Skills | Examples |
 |---|---|---|
+| [Agentic](skills/agentic/) | 10 | AI-agent readiness — remediates [agentiq.report](https://agentiq.report) findings: product JSON-LD & GTIN backfill, image alt-text, metafields, taxonomy, AI-crawler access, llms.txt, Organization schema, policy readability |
 | [Marketing](skills/marketing/) | 6 | Cart recovery, win-back, loyalty, VIP, promo codes, attribution |
 | [Merchandising](skills/merchandising/) | 25 | Pricing, stock, demand forecast, variant performance, COGS, vendor consolidation |
 | [Customer Support](skills/customer-support/) | 8 | Order lookup, refunds, returns, address correction, customer merge, timeline export |
