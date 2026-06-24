@@ -37,6 +37,8 @@
     "build:catalog": "node scripts/build-catalog.mjs",
     "scaffold": "bash templates/skill-scaffold.sh",
     "validate:index": "node scripts/validate-operations-index.mjs",
+    "build:signal-map": "node scripts/build-signal-skill-map.mjs",
+    "validate:signal-map": "node scripts/build-signal-skill-map.mjs --check",
     "test": "node scripts/validate-skill.mjs && node scripts/lint-skills.mjs"
   },
   "devDependencies": {

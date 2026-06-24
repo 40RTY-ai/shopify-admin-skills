@@ -1,0 +1,97 @@
+{
+  "agentic-listing-schema": {
+    "skill": "shopify-admin-agentic-description-enrichment",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "agents-md": {
+    "skill": "shopify-admin-agentic-llms-txt",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "catalog-intent-alignment": {
+    "skill": "shopify-admin-agentic-product-taxonomy",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "category-taxonomy-api": {
+    "skill": "shopify-admin-agentic-product-taxonomy",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "gtin-sku-pdp": {
+    "skill": "shopify-admin-agentic-product-jsonld-backfill",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "listing-description-quality": {
+    "skill": "shopify-admin-agentic-description-enrichment",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "listing-image-alt-text": {
+    "skill": "shopify-admin-agentic-image-alt-text",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "listing-metafields": {
+    "skill": "shopify-admin-agentic-metafields-setup",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "llms-txt": {
+    "skill": "shopify-admin-agentic-llms-txt",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "machine-contact": {
+    "skill": "shopify-admin-agentic-organization-schema",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "org-schema": {
+    "skill": "shopify-admin-agentic-organization-schema",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "product-schema-jsonld": {
+    "skill": "shopify-admin-agentic-product-jsonld-backfill",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "returns-policy-readable": {
+    "skill": "shopify-admin-agentic-policy-readability",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "robots-ai-rules": {
+    "skill": "shopify-admin-agentic-crawler-access",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "shipping-policy-readable": {
+    "skill": "shopify-admin-agentic-policy-readability",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "sizing-specs-structured": {
+    "skill": "shopify-admin-agentic-metafields-setup",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "variant-metadata": {
+    "skill": "shopify-admin-agentic-metafields-setup",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "well-known-llms-txt": {
+    "skill": "shopify-admin-agentic-llms-txt",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  },
+  "wikidata-qid": {
+    "skill": "shopify-admin-agentic-organization-schema",
+    "plugin": "shopify-admin-skills",
+    "marketplace": "shopify-admin-skills"
+  }
+}
