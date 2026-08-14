@@ -1,0 +1,17 @@
+# RFC 9116 security.txt for skills.40rty.ai
+# https://www.rfc-editor.org/rfc/rfc9116
+#
+# Uses contact@40rty.ai — the address 40rty already publishes — rather than a
+# security@ alias, because a security.txt pointing at a mailbox nobody reads is
+# worse than none at all. Vulnerabilities in the skills themselves are best
+# reported as GitHub issues; see Policy below.
+
+Contact: mailto:contact@40rty.ai
+Contact: https://github.com/40RTY-ai/shopify-admin-skills/issues
+Policy: https://github.com/40RTY-ai/shopify-admin-skills/blob/main/CONTRIBUTING.md
+Preferred-Languages: en, he
+Canonical: https://skills.40rty.ai/.well-known/security.txt
+
+# Expires is REQUIRED by RFC 9116, and an expired file is treated as no file
+# at all. Bump this whenever the contact above is reviewed.
+Expires: 2027-08-14T00:00:00.000Z

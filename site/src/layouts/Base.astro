@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { ORGANIZATION } from '../lib/schema';
 
 interface Props {
   title: string;
@@ -33,11 +34,7 @@ const defaultSchema: Record<string, unknown> = {
     '@type': 'WebSite',
     name: siteName,
     url: siteUrl,
-    publisher: {
-      '@type': 'Organization',
-      name: '40rty',
-      url: 'https://40rty.ai',
-    },
+    publisher: ORGANIZATION,
   },
 };
 

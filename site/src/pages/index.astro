@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { ORGANIZATION } from '../lib/schema';
 import UnifiedHero from '../components/illustrations/UnifiedHero';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -168,7 +169,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       name: 'Shopify Admin Skills',
       url: 'https://skills.40rty.ai',
       description: `${skills.length}+ pre-built AI agent skills for Shopify store operators.`,
-      publisher: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
+      publisher: ORGANIZATION,
     },
     {
       '@context': 'https://schema.org',
