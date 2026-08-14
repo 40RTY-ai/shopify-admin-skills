@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^5.0.4",
+    "@astrojs/sitemap": "^3.7.3",
     "astro": "^6.1.5",
     "gray-matter": "^4.0.3",
     "motion": "^12.38.0",
