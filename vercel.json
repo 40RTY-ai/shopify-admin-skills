@@ -3,11 +3,5 @@
   "buildCommand": "cd site && pnpm build",
   "outputDirectory": "site/dist",
   "installCommand": "pnpm install --frozen-lockfile=false",
-  "framework": null,
-  "rewrites": [
-    {
-      "source": "/.well-known/llms.txt",
-      "destination": "/llms.txt"
-    }
-  ]
+  "framework": null
 }
