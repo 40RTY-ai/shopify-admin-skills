@@ -1,7 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { ORGANIZATION } from '../lib/schema';
+import { ORGANIZATION_JSONLD, ORGANIZATION_REF } from '../lib/schema';
 
 interface Props {
   title: string;
@@ -34,13 +34,17 @@ const defaultSchema: Record<string, unknown> = {
     '@type': 'WebSite',
     name: siteName,
     url: siteUrl,
-    publisher: ORGANIZATION,
+    publisher: ORGANIZATION_REF,
   },
 };
 
-const schemas: Record<string, unknown>[] = jsonLd
+// The Organization goes first and stands alone, so a consumer looking for
+// "who publishes this site" finds it at the top level instead of having to
+// walk into WebSite.publisher. Everything else references it by @id.
+const pageSchemas: Record<string, unknown>[] = jsonLd
   ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd])
   : [defaultSchema];
+const schemas: Record<string, unknown>[] = [ORGANIZATION_JSONLD, ...pageSchemas];
 ---
 
 <!DOCTYPE html>

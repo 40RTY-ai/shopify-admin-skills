@@ -1,6 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import { ORGANIZATION } from '../../../lib/schema';
+import { ORGANIZATION_REF } from '../../../lib/schema';
 import SignupSection from '../../../components/SignupSection.astro';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -171,7 +171,7 @@ const renderedContent = renderMarkdown(content);
     articleSection: categoryName,
     keywords: `Shopify, AI agent, ${humanName(frontmatter.name)}, ${categoryName}, Claude Code, Cursor`,
     author: { '@type': 'Organization', name: '40rty', url: 'https://40rty.ai' },
-    publisher: ORGANIZATION,
+    publisher: ORGANIZATION_REF,
     isPartOf: { '@type': 'WebSite', name: 'Shopify Admin Skills', url: 'https://skills.40rty.ai' },
   }}
 >
