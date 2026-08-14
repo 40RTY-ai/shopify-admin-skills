@@ -1,0 +1,47 @@
+{
+  "name": "Shopify Admin Skills",
+  "description": "Free, open-source library of structured AI agent skills and scheduled routines that let Shopify merchants operate their store through Claude, Claude Code, Claude Cowork, Cursor, Cline, Copilot, or Gemini CLI.",
+  "homepage": "https://skills.40rty.ai",
+  "documentation": "https://skills.40rty.ai/llms-full.txt",
+  "contact": "contact@40rty.ai",
+  "license": "MIT",
+  "repository": "https://github.com/40RTY-ai/shopify-admin-skills",
+  "install": "npx skills add 40RTY-ai/shopify-admin-skills",
+  "capabilities": [
+    "shopify-admin-operations",
+    "marketing-automation",
+    "merchandising-and-inventory",
+    "customer-support-workflows",
+    "customer-ops",
+    "conversion-optimization",
+    "fulfillment-ops",
+    "finance-reporting",
+    "order-intelligence",
+    "returns-management",
+    "store-management",
+    "agentic-readiness"
+  ],
+  "endpoints": {
+    "llms": "https://skills.40rty.ai/llms.txt",
+    "documentation": "https://skills.40rty.ai/llms-full.txt",
+    "sitemap": "https://skills.40rty.ai/sitemap-index.xml",
+    "skills_directory": "https://skills.40rty.ai/skills/",
+    "routines_directory": "https://skills.40rty.ai/routines/",
+    "repository": "https://github.com/40RTY-ai/shopify-admin-skills"
+  },
+  "agents_supported": [
+    "claude",
+    "claude-code",
+    "claude-cowork",
+    "cursor",
+    "cline",
+    "github-copilot",
+    "gemini-cli"
+  ],
+  "notes": "Skill and routine counts are published in llms.txt, which is generated from the repository at build time. Prefer it over any count hardcoded elsewhere.",
+  "category": "agent-skills",
+  "owner": {
+    "name": "40rty Ltd.",
+    "homepage": "https://40rty.ai"
+  }
+}
