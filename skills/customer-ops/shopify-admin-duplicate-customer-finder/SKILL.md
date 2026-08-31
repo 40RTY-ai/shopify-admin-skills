@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-duplicate-customer-finder
 role: customer-ops
-description: "Read-only: finds likely duplicate customer records by matching email, phone, or name combinations."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: finds likely duplicate customer records by matching email, phone, or name combinations.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
+  - 'customers:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans the customer database for likely duplicate records using email, phone, and name matching. Duplicate customer records cause split order history, incorrect LTV calculations, and incorrect marketing segmentation. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`
 
 ## Parameters
@@ -47,8 +61,8 @@ Scans the customer database for likely duplicate records using email, phone, and
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CustomersForDeduplication($after: String) {
-  customers(first: 250, after: $after) {
+query CustomersForDeduplication($first: Int!, $after: String) {
+  customers(first: $first, after: $after) {
     edges {
       node {
         id

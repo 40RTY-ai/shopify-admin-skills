@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-checkout-abandonment-report
 role: conversion-optimization
-description: "Aggregate abandoned checkout data for a time range, broken down by cart value bucket and hour of day (UTC)."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Aggregate abandoned checkout data for a time range, broken down by cart value bucket and hour of day (UTC).'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - abandonedCheckouts:query
+  - 'abandonedCheckouts:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'abandonedCheckouts:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Aggregates abandoned checkout data broken down by cart value bucket and hour of day (UTC). Helps identify when and at what price point customers are most likely to abandon checkout. Scoped to what the `abandonedCheckouts` API provides — device type and geographic location are not available in this API and are not reported.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_checkouts`
 
 ## Parameters

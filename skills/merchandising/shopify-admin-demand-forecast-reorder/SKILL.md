@@ -1,23 +1,44 @@
 ---
 name: shopify-admin-demand-forecast-reorder
 role: merchandising
-description: "Read-only: forecasts demand per SKU using sales velocity and seasonality, then calculates reorder points and suggested purchase order quantities."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: forecasts demand per SKU using sales velocity and seasonality, then calculates reorder points and suggested purchase order quantities.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - productVariants:query
-  - inventoryItems:query
-  - inventoryLevels:query
+  - 'orders:query'
+  - 'productVariants:query'
+  - 'inventoryItems:query'
+  - 'inventoryLevels:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryLevels:query'
+        prefer_tool: get-inventory-levels
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Forecasts future demand for each SKU based on historical sales velocity, trend analysis, and optional seasonality adjustments. Calculates reorder points (when to order) and suggested reorder quantities (how much to order) factoring in vendor lead times and safety stock. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_products,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_products`, `read_inventory`
 
 ## Parameters
@@ -69,8 +90,8 @@ Forecasts future demand for each SKU based on historical sales velocity, trend a
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query SalesHistory($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query SalesHistory($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         createdAt
@@ -131,9 +152,9 @@ query InventoryItemDetails($ids: [ID!]!) {
 
 ```graphql
 # inventoryLevels:query — validated against api_version 2025-01
-query LocationInventory($locationId: ID!, $after: String) {
+query LocationInventory($first: Int!, $locationId: ID!, $after: String) {
   location(id: $locationId) {
-    inventoryLevels(first: 250, after: $after) {
+    inventoryLevels(first: $first, after: $after) {
       edges {
         node {
           quantities(names: ["available"]) { name quantity }

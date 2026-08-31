@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-exchange-vs-refund-ratio
 role: returns
-description: "Read-only: tracks what percentage of returns become exchanges vs. refunds vs. store credit — measures revenue recovery rate."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: tracks what percentage of returns become exchanges vs. refunds vs. store credit — measures revenue recovery rate.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - returns:query
-  - orders:query
+  - 'returns:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'returns:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Analyzes return resolutions to calculate the split between exchanges (revenue retained), store credit (revenue deferred), and refunds (revenue lost). Tracks this as a revenue recovery metric over time. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_returns`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_returns`
 
 ## Parameters
@@ -49,8 +65,8 @@ Analyzes return resolutions to calculate the split between exchanges (revenue re
 
 ```graphql
 # returns:query — validated against api_version 2025-01
-query ReturnResolutions($query: String!, $after: String) {
-  returns(first: 250, after: $after, query: $query) {
+query ReturnResolutions($first: Int!, $query: String!, $after: String) {
+  returns(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -104,8 +120,8 @@ query ReturnResolutions($query: String!, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersInPeriod($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersInPeriod($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

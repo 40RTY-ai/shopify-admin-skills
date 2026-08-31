@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-automated-order-tagger
 role: order-intelligence
-description: "Mutation: applies tags to orders based on configurable rules (geography, value, product type, risk level, customer tier)."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Mutation: applies tags to orders based on configurable rules (geography, value, product type, risk level, customer tier).'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - orderUpdate:mutation
+  - 'orders:query'
+  - 'orderUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'orderUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Applies tags to orders based on configurable rule sets — geography-based (domestic/international), value-based (high-value, low-value), product-type-based, customer-tier-based, or custom conditions. Supports dry-run mode for safe preview.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_orders`
 
 ## Parameters
@@ -77,8 +93,8 @@ Each rule has a `condition` and a `tag`:
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForTagging($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForTagging($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

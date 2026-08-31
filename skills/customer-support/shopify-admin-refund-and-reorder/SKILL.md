@@ -1,22 +1,39 @@
 ---
 name: shopify-admin-refund-and-reorder
 role: customer-support
-description: "Process a full or partial refund on an order and optionally create a replacement draft order for the customer."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Process a full or partial refund on an order and optionally create a replacement draft order for the customer.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - order:query
-  - refundCreate:mutation
-  - draftOrderCreate:mutation
+  - 'order:query'
+  - 'refundCreate:mutation'
+  - 'draftOrderCreate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'order:query'
+        prefer_tool: graphql_query
+      - skill_op: 'refundCreate:mutation'
+        prefer_tool: graphql_mutation
+      - skill_op: 'draftOrderCreate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Processes refunds and creates replacement orders without navigating the Shopify admin UI. This skill handles both the refund and the optional replacement draft order in a single workflow.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_orders`
 
 ## Parameters

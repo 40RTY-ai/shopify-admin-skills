@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-variant-option-normalizer
 role: merchandising
-description: "Detects inconsistent variant option naming (Sm vs Small vs S) and bulk-corrects to a standard set."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Detects inconsistent variant option naming (Sm vs Small vs S) and bulk-corrects to a standard set.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - productVariantsBulkUpdate:mutation
+  - 'products:query'
+  - 'productVariantsBulkUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'productVariantsBulkUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans product variants for inconsistent option values (e.g., "Sm", "Small", "small", "S" all meaning the same size) and bulk-updates them to a canonical set you define. Inconsistent option naming breaks size filters, causes customer confusion, and prevents search apps from grouping variants correctly.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,write_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
 
 ## Parameters
@@ -49,8 +65,8 @@ Scans product variants for inconsistent option values (e.g., "Sm", "Small", "sma
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductVariantOptions($query: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductVariantOptions($first: Int!, $query: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

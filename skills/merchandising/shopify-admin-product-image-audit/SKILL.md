@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-product-image-audit
 role: merchandising
-description: "Read-only: flags products and variants with missing images or fewer than a minimum number of images."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: flags products and variants with missing images or fewer than a minimum number of images.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
+  - 'products:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans all active products and their variants for missing or insufficient images. Flags products with zero images, variants with no assigned image, and products below a minimum image count threshold. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`
 
 ## Parameters
@@ -45,8 +59,8 @@ Scans all active products and their variants for missing or insufficient images.
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductImageAudit($query: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductImageAudit($first: Int!, $query: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

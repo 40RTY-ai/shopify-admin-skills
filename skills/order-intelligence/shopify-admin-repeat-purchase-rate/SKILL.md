@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-repeat-purchase-rate
 role: order-intelligence
-description: "Read-only: calculates what percentage of customers place 2+ orders within N days, segmented by product or collection."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: calculates what percentage of customers place 2+ orders within N days, segmented by product or collection.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - orders:query
+  - 'customers:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Calculates the repeat purchase rate — the percentage of customers who return to place at least one more order within a defined window — and segments it by first-purchase product or collection. Identifies which products drive the highest repeat purchase behavior. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_customers,read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `read_orders`
 
 ## Parameters
@@ -50,8 +67,8 @@ Calculates the repeat purchase rate — the percentage of customers who return t
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query AcquiredCustomers($query: String!, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query AcquiredCustomers($first: Int!, $query: String!, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -72,8 +89,8 @@ query AcquiredCustomers($query: String!, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query CustomerOrderHistory($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query CustomerOrderHistory($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

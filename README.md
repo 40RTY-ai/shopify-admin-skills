@@ -69,6 +69,8 @@ See [routines/INSTALL.md](routines/INSTALL.md) for the smart install prompt, or 
 
 **Skills** — each is a `SKILL.md` file that teaches your agent a complete workflow against the Shopify Admin GraphQL API. When invoked, the agent queries your store, previews mutations with `dry_run: true`, executes on confirmation, and reports exactly what happened.
 
+**Execution adapters** — skills are runtime-agnostic. They run via either the official **Shopify MCP connector** (`https://setup.shopify.com/mcp`, OAuth, widget UI) or the **Shopify CLI** (`shopify auth login`, headless / CI). See [docs/execution-adapters.md](docs/execution-adapters.md) for the contract.
+
 **Routines** — pre-built scheduled-task definitions that combine skills into automated workflows. Install once via Claude Code, then they fire on schedule autonomously — no machine needs to stay on.
 
 ## Contributing

@@ -1,24 +1,41 @@
 ---
 name: shopify-admin-metafield-bulk-update
 role: merchandising
-description: "Bulk set or delete metafields on products, variants, or customers filtered by tag or collection."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Bulk set or delete metafields on products, variants, or customers filtered by tag or collection.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - metafieldsSet:mutation
-  - metafieldsDelete:mutation
+  - 'products:query'
+  - 'metafieldsSet:mutation'
+  - 'metafieldsDelete:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'metafieldsSet:mutation'
+        prefer_tool: graphql_mutation
+      - skill_op: 'metafieldsDelete:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries products (or variants, or customers) matching a filter and bulk-sets or bulk-deletes metafield values. Used for structured data updates like material composition, care instructions, product specifications, or custom attributes that power storefront features.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,write_products`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
-- Metafield namespace and key must already exist or be created on first set
 
 ## Parameters
 
@@ -57,8 +74,8 @@ Queries products (or variants, or customers) matching a filter and bulk-sets or 
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductsWithMetafield($query: String!, $namespace: String!, $key: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductsWithMetafield($first: Int!, $query: String!, $namespace: String!, $key: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

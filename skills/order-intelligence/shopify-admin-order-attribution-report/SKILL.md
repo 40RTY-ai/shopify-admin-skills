@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-order-attribution-report
 role: order-intelligence
-description: "Read-only: parses UTM source/medium/campaign from order landing site URLs to attribute revenue, AOV, and conversion volume to marketing channels."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: parses UTM source/medium/campaign from order landing site URLs to attribute revenue, AOV, and conversion volume to marketing channels.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Pulls recent orders, extracts the UTM parameters embedded in each order's `landingPageUrl` query string, and rolls up revenue, order count, and average order value (AOV) by `utm_source`, `utm_medium`, and `utm_campaign`. Builds a marketing attribution report directly from first-party Shopify order data — no external analytics tool required. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`
 
 ## Parameters
@@ -48,8 +62,8 @@ Pulls recent orders, extracts the UTM parameters embedded in each order's `landi
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersWithAttribution($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersWithAttribution($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

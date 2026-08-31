@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-page-content-audit
 role: store-management
-description: "Read-only: lists all pages and blog posts, flags empty or short content and missing SEO fields."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists all pages and blog posts, flags empty or short content and missing SEO fields.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - pages:query
-  - articles:query
+  - 'pages:query'
+  - 'articles:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'pages:query'
+        prefer_tool: graphql_query
+      - skill_op: 'articles:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Scans all store pages and blog articles for missing or thin content (short body, missing SEO title/description, empty body). Thin content pages are penalized by search engines and create a poor customer experience. Read-only — no mutations. Complements `seo-metadata-audit` (which covers products and collections).
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_content`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_content`
 
 ## Parameters
@@ -47,8 +62,8 @@ Scans all store pages and blog articles for missing or thin content (short body,
 
 ```graphql
 # pages:query — validated against api_version 2025-04
-query PageContentAudit($after: String) {
-  pages(first: 250, after: $after) {
+query PageContentAudit($first: Int!, $after: String) {
+  pages(first: $first, after: $after) {
     edges {
       node {
         id
@@ -71,8 +86,8 @@ query PageContentAudit($after: String) {
 
 ```graphql
 # articles:query — validated against api_version 2025-04
-query ArticleContentAudit($after: String) {
-  articles(first: 250, after: $after) {
+query ArticleContentAudit($first: Int!, $after: String) {
+  articles(first: $first, after: $after) {
     edges {
       node {
         id

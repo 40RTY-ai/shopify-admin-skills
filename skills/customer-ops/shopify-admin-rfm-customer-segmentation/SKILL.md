@@ -1,21 +1,38 @@
 ---
 name: shopify-admin-rfm-customer-segmentation
 role: customer-ops
-description: "Read-only: scores every customer on Recency, Frequency, and Monetary value to segment them into actionable groups (Champions, Loyal, At-Risk, Lost)."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: scores every customer on Recency, Frequency, and Monetary value to segment them into actionable groups (Champions, Loyal, At-Risk, Lost).'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - orders:query
+  - 'customers:query'
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Performs full RFM (Recency, Frequency, Monetary) analysis across the entire customer base. Each customer is scored 1-5 on three dimensions — how recently they purchased, how often they purchase, and how much they spend — then classified into actionable segments: Champions, Loyal Customers, Potential Loyalists, At-Risk, Hibernating, and Lost. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_customers`
 
 ## Parameters
@@ -74,8 +91,8 @@ Performs full RFM (Recency, Frequency, Monetary) analysis across the entire cust
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForRFM($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForRFM($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -97,8 +114,8 @@ query OrdersForRFM($query: String!, $after: String) {
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CustomerDetails($query: String, $after: String) {
-  customers(first: 250, after: $after, query: $query) {
+query CustomerDetails($first: Int!, $query: String, $after: String) {
+  customers(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

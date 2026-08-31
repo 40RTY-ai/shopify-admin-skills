@@ -1,22 +1,41 @@
 ---
 name: shopify-admin-return-fraud-detector
 role: returns
-description: "Read-only: identifies customers with abnormal return behavior — high return rate, wardrobing patterns, or serial returner profiles — for manual review."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: identifies customers with abnormal return behavior — high return rate, wardrobing patterns, or serial returner profiles — for manual review.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
-  - returns:query
-  - customers:query
+  - 'orders:query'
+  - 'returns:query'
+  - 'customers:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'returns:query'
+        prefer_tool: graphql_query
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Surfaces customers whose return behavior deviates statistically from the store baseline so support and ops can review them before approving the next return. Three patterns are detected: (1) high return rate (≥40% of orders returned), (2) wardrobing — full-order returns shortly after delivery, (3) serial returners — many returns over time. Read-only. Output is a candidate list, not an automatic block list.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,read_returns,read_customers`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_returns`, `read_customers`
 
 ## Parameters
@@ -55,8 +74,8 @@ Surfaces customers whose return behavior deviates statistically from the store b
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForReturnFraud($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForReturnFraud($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -82,8 +101,8 @@ query OrdersForReturnFraud($query: String!, $after: String) {
 
 ```graphql
 # returns:query — validated against api_version 2025-01
-query ReturnsForFraud($query: String!, $after: String) {
-  returns(first: 250, after: $after, query: $query) {
+query ReturnsForFraud($first: Int!, $query: String!, $after: String) {
+  returns(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -103,8 +122,8 @@ query ReturnsForFraud($query: String!, $after: String) {
 
 ```graphql
 # customers:query — validated against api_version 2025-01
-query CustomerContactBatch($query: String!) {
-  customers(first: 250, query: $query) {
+query CustomerContactBatch($first: Int!, $query: String!) {
+  customers(first: $first, query: $query) {
     edges {
       node {
         id

@@ -1,22 +1,40 @@
 ---
 name: shopify-admin-bundle-availability-check
 role: fulfillment-ops
-description: "Read-only: for native bundle products and metafield-defined bundles, verifies every component variant has sufficient stock to fulfill the bundle's effective availability."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: for native bundle products and metafield-defined bundles, verifies every component variant has sufficient stock to fulfill the bundle''s effective availability.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - productVariants:query
-  - inventoryItems:query
+  - 'products:query'
+  - 'productVariants:query'
+  - 'inventoryItems:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'productVariants:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Walks every product flagged as a bundle (either via Shopify's native `requiresComponents` mechanic or a `bundle.components` metafield convention), then verifies each component variant has sufficient inventory to back the bundle's quantity ratio. Surfaces bundles that are listed as in-stock on the storefront but cannot actually be fulfilled because one component has run out. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_inventory`
 
 ## Parameters
@@ -56,8 +74,8 @@ Walks every product flagged as a bundle (either via Shopify's native `requiresCo
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query BundleProducts($query: String!, $after: String, $namespace: String!, $key: String!) {
-  products(first: 250, after: $after, query: $query) {
+query BundleProducts($first: Int!, $query: String!, $after: String, $namespace: String!, $key: String!) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

@@ -1,22 +1,40 @@
 ---
 name: shopify-admin-product-tag-bulk-update
 role: merchandising
-description: "Add or remove tags on all products matching a collection, existing tag, or search query — for campaign setup, teardown, or catalog organization."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Add or remove tags on all products matching a collection, existing tag, or search query — for campaign setup, teardown, or catalog organization.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - tagsAdd:mutation
-  - tagsRemove:mutation
+  - 'products:query'
+  - 'tagsAdd:mutation'
+  - 'tagsRemove:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'tagsAdd:mutation'
+        prefer_tool: graphql_mutation
+      - skill_op: 'tagsRemove:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Adds or removes one or more tags across a set of products in bulk — replacing manual product-by-product editing in the Shopify admin. Use for campaign setup (add `summer-sale` to a collection before launch), campaign teardown (remove `flash-sale` after it ends), or catalog reorganization (retag products moving between categories). Tags drive collection rules, marketing segments, and reporting filters, so bulk accuracy matters. Replaces manual Shopify admin bulk editing and CSV import/export workflows.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `write_products`
 
 ## Parameters

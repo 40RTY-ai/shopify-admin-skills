@@ -1,23 +1,43 @@
 ---
 name: shopify-admin-file-storage-audit
 role: store-management
-description: "Read-only: lists every file in CDN storage, cross-references usage on products, pages, and articles, and flags orphaned/unreferenced assets."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: lists every file in CDN storage, cross-references usage on products, pages, and articles, and flags orphaned/unreferenced assets.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - files:query
-  - products:query
-  - pages:query
-  - articles:query
+  - 'files:query'
+  - 'products:query'
+  - 'pages:query'
+  - 'articles:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'files:query'
+        prefer_tool: graphql_query
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'pages:query'
+        prefer_tool: graphql_query
+      - skill_op: 'articles:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Inventories every file (image, video, generic file) in the store's CDN library and cross-references each one against products, pages, and blog articles to determine whether it is actually used. Orphaned files inflate storage usage, slow back-office search, and obscure brand assets. Read-only — no mutations. Provides the data foundation for a manual cleanup or archival workflow.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_files,read_products,read_content`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_files`, `read_products`, `read_content`
 
 ## Parameters
@@ -60,8 +80,8 @@ Inventories every file (image, video, generic file) in the store's CDN library a
 
 ```graphql
 # files:query — validated against api_version 2025-01
-query FileInventory($after: String, $query: String) {
-  files(first: 250, after: $after, query: $query) {
+query FileInventory($first: Int!, $after: String, $query: String) {
+  files(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -90,8 +110,8 @@ query FileInventory($after: String, $query: String) {
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductMediaReferences($after: String) {
-  products(first: 250, after: $after) {
+query ProductMediaReferences($first: Int!, $after: String) {
+  products(first: $first, after: $after) {
     edges {
       node {
         id
@@ -112,8 +132,8 @@ query ProductMediaReferences($after: String) {
 
 ```graphql
 # pages:query — validated against api_version 2025-01
-query PageBodyReferences($after: String) {
-  pages(first: 250, after: $after) {
+query PageBodyReferences($first: Int!, $after: String) {
+  pages(first: $first, after: $after) {
     edges { node { id title body } }
     pageInfo { hasNextPage endCursor }
   }
@@ -121,7 +141,7 @@ query PageBodyReferences($after: String) {
 
 # articles:query — validated against api_version 2025-01
 query ArticleBodyReferences($after: String) {
-  articles(first: 250, after: $after) {
+  articles(first: $first, after: $after) {
     edges { node { id title body image { url } } }
     pageInfo { hasNextPage endCursor }
   }

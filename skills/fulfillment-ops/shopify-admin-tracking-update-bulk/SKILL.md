@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-tracking-update-bulk
 role: fulfillment-ops
-description: "Batch-update tracking numbers and URLs on existing fulfillments when a carrier reassigns tracking IDs."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: Batch-update tracking numbers and URLs on existing fulfillments when a carrier reassigns tracking IDs.
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - order:query
-  - fulfillmentUpdate:mutation
+  - 'order:query'
+  - 'fulfillmentUpdate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'order:query'
+        prefer_tool: graphql_query
+      - skill_op: 'fulfillmentUpdate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Looks up existing fulfillments on orders and updates their tracking numbers and carrier URLs in bulk. Used when a carrier reissues tracking IDs after a label reprint, a 3PL batch-uploads corrected tracking, or a carrier integration pushes wrong tracking numbers. Replaces manual tracking corrections in Shopify Admin order by order.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders,write_fulfillments`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_fulfillments`
 
 ## Parameters

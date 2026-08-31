@@ -1,22 +1,40 @@
 ---
 name: shopify-admin-return-cost-attribution
 role: returns
-description: "Read-only: calculates the true cost of returns by reason and product — refund dollars, restocking impact, shipping cost lost, and COGS impact for items written off."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: calculates the true cost of returns by reason and product — refund dollars, restocking impact, shipping cost lost, and COGS impact for items written off.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - returns:query
-  - orders:query
-  - inventoryItems:query
+  - 'returns:query'
+  - 'orders:query'
+  - 'inventoryItems:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'returns:query'
+        prefer_tool: graphql_query
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+      - skill_op: 'inventoryItems:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Quantifies the full cost of returns over a window — not just the refunded amount. Combines refund totals, lost shipping revenue, COGS for non-restockable items (e.g., `DEFECTIVE`), and restocking labor into a per-reason and per-product return P&L. Read-only. Use to prioritize which reasons or product lines deserve operational fixes — better packaging, size guides, listing accuracy.
 
 ## Prerequisites
-- `shopify store auth --store <domain> --scopes read_orders,read_returns,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `read_returns`, `read_inventory`
 
 ## Parameters
@@ -53,8 +71,8 @@ Quantifies the full cost of returns over a window — not just the refunded amou
 
 ```graphql
 # returns:query — validated against api_version 2025-01
-query ReturnsForCostAttribution($query: String!, $after: String) {
-  returns(first: 250, after: $after, query: $query) {
+query ReturnsForCostAttribution($first: Int!, $query: String!, $after: String) {
+  returns(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -92,8 +110,8 @@ query ReturnsForCostAttribution($query: String!, $after: String) {
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrderRefundsForReturns($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrderRefundsForReturns($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

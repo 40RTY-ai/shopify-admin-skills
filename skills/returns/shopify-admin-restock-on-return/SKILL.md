@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-restock-on-return
 role: returns
-description: "For approved/closed returns, restocks inventory at the return location by adjusting on-hand quantities for each returned line item."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'For approved/closed returns, restocks inventory at the return location by adjusting on-hand quantities for each returned line item.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - returns:query
-  - inventoryAdjustQuantities:mutation
+  - 'returns:query'
+  - 'inventoryAdjustQuantities:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'returns:query'
+        prefer_tool: graphql_query
+      - skill_op: 'inventoryAdjustQuantities:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Walks through recently approved or closed returns and restocks inventory for each `returnLineItem` whose physical item has been received and inspected. Adjusts the `available` quantity at the return's destination location using `inventoryAdjustQuantities` with reason `restock` and a `referenceDocumentUri` linking to the return record. Use when warehouse processing posts in a separate system from Shopify, or when manual restock has been deferred and needs a clean catch-up run.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_returns,write_inventory,read_locations`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_returns`, `read_inventory`, `write_inventory`
 
 ## Parameters
@@ -51,8 +66,8 @@ Walks through recently approved or closed returns and restocks inventory for eac
 
 ```graphql
 # returns:query — validated against api_version 2025-01
-query ReturnsForRestock($query: String!, $after: String) {
-  returns(first: 250, after: $after, query: $query) {
+query ReturnsForRestock($first: Int!, $query: String!, $after: String) {
+  returns(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

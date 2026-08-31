@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-customer-win-back
 role: marketing
-description: "Identify customers who have not ordered in N days, export a re-engagement list, and tag them in Shopify."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Identify customers who have not ordered in N days, export a re-engagement list, and tag them in Shopify.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - customers:query
-  - tagsAdd:mutation
+  - 'customers:query'
+  - 'tagsAdd:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'customers:query'
+        prefer_tool: list-customers
+        fallback: graphql_query
+      - skill_op: 'tagsAdd:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Segments lapsed customers — those who placed at least one order but have not purchased again within a configurable window — and tags them for re-engagement. This skill handles the Shopify-native data layer; sending re-engagement emails requires an external tool.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_customers`, `write_customers`
 
 ## Parameters

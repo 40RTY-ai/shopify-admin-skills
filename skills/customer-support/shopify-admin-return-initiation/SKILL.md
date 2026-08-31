@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-return-initiation
 role: customer-support
-description: "Create a formal Shopify Return record for an order, specifying line items, quantities, and return reason — the first step in the native returns workflow."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Create a formal Shopify Return record for an order, specifying line items, quantities, and return reason — the first step in the native returns workflow.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - order:query
-  - returnCreate:mutation
+  - 'order:query'
+  - 'returnCreate:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'order:query'
+        prefer_tool: graphql_query
+      - skill_op: 'returnCreate:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Initiates a formal Shopify Return on a delivered order — specifying which line items to return, quantities, and reason. This creates the return record in Shopify's native returns system (distinct from simply issuing a refund). Used by support agents when a customer contacts them to return delivered items. The return record enables tracking, warehouse inspection, and exchange/refund resolution downstream. Note: `returnCreate` requires the order to be in `FULFILLED` status. For orders that haven't shipped yet, use `cancel-and-restock` instead. For already-returned items needing a refund, use `refund-and-reorder`.
 
 ## Prerequisites
-- `shopify auth login --store <domain>`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`, `write_returns`
 
 ## Parameters

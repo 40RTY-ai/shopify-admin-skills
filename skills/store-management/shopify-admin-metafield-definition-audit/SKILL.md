@@ -1,20 +1,33 @@
 ---
 name: shopify-admin-metafield-definition-audit
 role: store-management
-description: "Read-only: enumerates every metafield definition across all owner types and flags unused, undocumented, or duplicate-key definitions."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: enumerates every metafield definition across all owner types and flags unused, undocumented, or duplicate-key definitions.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - metafieldDefinitions:query
+  - 'metafieldDefinitions:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'metafieldDefinitions:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Inventories every metafield definition (PRODUCT, VARIANT, CUSTOMER, ORDER, COLLECTION, COMPANY, LOCATION, and others) and flags definitions that are unused (zero values stored), undocumented (missing description), or share a `namespace.key` collision across owner types. Definition sprawl is a leading source of theme/app bugs and slow Admin search. Read-only — no mutations. Provides the data foundation for a definition-cleanup workflow.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_customers,read_orders,read_inventory`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: read scopes for any owner types in scope (defaults: `read_products`, `read_customers`, `read_orders`)
 
 ## Parameters
@@ -51,8 +64,8 @@ Inventories every metafield definition (PRODUCT, VARIANT, CUSTOMER, ORDER, COLLE
 
 ```graphql
 # metafieldDefinitions:query — validated against api_version 2025-01
-query MetafieldDefinitionAudit($ownerType: MetafieldOwnerType!, $after: String) {
-  metafieldDefinitions(first: 250, after: $after, ownerType: $ownerType) {
+query MetafieldDefinitionAudit($first: Int!, $ownerType: MetafieldOwnerType!, $after: String) {
+  metafieldDefinitions(first: $first, after: $after, ownerType: $ownerType) {
     edges {
       node {
         id

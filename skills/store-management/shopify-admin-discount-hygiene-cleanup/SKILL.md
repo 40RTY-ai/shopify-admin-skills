@@ -1,21 +1,36 @@
 ---
 name: shopify-admin-discount-hygiene-cleanup
 role: store-management
-description: "Finds expired, zero-usage, or duplicate discount codes and optionally deactivates or deletes them."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Finds expired, zero-usage, or duplicate discount codes and optionally deactivates or deletes them.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - discountNodes:query
-  - discountCodeDelete:mutation
+  - 'discountNodes:query'
+  - 'discountCodeDelete:mutation'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'discountNodes:query'
+        prefer_tool: graphql_query
+      - skill_op: 'discountCodeDelete:mutation'
+        prefer_tool: graphql_mutation
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Audits the discount catalog for expired codes, codes with zero redemptions, and duplicate code prefixes. Discount sprawl accumulates over months of campaigns and makes the admin difficult to navigate. Optionally deletes flagged codes. Replaces manual discount cleanup and builds on the `discount-ab-analysis` skill with a write step.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_discounts,write_discounts`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_discounts`, `write_discounts`
 
 ## Parameters
@@ -49,8 +64,8 @@ Audits the discount catalog for expired codes, codes with zero redemptions, and 
 
 ```graphql
 # discountNodes:query — validated against api_version 2025-01
-query DiscountAudit($after: String) {
-  discountNodes(first: 250, after: $after) {
+query DiscountAudit($first: Int!, $after: String) {
+  discountNodes(first: $first, after: $after) {
     edges {
       node {
         id

@@ -1,20 +1,34 @@
 ---
 name: shopify-admin-gift-message-extraction
 role: conversion-optimization
-description: "Read-only: extracts gift messages, gift recipients, and gift flags from order custom attributes and notes for fulfillment teams to print on packing slips."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: extracts gift messages, gift recipients, and gift flags from order custom attributes and notes for fulfillment teams to print on packing slips.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - orders:query
+  - 'orders:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'orders:query'
+        prefer_tool: list-orders
+        fallback: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Pulls gift messages, gift-recipient names, and "is_gift" flags from order custom attributes and order notes for orders that are pending or in-progress fulfillment. Produces a single sheet that the fulfillment team can use to print gift cards / inserts and route gift orders correctly. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_orders`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_orders`
 
 ## Parameters
@@ -61,8 +75,8 @@ For each order:
 
 ```graphql
 # orders:query — validated against api_version 2025-01
-query OrdersForGiftExtraction($query: String!, $after: String) {
-  orders(first: 250, after: $after, query: $query) {
+query OrdersForGiftExtraction($first: Int!, $query: String!, $after: String) {
+  orders(first: $first, after: $after, query: $query) {
     edges {
       node {
         id

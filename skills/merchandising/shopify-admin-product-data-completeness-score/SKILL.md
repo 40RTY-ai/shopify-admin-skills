@@ -6,6 +6,23 @@ toolkit: shopify-admin, shopify-admin-execution
 api_version: "2025-01"
 graphql_operations:
   - products:query
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: products:query
+        prefer_tool: graphql_query
+        fallback: graphql_query
+        notes: |
+          search_products covers status filtering but does NOT return
+          seo, metafields, or inventoryItem.unitCost. graphql_query is required
+          for the full completeness projection. Project minimal fields and
+          paginate at first=50 — full nested response easily exceeds the
+          MCP harness payload cap and will be spilled to disk for jq parsing.
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 status: stable
 compatibility: Claude Code, Cursor, Codex, Gemini CLI
 ---
@@ -14,7 +31,10 @@ compatibility: Claude Code, Cursor, Codex, Gemini CLI
 Calculates a data completeness score (0–100) for each active product based on the presence of key fields: description, images, SEO title, SEO description, variant weight, barcode, cost, and specified metafields. Produces a ranked list of products needing the most data work. Read-only — no mutations. Catalog health report in a single pass.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products`
+Either auth path works. See [docs/execution-adapters.md](../../../docs/execution-adapters.md).
+
+- **Shopify CLI:** `shopify store auth --store <domain> --scopes read_products`
+- **Shopify MCP connector** (official, `https://setup.shopify.com/mcp`): connector must have been installed with the `read_products` scope. Switch stores with the `switch-shop` tool before running.
 - API scopes: `read_products`
 
 ## Parameters
@@ -47,7 +67,7 @@ Calculates a data completeness score (0–100) for each active product based on 
 ## Workflow Steps
 
 1. **OPERATION:** `products` — query
-   **Inputs:** `query: "status:<status_filter>"`, `first: 250`, select all completeness fields, pagination cursor
+   **Inputs:** `query: "status:<status_filter>"`, `first: $first` (adapter-injected; CLI=250, MCP=50), select all completeness fields, pagination cursor
    **Expected output:** Products with all scored fields; paginate until `hasNextPage: false`
 
 2. Score each product per rubric; rank ascending by score
@@ -56,8 +76,8 @@ Calculates a data completeness score (0–100) for each active product based on 
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductCompleteness($query: String!, $after: String) {
-  products(first: 250, after: $after, query: $query) {
+query ProductCompleteness($first: Int!, $query: String!, $after: String) {
+  products(first: $first, after: $after, query: $query) {
     edges {
       node {
         id
@@ -80,8 +100,13 @@ query ProductCompleteness($query: String!, $after: String) {
             node {
               id
               barcode
-              weight
               inventoryItem {
+                measurement {
+                  weight {
+                    value
+                    unit
+                  }
+                }
                 unitCost {
                   amount
                 }

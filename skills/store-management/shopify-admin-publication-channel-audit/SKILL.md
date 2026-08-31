@@ -1,21 +1,37 @@
 ---
 name: shopify-admin-publication-channel-audit
 role: store-management
-description: "Read-only: shows which products are published to which sales channels and flags unpublished active products."
-toolkit: shopify-admin, shopify-admin-execution
-api_version: "2025-01"
+description: 'Read-only: shows which products are published to which sales channels and flags unpublished active products.'
+toolkit: 'shopify-admin, shopify-admin-execution'
+api_version: 2025-01
 graphql_operations:
-  - products:query
-  - publications:query
+  - 'products:query'
+  - 'publications:query'
 status: stable
-compatibility: Claude Code, Cursor, Codex, Gemini CLI
+compatibility: 'Claude Code, Cursor, Codex, Gemini CLI'
+execution_adapters:
+  shopify-mcp:
+    pagination_max_first: 50
+    auth: connector-managed
+    operations:
+      - skill_op: 'products:query'
+        prefer_tool: search_products
+        fallback: graphql_query
+      - skill_op: 'publications:query'
+        prefer_tool: graphql_query
+  shopify-cli:
+    pagination_max_first: 250
+    auth: cli-session
 ---
 
 ## Purpose
 Queries all active products and the publications (sales channels) they are visible on. Flags products that are active but missing from key channels (e.g., Online Store, Google Shopping, Meta). Prevents silent revenue loss from products that exist in the catalog but are invisible on sales channels. Read-only — no mutations.
 
 ## Prerequisites
-- Authenticated Shopify CLI session: `shopify store auth --store <domain> --scopes read_products,read_publications`
+Either auth path works. See [docs/execution-adapters.md](../../docs/execution-adapters.md).
+
+- **Shopify MCP connector** (recommended, official): `https://setup.shopify.com/mcp` — connect via `/mcp` in Claude Code; switch stores with the `switch-shop` tool. The connector must be installed with the scopes listed below.
+- **Shopify CLI:** `shopify auth login --store <domain>` with the scopes listed below.
 - API scopes: `read_products`, `read_publications`
 
 ## Parameters
@@ -64,8 +80,8 @@ query SalesChannels {
 
 ```graphql
 # products:query — validated against api_version 2025-01
-query ProductPublications($after: String) {
-  products(first: 250, after: $after, query: "status:active") {
+query ProductPublications($first: Int!, $after: String) {
+  products(first: $first, after: $after, query: "status:active") {
     edges {
       node {
         id
