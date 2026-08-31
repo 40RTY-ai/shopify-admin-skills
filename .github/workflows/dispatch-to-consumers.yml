@@ -1,0 +1,19 @@
+name: Dispatch skill update to consumers
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: [Claudecode, boco-agency]
+    steps:
+      - name: Trigger sync in ${{ matrix.repo }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: sobankousik/${{ matrix.repo }}
+          event-type: skills-updated
