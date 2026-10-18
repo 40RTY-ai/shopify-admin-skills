@@ -25,7 +25,7 @@ audit_signals:
 ---
 
 ## Purpose
-Runs a store-side "Agentic Commerce Readiness" scan — the same questions the public **agentiq.report** audit asks, but answered from inside the Shopify Admin with full catalog data. It scores whether AI shopping agents (ChatGPT, Gemini, Perplexity, agentic checkout) can FIND, READ, and RECOMMEND the store's products, then prints a prioritized gap list where **every gap names the sibling `agentic` skill that fixes it**. Read-only — it changes nothing. Use it first (and on a schedule) to decide which remediation skills to run.
+Runs a store-side "Agentic Commerce Readiness" scan — the same questions the public **audit.40rty.ai** audit asks, but answered from inside the Shopify Admin with full catalog data. It scores whether AI shopping agents (ChatGPT, Gemini, Perplexity, agentic checkout) can FIND, READ, and RECOMMEND the store's products, then prints a prioritized gap list where **every gap names the sibling `agentic` skill that fixes it**. Read-only — it changes nothing. Use it first (and on a schedule) to decide which remediation skills to run.
 
 ## Prerequisites
 - Authenticated Shopify CLI session (`shopify auth login --store <domain>`)
@@ -71,7 +71,7 @@ Skill-specific parameters:
 
 6. **HTTP (no auth, optional):** `GET https://audit.40rty.ai/api/audit?domain=<primary domain>`
    **Inputs:** the shop's primary storefront domain from step 1
-   **Expected output:** the outside-in view the Admin API can't give — robots/llms.txt as actually served, no-JS rendering, UCP/ACP endpoints, live Product JSON-LD. `200` = JSON with `score` and ranked `fixes` (each has a `fixSkill`); `202` = scan running, retry the same URL in 30s (up to ~4 min) or skip; `429` = daily cap, skip. Prefer its findings over the theme-file guesses in step 2 when they disagree — it reads the live storefront.
+   **Expected output:** the outside-in view the Admin API can't give — robots/llms.txt as actually served, no-JS rendering, UCP/ACP endpoints, live Product JSON-LD. `200` = JSON with `score` and ranked `fixes`; a fix's `fixSkill` may be `null`, in which case use the step 7 pillar → skill mapping. `202` = scan running, retry the same URL in 30s (up to ~4 min) or skip. `429` = this IP's daily cap on fresh scans (reports under 24h old are still served), skip. Prefer its findings over the theme-file guesses in step 2 when they disagree — it reads the live storefront.
 
 7. **COMPUTE (no API):** roll the findings into a 0–100 readiness score across five pillars — **Discoverable** (robots/llms.txt), **Trusted** (Organization schema, sameAs, policies), **Readable** (descriptions, alt text, JSON-LD fields), **Structured** (metafields, category, barcodes), **Matchable** (title/tag/metafield richness for intent) — and map each failing pillar to its fix skill.
 
@@ -174,7 +174,7 @@ query AgenticReadinessFiles($first: Int!, $after: String) {
 
 **After each step**, emit:
 ```
-[N/TOTAL] <QUERY|MUTATION>  <OperationName>
+[N/TOTAL] <QUERY|MUTATION|HTTP>  <OperationName>
           → Params: <brief summary of key inputs>
           → Result: <count or outcome>
 ```
@@ -205,7 +205,7 @@ For `format: json`, emit:
     {
       "step": 1,
       "operation": "<OperationName>",
-      "type": "query",
+      "type": "query | http",
       "params_summary": "<string>",
       "result_summary": "<string>",
       "skipped": false
@@ -228,7 +228,7 @@ A readiness scorecard. `human`: an overall 0–100 score + per-pillar bars (Disc
 | `THROTTLED` | API rate limit | Wait 2s, retry up to 3 times |
 | `ACCESS_DENIED` reading themes | Missing `read_content` scope | Skip the theme pillar, mark Discoverable/Trusted "unknown", continue |
 | Empty catalog | New/empty store | Report "no products to assess"; still check theme + policies |
-| Step 6 returns `202` past ~4 min, `429`, or fails | Scan still running, daily cap, or storefront unreachable | Skip it, score from steps 1–5, and link `https://audit.40rty.ai/audit/<domain>` for the live report |
+| Step 6 returns `202` past ~4 min, `429`, or fails | Scan still running, per-IP fresh-scan cap, or storefront unreachable | Skip it, score from steps 1–5, and link `https://audit.40rty.ai/audit/<domain>` for the live report |
 
 ## Best Practices
 - Run this FIRST and re-run it after each remediation skill — it's the scoreboard that tells you what's left and what moved.
