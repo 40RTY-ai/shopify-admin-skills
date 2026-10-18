@@ -60,7 +60,10 @@ agent authenticates against the merchant's Shopify Admin API.
 
 - **https://40rty.ai** — 40rty and the AgentIQ product.
 - **https://audit.40rty.ai** — free agentic commerce readiness audit for any
-  storefront. Relevant to the `agentic` skill category here.
+  storefront. Relevant to the `agentic` skill category here. Callable with no
+  account: `GET https://audit.40rty.ai/api/audit?domain=<store>` (JSON; `202`
+  means retry in 30s) or the MCP server `https://audit.40rty.ai/mcp`
+  (tool `audit_store`).
 
 ## Contact
 
