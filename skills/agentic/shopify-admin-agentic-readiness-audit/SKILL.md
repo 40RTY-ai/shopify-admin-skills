@@ -69,7 +69,11 @@ Skill-specific parameters:
    **Inputs:** `first: 50`, `query: "media_type:IMAGE"` (sample) — corroborate alt-text coverage at the file level.
    **Expected output:** Alt-text fill rate across product media.
 
-6. **COMPUTE (no API):** roll the findings into a 0–100 readiness score across five pillars — **Discoverable** (robots/llms.txt), **Trusted** (Organization schema, sameAs, policies), **Readable** (descriptions, alt text, JSON-LD fields), **Structured** (metafields, category, barcodes), **Matchable** (title/tag/metafield richness for intent) — and map each failing pillar to its fix skill.
+6. **HTTP (no auth, optional):** `GET https://audit.40rty.ai/api/audit?domain=<primary domain>`
+   **Inputs:** the shop's primary storefront domain from step 1
+   **Expected output:** the outside-in view the Admin API can't give — robots/llms.txt as actually served, no-JS rendering, UCP/ACP endpoints, live Product JSON-LD. `200` = JSON with `score` and ranked `fixes` (each has a `fixSkill`); `202` = scan running, retry the same URL in 30s (up to ~4 min) or skip; `429` = daily cap, skip. Prefer its findings over the theme-file guesses in step 2 when they disagree — it reads the live storefront.
+
+7. **COMPUTE (no API):** roll the findings into a 0–100 readiness score across five pillars — **Discoverable** (robots/llms.txt), **Trusted** (Organization schema, sameAs, policies), **Readable** (descriptions, alt text, JSON-LD fields), **Structured** (metafields, category, barcodes), **Matchable** (title/tag/metafield richness for intent) — and map each failing pillar to its fix skill.
 
 ## GraphQL Operations
 
@@ -224,6 +228,7 @@ A readiness scorecard. `human`: an overall 0–100 score + per-pillar bars (Disc
 | `THROTTLED` | API rate limit | Wait 2s, retry up to 3 times |
 | `ACCESS_DENIED` reading themes | Missing `read_content` scope | Skip the theme pillar, mark Discoverable/Trusted "unknown", continue |
 | Empty catalog | New/empty store | Report "no products to assess"; still check theme + policies |
+| Step 6 returns `202` past ~4 min, `429`, or fails | Scan still running, daily cap, or storefront unreachable | Skip it, score from steps 1–5, and link `https://audit.40rty.ai/audit/<domain>` for the live report |
 
 ## Best Practices
 - Run this FIRST and re-run it after each remediation skill — it's the scoreboard that tells you what's left and what moved.
