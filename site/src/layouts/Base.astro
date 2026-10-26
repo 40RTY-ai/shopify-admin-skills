@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { ORGANIZATION_JSONLD, ORGANIZATION_REF } from '../lib/schema';
+import { ATTRIBUTION_JS, CONSENT_DEFAULT_JS, GTM_ID, TRACK_JS, gtmLoaderJs } from '../lib/tracking';
 
 interface Props {
   title: string;
@@ -53,6 +54,14 @@ const schemas: Record<string, unknown>[] = [ORGANIZATION_JSONLD, ...pageSchemas]
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Tracking (spec 1.3), in this order: consent defaults, attribution.js, GTM. GA4, Google Ads, LinkedIn and X load through GTM. -->
+    <script is:inline set:html={CONSENT_DEFAULT_JS} />
+    <script is:inline set:html={ATTRIBUTION_JS} />
+    <script is:inline set:html={TRACK_JS} />
+    <script is:inline set:html={gtmLoaderJs(GTM_ID)} />
+    <!-- Full page loads, so one page_view per load (spec 1.3, Astro). -->
+    <script is:inline>window.dataLayer.push({event:'page_view',page_location:location.href,page_path:location.pathname,page_title:document.title,page_referrer:document.referrer,page_type:'skills',site_section:location.hostname});</script>
+
     <!-- Primary -->
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -85,19 +94,9 @@ const schemas: Record<string, unknown>[] = [ORGANIZATION_JSONLD, ...pageSchemas]
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     ))}
 
-    <!-- Google Analytics -->
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YQXK1GQEGB"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-YQXK1GQEGB', {
-        page_title: document.title,
-        page_location: window.location.href,
-      });
-    </script>
   </head>
   <body>
+    <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- Page-wide gradient mesh -->
     <div class="page-mesh">
       <div class="mesh-orb mesh-1"></div>
