@@ -540,12 +540,10 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
       fetch(`${apiBase}/api/skills-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, domain: result.domain }),
+        body: JSON.stringify({ email, domain: result.domain, attribution: (window as any).fortyAttribution?.formFields?.().attribution ?? null }),
       }).catch(() => {});
 
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'skills_signup', { method: 'email' });
-      }
+      (window as any).fortyTrackSkillsSignup?.(email, 'skills_inline');
 
       // Move to step 2
       document.getElementById('signup-step1')?.classList.add('done');
@@ -568,9 +566,7 @@ Throughout: you're my guide. Ask, confirm, execute, summarize. No walls of text,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: capturedEmail, domain: capturedDomain, skillRequest }),
         }).catch(() => {});
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'skill_request', { method: 'text' });
-        }
+        (window as any).fortyTrack?.('skill_request', { method: 'text' });
       }
       showSuccess();
     });
